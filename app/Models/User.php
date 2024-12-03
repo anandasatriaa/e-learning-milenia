@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Course\Course;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,15 +13,76 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    public $incrementing = false;
+
+    protected $primaryKey = 'ID';
+
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'ID',
+        'Nama',
+        'JK',
+        'TmpLahir',
+        'TglLahir',
+        'Agama',
+        'Pendidikan',
+        'Alamat',
+        'Alamat_dom',
+        'Kota',
+        'KodePos',
+        'Telpon',
+        'KTP',
+        'Status',
+        'JA',
+        'TglMasuk',
+        'TglLulus',
+        'TglUpdate',
+        'Aktif',
+        'TglKeluar',
+        'Jabatan',
+        'Divisi',
+        'Cabang',
+        'Golongan',
+        'jeniskar',
+        'statuskar',
+        'no_bpjs_tk',
+        'no_bpjs_kes',
+        'tgl_keper_bpjs',
+        'statBpjs',
+        'Atasan',
+        'JamKerja',
+        'total_telat',
+        'NoSuratKerja',
+        'NoSuratKerja2',
+        'MasaBerlaku',
+        'MasaBerlaku2',
+        'TjMakan',
+        'stat_makan',
+        'NilaiTjMakan',
+        'TjBBM',
+        'NilaiTjBBM',
+        'stat_BBM',
+        'TjAsuransi',
+        'TjAssEff',
+        'TjAssPolis',
+        'TjPengobatan',
+        'TjKerajinan',
+        'TjLembur',
+        'SaldoTjPengobatan',
+        'TjUmObMinggu',
+        'IDMesin',
+        'StatusNoPrick',
+        'Pajak',
+        'Npwp',
+        'hak_cuti',
+        'jml_cuti',
+        'jml_off',
+        'nokk',
+        'email_karyawan',
+        'email_atasan',
+        'uname',
+        'pwd',
+        'lvl',
+        'abs',
     ];
 
     /**
@@ -29,8 +91,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'pwd',
     ];
 
     /**
@@ -38,7 +99,12 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    // protected $casts = [
+    //     'email_verified_at' => 'datetime',
+    // ];
+
+    public function course()
+    {
+        return $this->belongsToMany(Course::class, 'user_course_enrolls', 'user_id', 'course_id');
+    }
 }

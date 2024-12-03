@@ -1,18 +1,70 @@
 <?php
 
+use App\Http\Controllers\Admin\Category\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\Category\DivisiCategoryController as AdminDivisiCategoryController;
+use App\Http\Controllers\Admin\Category\SubCategoryController as AdminSubCategoryController;
+use App\Http\Controllers\Admin\Course\CourseController as AdminCourseController;
+use App\Http\Controllers\Admin\Course\CourseModulController as AdminCourseModulController;
+use App\Http\Controllers\Admin\Course\UserCourseEnrollController;
+use App\Http\Controllers\Admin\HomeController as AdminHomeController;
+use App\Http\Controllers\Admin\User\UserController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Pages\Course\CourseController;
+use App\Http\Controllers\Pages\HomeController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/login-process', [AuthController::class, 'authenticate'])->name('login.process');
 
-Route::get('/', function () {
-    return view('welcome');
+Route::group(['middleware' => 'auth'], function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'checkAdmin'], function () {
+        Route::get('/dashboard', [AdminHomeController::class, 'index']);
+        Route::get('/home', [AdminHomeController::class, 'index']);
+        Route::get('/', [AdminHomeController::class, 'index'])->name('dashboard');
+
+        Route::group(['prefix' => 'category', 'as' => 'category.'], function () {
+            Route::resource('divisi-category', AdminDivisiCategoryController::class);
+            Route::resource('category', AdminCategoryController::class);
+            Route::resource('sub-category', AdminSubCategoryController::class);
+        });
+
+        Route::group(['prefix' => 'course', 'as' => 'course.'], function () {
+            Route::get('/course', [AdminCourseController::class, 'index'])->name('course.index');
+            Route::get('/course/create', [AdminCourseController::class, 'create'])->name('course.create');
+            Route::post('/course/store', [AdminCourseController::class, 'store'])->name('course.store');
+            Route::get('/course/{id}/edit', [AdminCourseController::class, 'edit'])->name('course.edit');
+            Route::put('/course/{id}/update', [AdminCourseController::class, 'update'])->name('course.update');
+            Route::delete('/course/destroy/{id}', [AdminCourseController::class, 'destroy'])->name('course.destroy');
+
+            Route::patch('/course/update-is-active/{id}', [AdminCourseController::class, 'isActive'])->name('course.is-active');
+
+            Route::get('/course/{course_id}/modul', [AdminCourseModulController::class, 'index'])->name('modul.index');
+            Route::get('/course/{course_id}/modul/create', [AdminCourseModulController::class, 'create'])->name('modul.create');
+            Route::post('/course/{course_id}/modul/store', [AdminCourseModulController::class, 'store'])->name('modul.store');
+            Route::delete('/course/{course_id}/modul/destroy/{modul_id}', [AdminCourseModulController::class, 'destroy'])->name('modul.destroy');
+            Route::patch('/course/{course_id}/modul/update-is-active/{modul_id}', [AdminCourseModulController::class, 'isActive'])->name('modul.is-active');
+            Route::post('/course/{course_id}/modul/{modul_id}/question-import', [AdminCourseModulController::class, 'importQuizProcess'])->name('modul.question-import');
+
+
+            Route::post('/course/{course_id}/enroll-user', [UserCourseEnrollController::class, 'userCourseEnroll'])->name('course.enroll');
+        });
+
+        Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
+            Route::get('/employee/index', [UserController::class, 'index'])->name('employee.index');
+            Route::get('/employee/getAllEmployee', [UserController::class, 'datatableGetAllEmployee'])->name('datatable-getAllEmployee');
+            Route::get('/employee/sync', [UserController::class, 'APIgetAllEmployee'])->name('api-sync');
+        });
+    });
+
+    Route::group(['prefix' => '/', 'as' => 'pages.'], function () {
+        Route::get('/dashboard', [HomeController::class, 'index']);
+        Route::get('/home', [HomeController::class, 'index']);
+        Route::get('/', [HomeController::class, 'index'])->name('dashboard');
+        Route::group(['prefix' => 'course', 'as' => 'course.'], function () {
+            Route::get('/{course_id}/', [CourseController::class, 'detailcourse'])->name('course.detail');
+            Route::get('/embed-video/{course_modul_id}/', [CourseController::class, 'embedVideo'])->name('course.video');
+        });
+    });
 });
