@@ -38,7 +38,7 @@
                                     <span class="input-icon-addon">
                                         <i class="fa fa-search"></i>
                                     </span>
-                                    <input type="text" class="form-control" placeholder="Cari..." name="search"
+                                    <input type="text" class="form-control" placeholder="Cari..." name="search" id="searchInput"
                                         value="{{ $search ?? '' }}">
                                     @if (!empty($search))
                                         <a href="{{ route('admin.category.sub-category.index') }}" class="input-icon-addon">
@@ -213,5 +213,29 @@
                 });
             });
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            const tableContainer = document.querySelector('.table-responsive');
+            const baseUrl = "{{ route('admin.category.sub-category.index') }}";
+
+            searchInput.addEventListener('input', function () {
+                const searchQuery = this.value;
+
+                // Kirim permintaan AJAX ke server
+                fetch(`${baseUrl}?search=${encodeURIComponent(searchQuery)}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        // Gantikan isi tabel dengan respons dari server
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newTable = doc.querySelector('.table-responsive');
+                        if (newTable) {
+                            tableContainer.innerHTML = newTable.innerHTML;
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
     </script>
 @endsection

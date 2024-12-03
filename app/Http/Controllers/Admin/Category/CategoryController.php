@@ -21,6 +21,11 @@ class CategoryController extends Controller
         }
         $data = $query->paginate($show)->withQueryString();
 
+        if ($request->ajax()) {
+            // Jika permintaan berasal dari AJAX, kembalikan hanya tabelnya
+            return view('admin.category.category.index', compact('data'))->render();
+        }
+
         return view('admin.category.category.index', compact('data', 'search', 'show'));
     }
 
