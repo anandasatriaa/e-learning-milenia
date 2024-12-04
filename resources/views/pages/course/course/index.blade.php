@@ -107,7 +107,9 @@
 
                                         @default
                                     @endswitch
-                                    <a href="" class="stretched-link text-black">{{ $modul->nama_modul }}</a>
+                                    <a href="" class="stretched-link text-black"
+                                    data-media-url="{{ $modul->url_media_link }}" 
+                                    data-media-type="{{ $modul->tipe_media }}">{{ $modul->nama_modul }}</a>
                                 </li>
                             @endforeach
                         </ul>
@@ -230,5 +232,34 @@
             const formattedSeconds = String(secs).padStart(2, '0'); // Tambahkan nol di depan jika perlu
             return `${formattedMinutes}:${formattedSeconds}`;
         }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const links = document.querySelectorAll('.list-group .stretched-link');
+    const iframe = document.getElementById('videoSource');
+
+    links.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault(); // Mencegah navigasi default
+
+            // Ambil URL media dan tipe media dari data-attributes
+            const mediaUrl = link.getAttribute('data-media-url');
+            const mediaType = link.getAttribute('data-media-type');
+
+            // Periksa tipe media dan tampilkan kontennya di iframe
+            if (mediaType === 'video') {
+                iframe.src = mediaUrl;  // Menampilkan video di iframe
+                iframe.style.display = 'block';  // Menampilkan iframe
+            } else if (mediaType === 'pdf') {
+                iframe.src = mediaUrl;  // Memuat PDF di iframe
+                iframe.style.display = 'block';  // Menampilkan iframe
+            } else if (mediaType === 'link') {
+                iframe.src = mediaUrl;  // Memuat URL di iframe
+                iframe.style.display = 'block';  // Menampilkan iframe
+            }
+        });
+    });
+});
+
+
     </script>
 @endsection
