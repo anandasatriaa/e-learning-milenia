@@ -538,6 +538,27 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Modal -->
+                        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form id="deleteForm" method="POST">
+                                        @method('DELETE')
+                                        @csrf
+                                        <div class="modal-body">
+                                            <h4 class="text-danger mb-4">Hapus data</h4>
+                                            <p>Apakah anda yakin?</p>
+                                        </div>
+                                        <div class="modal-footer d-flex justify-content-center">
+                                            <button type="button" class="btn btn-default" data-bs-dismiss="modal">Tutup</button>
+                                            <button type="submit" class="btn btn-danger">Hapus</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Existing Template -->
                         <div class="card-list py-4 overflow-y-scroll" style="max-height: 720px">
                             @foreach ($data->user as $enrollUser)
                                 <a href="#" class="item-list">
@@ -552,7 +573,7 @@
                                         <div class="username">{{ $enrollUser->Nama }}</div>
                                         <div class="status">{{ $enrollUser->Jabatan }}</div>
                                     </div>
-                                    <button class="btn btn-icon btn-round btn-light text-danger me-3">
+                                    <button class="btn btn-icon btn-round btn-light text-danger me-3" onclick="confirmDelete('{{ route('admin.course.course.destroy-user', ['course_id' => $data->id, 'user_id' => $enrollUser->ID]) }}')">
                                         <i class="fas fa-ban"></i>
                                     </button>
                                 </a>
@@ -831,6 +852,17 @@
 
         function redirectOnClose() {
             location.reload();
+        }
+
+        // Konfirmasi Modal User Unenroll
+        function confirmDelete(url) {
+            // Set action form untuk delete
+            document.getElementById('deleteForm').action = url;
+            // Buka modal
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'), {
+                keyboard: false
+            });
+            deleteModal.show();
         }
     </script>
 @endsection
