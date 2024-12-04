@@ -12,6 +12,7 @@ class Course extends Model
     use HasFactory;
 
     protected $appends = ['thumbnail_url', 'thumbnail_video_url'];
+    protected $fillable = ['nama_kelas'];
 
     public function getThumbnailUrlAttribute()
     {
@@ -35,6 +36,8 @@ class Course extends Model
 
     public function modul()
     {
-        return $this->hasMany(CourseModul::class);
+        return $this->hasMany(CourseModul::class, 'course_id', 'id')
+        ->where('active', 1)
+        ->orderBy('no_urut', 'asc');  
     }
 }

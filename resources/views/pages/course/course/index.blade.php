@@ -55,7 +55,7 @@
                                 <button type="button" class="btn btn-label-info btn-round btn-sm me-2" id="goToLastAccess">
                                     Last access : <span id="lastAccess">00:00</span> <i class="fas fa-history ms-1"></i>
                                 </button>
-                                <a href="#" class="btn btn-success btn-round btn-sm me-2">
+                                <a href="#" id="mulaiBelajarBtn" class="btn btn-success btn-round btn-sm me-2">
                                     Mulai Belajar <i class="fas fa-arrow-right ms-2"></i>
                                 </a>
                             </div>
@@ -85,38 +85,74 @@
                                 </div>
                             </div>
                         </div>
-                        <ul class="list-group list-group-flush overflow-y-scroll" style="max-height: 60vh">
-                            @foreach ($course->modul as $modul)
-                                <li class="list-group-item list-materi align-middle">
-                                    <input class="form-check-input me-3" type="checkbox" />
-                                    @switch($modul->tipe_media)
-                                        @case('video')
-                                            <span class="me-2 bg-danger px-2 py-1 my-auto rounded text-white">
-                                                <i class="fas fa-video"></i></span>
-                                        @break
+<ul class="list-group list-group-flush overflow-y-scroll" style="max-height: 60vh">
+    @foreach ($course->modul as $modul)
+        <li class="list-group-item list-materi align-middle"
+            data-url="{{ $modul->url_media_link }}"
+            data-type="{{ $modul->tipe_media }}"
+            data-quiz="{{ $modul->quiz_available ? 'true' : 'false' }}">
+            <input class="form-check-input me-3" type="checkbox" />
+            @switch($modul->tipe_media)
+                @case('video')
+                    <span class="me-2 bg-danger px-2 py-1 my-auto rounded text-white">
+                        <i class="fas fa-video"></i></span>
+                @break
 
-                                        @case('pdf')
-                                            <span class="me-2 bg-info-subtle px-2 py-1 my-auto rounded">
-                                                <i class="icon-book-open"></i></span>
-                                        @break
+                @case('pdf')
+                    <span class="me-2 bg-info-subtle px-2 py-1 my-auto rounded">
+                        <i class="icon-book-open"></i></span>
+                @break
 
-                                        @case('link')
-                                            <span class="me-2 bg-primary px-2 py-1 my-auto rounded text-white">
-                                                <i class="icon-share-alt"></i></span>
-                                        @break
+                @case('link')
+                    <span class="me-2 bg-primary px-2 py-1 my-auto rounded text-white">
+                        <i class="icon-share-alt"></i></span>
+                @break
 
-                                        @default
-                                    @endswitch
-                                    <a href="" class="stretched-link text-black"
-                                    data-media-url="{{ $modul->url_media_link }}" 
-                                    data-media-type="{{ $modul->tipe_media }}">{{ $modul->nama_modul }}</a>
-                                </li>
-                            @endforeach
-                        </ul>
+                @default
+            @endswitch
+            <a href="" class="stretched-link text-black"
+               data-media-url="{{ $modul->url_media_link }}" 
+               data-media-type="{{ $modul->tipe_media }}">{{ $modul->nama_modul }}</a>
+        </li>
+    @endforeach
+</ul>
+
+
                     </div>
                 </div>
             </div>
         </div>
+<div id="quizContainer" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            Pertanyaan: Apa ibu kota Indonesia?
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="answer" id="answer1" value="Jakarta">
+                    <label class="form-check-label" for="answer1">Jakarta</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="answer" id="answer2" value="Bandung">
+                    <label class="form-check-label" for="answer2">Bandung</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="answer" id="answer3" value="Surabaya">
+                    <label class="form-check-label" for="answer3">Surabaya</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="answer" id="answer4" value="Medan">
+                    <label class="form-check-label" for="answer4">Medan</label>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer text-muted">
+            Pilih salah satu jawaban di atas.
+        </div>
+    </div>
+</div>
+
         <div class="card">
             <div class="card-header d-flex justify-content-between">
             </div>
@@ -233,32 +269,122 @@
             return `${formattedMinutes}:${formattedSeconds}`;
         }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const links = document.querySelectorAll('.list-group .stretched-link');
-    const iframe = document.getElementById('videoSource');
+        document.addEventListener("DOMContentLoaded", function () {
+            const links = document.querySelectorAll('.list-group .stretched-link');
+            const iframe = document.getElementById('videoSource');
 
-    links.forEach(link => {
-        link.addEventListener('click', function (e) {
-            e.preventDefault(); // Mencegah navigasi default
+            links.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault(); // Mencegah navigasi default
 
-            // Ambil URL media dan tipe media dari data-attributes
-            const mediaUrl = link.getAttribute('data-media-url');
-            const mediaType = link.getAttribute('data-media-type');
+                    // Ambil URL media dan tipe media dari data-attributes
+                    const mediaUrl = link.getAttribute('data-media-url');
+                    const mediaType = link.getAttribute('data-media-type');
 
-            // Periksa tipe media dan tampilkan kontennya di iframe
-            if (mediaType === 'video') {
-                iframe.src = mediaUrl;  // Menampilkan video di iframe
-                iframe.style.display = 'block';  // Menampilkan iframe
-            } else if (mediaType === 'pdf') {
-                iframe.src = mediaUrl;  // Memuat PDF di iframe
-                iframe.style.display = 'block';  // Menampilkan iframe
-            } else if (mediaType === 'link') {
-                iframe.src = mediaUrl;  // Memuat URL di iframe
-                iframe.style.display = 'block';  // Menampilkan iframe
+                    // Periksa tipe media dan tampilkan kontennya di iframe
+                    if (mediaType === 'video') {
+                        iframe.src = mediaUrl;  // Menampilkan video di iframe
+                        iframe.style.display = 'block';  // Menampilkan iframe
+                    } else if (mediaType === 'pdf') {
+                        iframe.src = mediaUrl;  // Memuat PDF di iframe
+                        iframe.style.display = 'block';  // Menampilkan iframe
+                    } else if (mediaType === 'link') {
+                        iframe.src = mediaUrl;  // Memuat URL di iframe
+                        iframe.style.display = 'block';  // Menampilkan iframe
+                    }
+                });
+            });
+        });
+
+    document.querySelector('.btn-success').addEventListener('click', function (e) {
+        e.preventDefault();
+        const courseId = {{ $course->id }};
+
+        fetch(`/course/${courseId}/first-modul`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const iframe = document.getElementById('videoSource');
+                    iframe.src = data.url;
+
+                    // Tambahkan pengaturan tipe media jika diperlukan
+                    if (data.tipe_media === 'pdf') {
+                        iframe.src = `/pdf-viewer?file=${data.url}`;
+                    } else if (data.tipe_media === 'link') {
+                        iframe.src = data.url;
+                    }
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const mulaiBelajarBtn = document.getElementById("mulaiBelajarBtn");
+        const modulItems = document.querySelectorAll(".list-group-item");
+
+        mulaiBelajarBtn.addEventListener("click", () => {
+            if (modulItems.length > 0) {
+                // Hapus class active dari semua modul
+                modulItems.forEach(item => item.classList.remove("bg-secondary"));
+
+                // Tambahkan class active ke modul pertama
+                const firstModul = modulItems[0];
+                firstModul.classList.add("bg-secondary");
+
+                // Atur iframe untuk memuat media dari modul pertama
+                const videoSource = document.getElementById("videoSource");
+                videoSource.src = firstModul.getAttribute("data-url");
             }
         });
     });
+
+    document.querySelector('#mulaiBelajarBtn').addEventListener('click', function (e) {
+    e.preventDefault();
+
+    // Simulasikan pengambilan data dari server
+    const courseId = {{ $course->id }};
+    fetch(`/course/${courseId}/first-modul`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const iframe = document.getElementById('videoSource');
+                const quizContainer = document.getElementById('quizContainer');
+                const button = document.getElementById('mulaiBelajarBtn');
+
+                if (data.is_quiz) {
+                    // Sembunyikan iframe dan tampilkan kuis
+                    iframe.style.display = 'none';
+                    quizContainer.style.display = 'block';
+
+                    // Ganti tombol menjadi "Kerjakan Kuis"
+                    button.textContent = 'Kerjakan Kuis';
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-primary');
+                } else {
+                    // Tampilkan media di iframe
+                    iframe.src = data.url;
+                    iframe.style.display = 'block';
+                    quizContainer.style.display = 'none';
+
+                    // Kembalikan tombol ke "Mulai Belajar"
+                    button.textContent = 'Mulai Belajar';
+                    button.classList.add('btn-success');
+                    button.classList.remove('btn-primary');
+                }
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 });
+
 
 
     </script>

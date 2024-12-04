@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use PharIo\Manifest\InvalidUrlException;
+use Illuminate\Support\Facades\Log;
+
 
 use function PHPUnit\Framework\throwException;
 
@@ -198,5 +200,22 @@ class CourseModulController extends Controller
             DB::rollBack();
             return response()->json($th->getMessage(), 500);
         }
+    }
+
+    public function updateOrder(Request $request, $course_id)
+    {
+        $order = $request->input('order');
+
+        foreach ($order as $index => $item) {
+            $modul = CourseModul::find($item['id']);
+            if ($modul) {
+                $modul->no_urut = $item['no_urut'];
+                $modul->save();
+            }
+        }
+
+        
+
+        return response()->json(['success' => true]);
     }
 }

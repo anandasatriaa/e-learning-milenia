@@ -10,6 +10,15 @@ class CourseModul extends Model
     use HasFactory;
 
     protected $appends = ['url_media_link'];
+    protected $fillable = [
+        'course_id',
+        'nama_modul',
+        'deskripsi',
+        'tipe_media',
+        'url_media',
+        'active',
+        'no_urut',
+    ];
 
     public function course()
     {

@@ -46,6 +46,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::delete('/course/{course_id}/modul/destroy/{modul_id}', [AdminCourseModulController::class, 'destroy'])->name('modul.destroy');
             Route::patch('/course/{course_id}/modul/update-is-active/{modul_id}', [AdminCourseModulController::class, 'isActive'])->name('modul.is-active');
             Route::post('/course/{course_id}/modul/{modul_id}/question-import', [AdminCourseModulController::class, 'importQuizProcess'])->name('modul.question-import');
+            Route::post('/course/{course_id}/modul/updateOrder', [AdminCourseModulController::class, 'updateOrder'])->name('modul.update-order');
 
             Route::post('/course/{course_id}/enroll-user', [UserCourseEnrollController::class, 'userCourseEnroll'])->name('course.enroll');
             Route::delete('/course/{course_id}/enroll-user/destroy/{user_id}', [UserCourseEnrollController::class, 'destroyUser'])->name('course.destroy-user');
@@ -65,6 +66,11 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['prefix' => 'course', 'as' => 'course.'], function () {
             Route::get('/{course_id}/', [CourseController::class, 'detailcourse'])->name('course.detail');
             Route::get('/embed-video/{course_modul_id}/', [CourseController::class, 'embedVideo'])->name('course.video');
+            Route::get('/{course_id}/first-modul', [CourseController::class, 'getFirstModul']);
+            // Route::get('/{course_id}/first-modul/{course_modul_id}/', [CourseController::class, 'getFirstModul']);
+            // Route::get('/quiz/{modul_quiz_id}/', [CourseController::class, 'quiz'])->name('course.quiz');
+            // Route::post('/quiz/{modul_quiz_id}/submit', [CourseController::class, 'submitQuiz'])->name('course.submitQuiz');
+
         });
     });
 });

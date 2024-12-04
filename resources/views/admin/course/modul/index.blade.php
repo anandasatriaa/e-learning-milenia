@@ -222,7 +222,7 @@
                                 </thead>
                                 <tbody id="my-list">
                                     @foreach ($courseModul as $item)
-                                        <tr>
+                                        <tr id="module-{{ $item->id }}">
                                             <td class="text-center">
                                                 <button class="btn btn-icon btn-sm drag" type="button"
                                                     style="display: none">
@@ -864,5 +864,40 @@
             });
             deleteModal.show();
         }
+
+    document.getElementById("simpanUbahUrut").addEventListener("click", function() {
+        const listItems = document.querySelectorAll('#my-list tr');
+        let order = [];
+
+        listItems.forEach((item, index) => {
+            const id = item.id.split('-')[1]; // Extract module ID
+            order.push({ id: id, no_urut: index + 1 }); // Set the order
+        });
+
+        // Send the new order to the server
+        fetch("{{ route('admin.course.modul.update-order', ['course_id' => $data->id]) }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            },
+            body: JSON.stringify({ order: order })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Handle response
+            if (data.success) {
+                alert("Urutan berhasil diperbarui!");
+                window.location.reload();
+            } else {
+                alert("Terjadi kesalahan saat memperbarui urutan.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Terjadi kesalahan jaringan.");
+        });
+    });
+
     </script>
 @endsection

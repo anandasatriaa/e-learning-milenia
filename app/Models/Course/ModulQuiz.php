@@ -18,4 +18,9 @@ class ModulQuiz extends Model
     {
         return $this->hasMany(ModulQuizAnswer::class);
     }
+
+    public function answers()
+    {
+        return $this->hasMany(ModulQuizAnswer::class, 'modul_quiz_id');
+    }
 }
