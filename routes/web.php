@@ -46,6 +46,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::delete('/course/{course_id}/modul/destroy/{modul_id}', [AdminCourseModulController::class, 'destroy'])->name('modul.destroy');
             Route::patch('/course/{course_id}/modul/update-is-active/{modul_id}', [AdminCourseModulController::class, 'isActive'])->name('modul.is-active');
             Route::post('/course/{course_id}/modul/{modul_id}/question-import', [AdminCourseModulController::class, 'importQuizProcess'])->name('modul.question-import');
+            Route::post('/course/{course_id}/modul/{modul_id}/question-import-essay', [AdminCourseModulController::class, 'importEssayProcess'])->name('modul.question-import-essay');
             Route::post('/course/{course_id}/modul/updateOrder', [AdminCourseModulController::class, 'updateOrder'])->name('modul.update-order');
 
             Route::post('/course/{course_id}/enroll-user', [UserCourseEnrollController::class, 'userCourseEnroll'])->name('course.enroll');

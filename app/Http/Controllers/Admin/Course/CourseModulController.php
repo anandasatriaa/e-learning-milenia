@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Imports\QuizModulImport;
 use App\Models\Course\Course;
 use App\Models\Course\CourseModul;
+use App\Models\Course\ModulEssay;
 use App\Models\User;
 use App\Models\UserCourseEnroll;
 use Exception;
@@ -184,6 +185,41 @@ class CourseModulController extends Controller
         }
     }
 
+    public function importEssayProcess(Request $request, $course_id, $modul_id)
+    {
+        // Validasi input
+        $request->validate([
+            'essay' => 'required|array|min:1',   // Essay harus berupa array dan minimal memiliki 1 elemen
+            'essay.*' => 'required|string|max:5000', // Setiap item dalam array essay harus string dengan panjang maksimal 5000 karakter
+        ]);
+
+        try {
+            $essays = $request->input('essay'); // Mendapatkan array essay
+
+            foreach ($essays as $essay) {
+                // Simpan setiap essay ke dalam database
+                ModulEssay::create([
+                    'course_modul_id' => $modul_id,
+                    'pertanyaan' => $essay,
+                ]);
+            }
+
+            // Kembalikan response JSON
+            return response()->json([
+                'success' => true,
+                'message' => 'Essays berhasil disimpan!',
+            ]);
+        } catch (\Throwable $th) {
+            // Kembalikan response JSON dengan error
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage(),
+            ]);
+        }
+    }
+
+
+
     public function isActive(Request $request, $course_id, $modul_id)
     {
         try {
@@ -213,8 +249,6 @@ class CourseModulController extends Controller
                 $modul->save();
             }
         }
-
-        
 
         return response()->json(['success' => true]);
     }

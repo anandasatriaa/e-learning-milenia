@@ -218,6 +218,7 @@
                                         <th scope="col" class="text-center">Tipe</th>
                                         <th scope="col" class="text-center">Status</th>
                                         <th scope="col" class="text-center">Quiz</th>
+                                        <th scope="col" class="text-center">Essay</th>
                                     </tr>
                                 </thead>
                                 <tbody id="my-list">
@@ -320,7 +321,16 @@
                                                     Tambahkan Quiz
                                                 </button>
                                             </td>
+                                            <td class="text-center">
+                                                <p class="form-text mb-1">Total soal : </p>
+                                                <button type="button" class="btn btn-primary btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalImportEssay{{ $item->id }}">
+                                                    Tambahkan Essay
+                                                </button>
+                                            </td>
                                         </tr>
+                                        {{-- Modal Quiz --}}
                                         <div class="modal fade" id="modalImportQuiz{{ $item->id }}" tabindex="-1"
                                             role="dialog"aria-hidden="true">
                                             <div class="modal-dialog modal-sm modal-xl" role="document">
@@ -415,6 +425,46 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Modal Essay --}}
+                                        <div class="modal fade" id="modalImportEssay{{ $item->id }}" tabindex="-1" aria-labelledby="modalImportEssayLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalImportEssayLabel">Tambah Essay {{ $item->nama_modul }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="essayForm{{ $item->id }}" action="{{ route('admin.course.modul.question-import-essay', ['course_id' => $data->id, 'modul_id' => $item->id]) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div id="essay-container{{ $item->id }}">
+                        <!-- Essay pertama -->
+                        <div class="d-flex mb-3" id="essay-1">
+                            <div class="me-2" style="width: 30px; text-align: center; line-height: 2;">
+                                <span class="number">1</span>
+                            </div>
+                            <textarea class="form-control" name="essay[]" rows="3" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Ikon untuk menambah nomor dan textarea baru -->
+                    <div class="text-center">
+                        <button type="button" class="btn btn-outline-secondary btn-sm addEssay" data-modal-id="{{ $item->id }}">
+                            <i class="bi bi-plus"></i> Tambah Essay
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm deleteEssay" data-modal-id="{{ $item->id }}" style="display: none;">
+                            <i class="bi bi-trash"></i> Hapus Essay
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
                                     @endforeach
                                 </tbody>
                             </table>
@@ -422,6 +472,18 @@
                     </div>
                 </div>
             </div>
+            @if (session('success'))
+    <div class="alert alert-success">
+        <strong>{{ session('success.title') }}</strong> - {{ session('success.message') }}
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger">
+        <strong>{{ session('error.title') }}</strong> - {{ session('error.message') }}
+    </div>
+@endif
+
             <div class="col-md-4">
                 <div class="card card-round">
                     <div class="card-body">
@@ -588,6 +650,7 @@
 @section('js')
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+    <script src="{{ asset('vendor/ckeditor/ckeditor.js') }}"></script>
     <script src="{{ asset('js/core/jq-ajax-progress.min.js') }}"></script>
     <script>
         let listSortModul = $('#my-list').sortable({
@@ -924,6 +987,103 @@
             });
         });
     });
+
+    // Increment menambah soal essay
+document.addEventListener('DOMContentLoaded', function () {
+    // Menambahkan event listener untuk tombol "Tambah Essay"
+    document.querySelectorAll('.addEssay').forEach(button => {
+        button.addEventListener('click', function () {
+            const modalId = this.getAttribute('data-modal-id');
+            const essayContainer = document.getElementById(`essay-container${modalId}`);
+
+            // Cari nomor urut terkecil yang tersedia
+            const essayDivs = essayContainer.querySelectorAll('.d-flex.mb-3');
+            let essayNumbers = [];
+            essayDivs.forEach(div => {
+                const numberSpan = div.querySelector('.number');
+                if (numberSpan) {
+                    essayNumbers.push(parseInt(numberSpan.textContent));
+                }
+            });
+
+            // Cari nomor urut terkecil yang belum digunakan
+            let newEssayId = 1;
+            while (essayNumbers.includes(newEssayId)) {
+                newEssayId++;
+            }
+
+            // Buat div untuk essay baru
+            const newEssayDiv = document.createElement('div');
+            newEssayDiv.classList.add('d-flex', 'mb-3');
+            newEssayDiv.id = `essay-${newEssayId}`;
+
+            newEssayDiv.innerHTML = `
+                <div class="me-2" style="width: 30px; text-align: center; line-height: 2;">
+                    <span class="number">${newEssayId}</span>
+                </div>
+                <textarea class="form-control" name="essay[]" rows="3" required></textarea>
+            `;
+
+            // Tambahkan div baru ke container essay
+            essayContainer.appendChild(newEssayDiv);
+
+            // Tampilkan tombol "Hapus Essay" setelah textarea kedua muncul
+            document.querySelector(`#modalImportEssay${modalId} .deleteEssay`).style.display = 'inline-block';
+        });
+    });
+
+    // Menghapus essay pada modal tertentu
+    document.querySelectorAll('.deleteEssay').forEach(button => {
+        button.addEventListener('click', function () {
+            const modalId = this.getAttribute('data-modal-id');
+            const essayContainer = document.getElementById(`essay-container${modalId}`);
+
+            // Cari semua div essay dalam container
+            const allEssayDivs = essayContainer.querySelectorAll('.d-flex.mb-3');
+            if (allEssayDivs.length > 1) {
+                // Hapus essay terakhir
+                const lastEssayDiv = allEssayDivs[allEssayDivs.length - 1];
+                lastEssayDiv.remove();
+            }
+
+            // Sembunyikan tombol "Hapus Essay" jika hanya ada satu essay yang tersisa
+            if (essayContainer.querySelectorAll('.d-flex.mb-3').length <= 1) {
+                this.style.display = 'none';
+            }
+        });
+    });
+
+    // Mengirimkan data saat form disubmit
+    document.querySelectorAll('[id^="essayForm"]').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(data.message); // Pesan sukses
+                } else {
+                    console.error(data.message); // Pesan error
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+});
+
+
+
 
     </script>
 @endsection
