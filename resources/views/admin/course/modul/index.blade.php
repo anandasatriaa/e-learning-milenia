@@ -221,7 +221,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="my-list">
-                                    @foreach ($courseModul as $item)
+                                    @foreach ($courseModul->sortBy('no_urut') as $item)
                                         <tr id="module-{{ $item->id }}">
                                             <td class="text-center">
                                                 <button class="btn btn-icon btn-sm drag" type="button"
@@ -887,15 +887,41 @@
         .then(data => {
             // Handle response
             if (data.success) {
-                alert("Urutan berhasil diperbarui!");
-                window.location.reload();
+                $.notify({
+                    icon: "icon-check",
+                    title: 'Sukses',
+                    message: 'Urutan berhasil diperbarui!'
+                }, {
+                    type: 'success',
+                    delay: 2000
+                });
+
+                // Delay reload for a few seconds to let the user see the notification
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1000); // 2 seconds delay
+
             } else {
-                alert("Terjadi kesalahan saat memperbarui urutan.");
+                $.notify({
+                    icon: "icon-exclamation",
+                    title: 'Gagal',
+                    message: 'Terjadi kesalahan saat memperbarui urutan.'
+                }, {
+                    type: 'danger',
+                    delay: 2000
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert("Terjadi kesalahan jaringan.");
+            $.notify({
+                icon: "icon-exclamation",
+                title: 'Gagal',
+                message: 'Terjadi kesalahan jaringan.'
+            }, {
+                type: 'danger',
+                delay: 2000
+            });
         });
     });
 
