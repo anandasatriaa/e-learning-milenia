@@ -296,33 +296,6 @@
             });
         });
 
-    document.querySelector('.btn-success').addEventListener('click', function (e) {
-        e.preventDefault();
-        const courseId = {{ $course->id }};
-
-        fetch(`/course/${courseId}/first-modul`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const iframe = document.getElementById('videoSource');
-                    iframe.src = data.url;
-
-                    // Tambahkan pengaturan tipe media jika diperlukan
-                    if (data.tipe_media === 'pdf') {
-                        iframe.src = `/pdf-viewer?file=${data.url}`;
-                    } else if (data.tipe_media === 'link') {
-                        iframe.src = data.url;
-                    }
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    });
-
-
     document.addEventListener("DOMContentLoaded", () => {
         const mulaiBelajarBtn = document.getElementById("mulaiBelajarBtn");
         const modulItems = document.querySelectorAll(".list-group-item");
@@ -342,50 +315,5 @@
             }
         });
     });
-
-    document.querySelector('#mulaiBelajarBtn').addEventListener('click', function (e) {
-    e.preventDefault();
-
-    // Simulasikan pengambilan data dari server
-    const courseId = {{ $course->id }};
-    fetch(`/course/${courseId}/first-modul`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const iframe = document.getElementById('videoSource');
-                const quizContainer = document.getElementById('quizContainer');
-                const button = document.getElementById('mulaiBelajarBtn');
-
-                if (data.is_quiz) {
-                    // Sembunyikan iframe dan tampilkan kuis
-                    iframe.style.display = 'none';
-                    quizContainer.style.display = 'block';
-
-                    // Ganti tombol menjadi "Kerjakan Kuis"
-                    button.textContent = 'Kerjakan Kuis';
-                    button.classList.remove('btn-success');
-                    button.classList.add('btn-primary');
-                } else {
-                    // Tampilkan media di iframe
-                    iframe.src = data.url;
-                    iframe.style.display = 'block';
-                    quizContainer.style.display = 'none';
-
-                    // Kembalikan tombol ke "Mulai Belajar"
-                    button.textContent = 'Mulai Belajar';
-                    button.classList.add('btn-success');
-                    button.classList.remove('btn-primary');
-                }
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-});
-
-
-
     </script>
 @endsection
