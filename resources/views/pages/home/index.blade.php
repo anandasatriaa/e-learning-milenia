@@ -25,8 +25,8 @@
                             </div>
                             <div class="col col-stats ms-3 ms-sm-0">
                                 <div class="numbers">
-                                    <p class="card-category">Data 1</p>
-                                    <h4 class="card-title">1,294</h4>
+                                    <p class="card-category">Kursus Tersedia</p>
+                                    <h4 class="card-title">5</h4>
                                 </div>
                             </div>
                         </div>
@@ -44,8 +44,8 @@
                             </div>
                             <div class="col col-stats ms-3 ms-sm-0">
                                 <div class="numbers">
-                                    <p class="card-category">Data 2</p>
-                                    <h4 class="card-title">1303</h4>
+                                    <p class="card-category">Kursus Diikuti</p>
+                                    <h4 class="card-title">2</h4>
                                 </div>
                             </div>
                         </div>
@@ -63,8 +63,8 @@
                             </div>
                             <div class="col col-stats ms-3 ms-sm-0">
                                 <div class="numbers">
-                                    <p class="card-category">Data 3</p>
-                                    <h4 class="card-title">$ 1,345</h4>
+                                    <p class="card-category">Kursus Sedang Dipelajari</p>
+                                    <h4 class="card-title">2</h4>
                                 </div>
                             </div>
                         </div>
@@ -82,8 +82,8 @@
                             </div>
                             <div class="col col-stats ms-3 ms-sm-0">
                                 <div class="numbers">
-                                    <p class="card-category">Data 4</p>
-                                    <h4 class="card-title">576</h4>
+                                    <p class="card-category">Kursus Telah Diselesaikan</p>
+                                    <h4 class="card-title">0</h4>
                                 </div>
                             </div>
                         </div>
@@ -92,21 +92,13 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-8 col-lg-6">
+            <div class="col-md-8 col-lg-12">
                 <div class="card card-round">
                     <div class="card-header">
                         <div class="card-head-row">
                             <div class="card-title"> <span class="bg-light p-1 rounded me-1">
                                     <i class="icon-graph"></i></span>
                                 Progress Pelatihan</div>
-                            <div class="card-tools">
-                                <a href="#" class="btn btn-label-info btn-round btn-sm me-2">
-                                    <span class="btn-label">
-                                        <i class="fa fa-pencil"></i>
-                                    </span>
-                                    Lihat Selengkapnya
-                                </a>
-                            </div>
                         </div>
                     </div>
                     <div class="card-body">
@@ -150,32 +142,6 @@
                                 </div>
                             </div>
                         @endforeach
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card card-primary card-round">
-                    <div class="card-header">
-                        <div class="card-head-row">
-                            <div class="card-title">Aktivitas Lain</div>
-                            <div class="card-tools">
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-label-light dropdown-toggle" type="button"
-                                        id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false">
-
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                        <a class="dropdown-item" href="#">Action</a>
-                                        <a class="dropdown-item" href="#">Another action</a>
-                                        <a class="dropdown-item" href="#">Something else here</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body pb-0">
-
                     </div>
                 </div>
             </div>
