@@ -2,6 +2,7 @@
 
 namespace App\Models\Course;
 
+use App\Models\Nilai\Nilai;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -49,5 +50,10 @@ class CourseModul extends Model
     public function modulQuiz()
     {
         return $this->hasMany(ModulQuiz::class);
+    }
+
+    public function nilai()
+    {
+        return $this->hasMany(Nilai::class);
     }
 }

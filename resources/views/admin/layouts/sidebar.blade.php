@@ -107,6 +107,13 @@
                                     <span>Kelas</span>
                                 </a>
                             </li>
+                            <li class="ms-3">
+                                <a class="{{ request()->routeIs('admin.course.nilai.*') ? 'text-white fw-bold active border-start border-2' : '' }}"
+                                    href="{{ route('admin.course.nilai.index') }}">
+                                    <i class="fas fa-clipboard-check"></i>
+                                    <span>Nilai</span>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </li>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Course\Course;
+use App\Models\Nilai\Nilai;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -106,5 +107,10 @@ class User extends Authenticatable
     public function course()
     {
         return $this->belongsToMany(Course::class, 'user_course_enrolls', 'user_id', 'course_id');
+    }
+
+    public function nilai()
+    {
+        return $this->hasMany(Nilai::class);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models\Course;
 
 use App\Models\Category\SubCategory;
 use App\Models\User;
+use App\Models\Nilai\Nilai;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -39,5 +40,10 @@ class Course extends Model
         return $this->hasMany(CourseModul::class, 'course_id', 'id')
         ->where('active', 1)
         ->orderBy('no_urut', 'asc');  
+    }
+
+    public function nilai()
+    {
+        return $this->hasMany(Nilai::class);
     }
 }

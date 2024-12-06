@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\Course\UserCourseEnrollController;
 use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 use App\Http\Controllers\Admin\User\UserController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Admin\Nilai\NilaiController;
 use App\Http\Controllers\Pages\Course\CourseController;
 use App\Http\Controllers\Pages\HomeController;
 use Illuminate\Support\Facades\Route;
@@ -51,6 +52,9 @@ Route::group(['middleware' => 'auth'], function () {
 
             Route::post('/course/{course_id}/enroll-user', [UserCourseEnrollController::class, 'userCourseEnroll'])->name('course.enroll');
             Route::delete('/course/{course_id}/enroll-user/destroy/{user_id}', [UserCourseEnrollController::class, 'destroyUser'])->name('course.destroy-user');
+
+            Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai.index');
+            Route::get('/nilai/course_id', [NilaiController::class, 'detail'])->name('nilai.detail');
         });
 
         Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
