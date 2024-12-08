@@ -52,6 +52,11 @@ class CourseModul extends Model
         return $this->hasMany(ModulQuiz::class);
     }
 
+    public function modulEssay()
+    {
+        return $this->hasMany(ModulEssay::class);
+    }
+
     public function nilai()
     {
         return $this->hasMany(Nilai::class);

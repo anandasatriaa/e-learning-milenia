@@ -427,44 +427,44 @@
                                         </div>
                                         {{-- Modal Essay --}}
                                         <div class="modal fade" id="modalImportEssay{{ $item->id }}" tabindex="-1" aria-labelledby="modalImportEssayLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalImportEssayLabel">Tambah Essay {{ $item->nama_modul }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="essayForm{{ $item->id }}" action="{{ route('admin.course.modul.question-import-essay', ['course_id' => $data->id, 'modul_id' => $item->id]) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-body">
-                    <div id="essay-container{{ $item->id }}">
-                        <!-- Essay pertama -->
-                        <div class="d-flex mb-3" id="essay-1">
-                            <div class="me-2" style="width: 30px; text-align: center; line-height: 2;">
-                                <span class="number">1</span>
-                            </div>
-                            <textarea class="form-control" name="essay[]" rows="3" required></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Ikon untuk menambah nomor dan textarea baru -->
-                    <div class="text-center">
-                        <button type="button" class="btn btn-outline-secondary btn-sm addEssay" data-modal-id="{{ $item->id }}">
-                            <i class="bi bi-plus"></i> Tambah Essay
-                        </button>
-                        <button type="button" class="btn btn-outline-danger btn-sm deleteEssay" data-modal-id="{{ $item->id }}" style="display: none;">
-                            <i class="bi bi-trash"></i> Hapus Essay
-                        </button>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="modalImportEssayLabel">Tambah Essay {{ $item->nama_modul }}</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form id="essayForm{{ $item->id }}" action="{{ route('admin.course.modul.question-import-essay', ['course_id' => $data->id, 'modul_id' => $item->id]) }}" method="POST" enctype="multipart/form-data">
+                                                        @csrf
+                                                        <div class="modal-body">
+                                                            <div id="essay-container{{ $item->id }}">
+                                                                @foreach ($item->modulEssay as $essay)
+                                                                    <div class="d-flex mb-3" id="essay-{{ $loop->iteration }}">
+                                                                        <div class="me-2" style="width: 30px; text-align: center; line-height: 2;">
+                                                                            <span class="number">{{ $loop->iteration }}</span>
+                                                                        </div>
+                                                                        <textarea class="form-control" name="essay[]" rows="3" required data-id="{{ $essay->id }}" data-course-id="{{ $data->id }}" data-modul-id="{{ $item->id }}">{{ $essay->pertanyaan }}</textarea>
+                                                                        <button type="button" class="btn btn-outline-danger btn-sm deleteEssay" data-modal-id="{{ $item->id }}" 
+                                                                            data-id="{{ $essay->id }}" data-course-id="{{ $data->id }}" data-modul-id="{{ $item->id }}">
+                                                                            <i class="bi bi-trash"></i> Hapus Essay
+                                                                        </button>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                            <!-- Ikon untuk menambah nomor dan textarea baru -->
+                                                            <div class="text-center">
+                                                                <button type="button" class="btn btn-outline-secondary btn-sm addEssay" data-modal-id="{{ $item->id }}">
+                                                                    <i class="bi bi-plus"></i> Tambah Essay
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
                                     @endforeach
                                 </tbody>
                             </table>
@@ -472,18 +472,6 @@
                     </div>
                 </div>
             </div>
-            @if (session('success'))
-    <div class="alert alert-success">
-        <strong>{{ session('success.title') }}</strong> - {{ session('success.message') }}
-    </div>
-@endif
-
-@if (session('error'))
-    <div class="alert alert-danger">
-        <strong>{{ session('error.title') }}</strong> - {{ session('error.message') }}
-    </div>
-@endif
-
             <div class="col-md-4">
                 <div class="card card-round">
                     <div class="card-body">
@@ -996,7 +984,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const modalId = this.getAttribute('data-modal-id');
             const essayContainer = document.getElementById(`essay-container${modalId}`);
 
-            // Cari nomor urut terkecil yang tersedia
+            // Ambil semua nomor essay yang ada
             const essayDivs = essayContainer.querySelectorAll('.d-flex.mb-3');
             let essayNumbers = [];
             essayDivs.forEach(div => {
@@ -1012,7 +1000,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 newEssayId++;
             }
 
-            // Buat div untuk essay baru
+            // Buat div baru untuk essay
             const newEssayDiv = document.createElement('div');
             newEssayDiv.classList.add('d-flex', 'mb-3');
             newEssayDiv.id = `essay-${newEssayId}`;
@@ -1022,36 +1010,112 @@ document.addEventListener('DOMContentLoaded', function () {
                     <span class="number">${newEssayId}</span>
                 </div>
                 <textarea class="form-control" name="essay[]" rows="3" required></textarea>
+                <button type="button" class="btn btn-outline-danger btn-sm deleteEssay" style="margin-left: 10px;">
+                    <i class="bi bi-trash"></i> Hapus Essay
+                </button>
             `;
 
-            // Tambahkan div baru ke container essay
+            // Tambahkan elemen baru ke container
             essayContainer.appendChild(newEssayDiv);
 
-            // Tampilkan tombol "Hapus Essay" setelah textarea kedua muncul
-            document.querySelector(`#modalImportEssay${modalId} .deleteEssay`).style.display = 'inline-block';
+            // Tambahkan event listener untuk tombol hapus
+            const deleteButton = newEssayDiv.querySelector('.deleteEssay');
+            deleteButton.addEventListener('click', function () {
+                newEssayDiv.remove();
+
+                // Perbarui nomor urut setelah elemen dihapus
+                updateEssayNumbers(essayContainer);
+            });
         });
     });
 
-    // Menghapus essay pada modal tertentu
+    // Tambahkan event listener untuk semua tombol "Hapus Essay" awal
     document.querySelectorAll('.deleteEssay').forEach(button => {
         button.addEventListener('click', function () {
             const modalId = this.getAttribute('data-modal-id');
-            const essayContainer = document.getElementById(`essay-container${modalId}`);
+            const courseId = this.getAttribute('data-course-id');
+            const modulId = this.getAttribute('data-modul-id');
+            const essayId = this.getAttribute('data-id'); // Ambil ID essay yang akan dihapus
+            const essayDiv = this.closest('.d-flex.mb-3'); // Elemen terkait
 
-            // Cari semua div essay dalam container
-            const allEssayDivs = essayContainer.querySelectorAll('.d-flex.mb-3');
-            if (allEssayDivs.length > 1) {
-                // Hapus essay terakhir
-                const lastEssayDiv = allEssayDivs[allEssayDivs.length - 1];
-                lastEssayDiv.remove();
-            }
+            // Kirim request AJAX untuk menghapus data di server
+            fetch(`/admin/course/course/${courseId}/modul/${modulId}/delete-essay/${essayId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Hapus elemen dari DOM
+                        if (essayDiv) {
+                            essayDiv.remove();
+                        }
 
-            // Sembunyikan tombol "Hapus Essay" jika hanya ada satu essay yang tersisa
-            if (essayContainer.querySelectorAll('.d-flex.mb-3').length <= 1) {
-                this.style.display = 'none';
-            }
+                        // Perbarui nomor urut setelah elemen dihapus
+                        const essayContainer = document.getElementById(`essay-container${modalId}`);
+                        updateEssayNumbers(essayContainer);
+
+                        // Tampilkan notifikasi sukses
+                        $.notify({
+                            icon: "icon-check",
+                            title: 'Sukses',
+                            message: 'Essay berhasil dihapus!'
+                        }, { type: 'success', delay: 2000 });
+                    } else {
+                        // Notifikasi jika gagal
+                        $.notify({
+                            icon: "icon-exclamation",
+                            title: 'Gagal',
+                            message: 'Terjadi kesalahan saat menghapus data.'
+                        }, { type: 'danger', delay: 2000 });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Tampilkan notifikasi kesalahan jaringan
+                    $.notify({
+                        icon: "icon-exclamation",
+                        title: 'Gagal',
+                        message: 'Terjadi kesalahan jaringan.'
+                    }, { type: 'danger', delay: 2000 });
+                });
         });
     });
+
+    // Fungsi untuk memperbarui nomor essay setelah ada perubahan
+    function updateEssayNumbers(container) {
+        const essays = container.querySelectorAll('.d-flex.mb-3');
+        let counter = 1;
+
+        essays.forEach(essay => {
+            const numberSpan = essay.querySelector('.number');
+            numberSpan.textContent = counter++;
+        });
+    }
+});
+
+
+
+
+// Pastikan tombol "Hapus Essay" muncul jika data ada di textarea (diambil dari database)
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('show.bs.modal', function () {
+        const modalId = this.id.replace('modalImportEssay', '');
+        const essayContainer = document.getElementById(`essay-container${modalId}`);
+        const deleteButton = document.querySelector(`.deleteEssay[data-modal-id="${modalId}"]`);
+
+        // Periksa apakah ada data di dalam essay container
+        const allEssayDivs = essayContainer.querySelectorAll('.d-flex.mb-3');
+        if (allEssayDivs.length > 0) {
+            deleteButton.style.display = 'inline-block'; // Munculkan tombol "Hapus Essay"
+        } else {
+            deleteButton.style.display = 'none'; // Sembunyikan tombol jika tidak ada data
+        }
+    });
+});
 
     // Mengirimkan data saat form disubmit
     document.querySelectorAll('[id^="essayForm"]').forEach(form => {
@@ -1069,21 +1133,107 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(response => response.json())
             .then(data => {
+                // Handle response
                 if (data.success) {
-                    console.log(data.message); // Pesan sukses
+                    $.notify({
+                        icon: "icon-check",
+                        title: 'Sukses',
+                        message: 'Essay berhasil disimpan!'
+                    }, {
+                        type: 'success',
+                        delay: 2000
+                    });
+
+                    // Menutup modal yang sesuai
+                    const modalId = `#modalImportEssay${form.id.replace('essayForm', '')}`;
+                    $(modalId).modal('hide'); // Menggunakan Bootstrap Modal
+
                 } else {
-                    console.error(data.message); // Pesan error
+                    $.notify({
+                        icon: "icon-exclamation",
+                        title: 'Gagal',
+                        message: 'Terjadi kesalahan saat memperbarui urutan.'
+                    }, {
+                        type: 'danger',
+                        delay: 2000
+                    });
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
+                .catch(error => {
+                    console.error('Error:', error);
+                    $.notify({
+                        icon: "icon-exclamation",
+                        title: 'Gagal',
+                        message: 'Terjadi kesalahan jaringan.'
+                    }, {
+                        type: 'danger',
+                        delay: 2000
+                    });
+                });
+        });
+    });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('textarea[data-id]').forEach(textarea => {
+        textarea.addEventListener('change', (event) => {
+            const essayId = event.target.getAttribute('data-id');
+            const courseId = event.target.getAttribute('data-course-id');
+            const modulId = event.target.getAttribute('data-modul-id');
+            const pertanyaan = event.target.value;
+
+            // Buat URL sesuai dengan route
+            const url = `/admin/course/course/${courseId}/modul/${modulId}/update-essay/${essayId}`;
+
+            // Kirim request AJAX untuk mengupdate data
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ pertanyaan })
+            })
+            .then(response => response.json())
+            .then(data => {
+            // Handle response
+            if (data.success) {
+                $.notify({
+                    icon: "icon-check",
+                    title: 'Sukses',
+                    message: 'Essay berhasil diperbarui!'
+                }, {
+                    type: 'success',
+                    delay: 2000
+                });
+
+            } else {
+                $.notify({
+                    icon: "icon-exclamation",
+                    title: 'Gagal',
+                    message: 'Terjadi kesalahan saat memperbarui essay.'
+                }, {
+                    type: 'danger',
+                    delay: 2000
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            $.notify({
+                icon: "icon-exclamation",
+                title: 'Gagal',
+                message: 'Terjadi kesalahan jaringan.'
+            }, {
+                type: 'danger',
+                delay: 2000
             });
+        });
         });
     });
 });
+</script>
 
-
-
-
-    </script>
 @endsection

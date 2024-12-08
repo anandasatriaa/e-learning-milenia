@@ -31,6 +31,8 @@ class CourseModulController extends Controller
         $linkModul = $courseModul->where('tipe_media', 'link')->where('active', 1)->count();
         $pdfModul = $courseModul->where('tipe_media', 'pdf')->where('active', 1)->count();
 
+        $modul = CourseModul::with('modulEssay')->where('course_id', $course_id)->get();
+
         $checkEnrolledCourse = UserCourseEnroll::where('course_id', $course_id)->pluck('user_id');
         $listUser = User::whereNotIn('ID', $checkEnrolledCourse)->orderBy('ID', 'desc')->get(['ID', 'Nama', 'Jabatan']);
 
@@ -41,7 +43,7 @@ class CourseModulController extends Controller
             return $user;
         });
 
-        return view('admin.course.modul.index', compact('data', 'totalModul', 'videoModul', 'linkModul', 'pdfModul', 'courseModul', 'listUser'));
+        return view('admin.course.modul.index', compact('data', 'totalModul', 'videoModul', 'linkModul', 'pdfModul', 'courseModul', 'listUser', 'modul'));
     }
 
     private function formatToFiveDigits($number)
@@ -191,19 +193,65 @@ class CourseModulController extends Controller
 
         if (is_array($essays)) {
             foreach ($essays as $content) {
-                if (!empty($content)) { // Abaikan elemen kosong
-                    DB::table('modul_essay_questions')->insert([
-                        'course_modul_id' => $modul_id,
-                        'pertanyaan' => $content,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                if (!empty($content)) {
+                    // Cek apakah pertanyaan sudah ada
+                    $exists = DB::table('modul_essay_questions')
+                        ->where('course_modul_id', $modul_id)
+                        ->where('pertanyaan', $content)
+                        ->exists();
+    
+                    if (!$exists) {
+                        DB::table('modul_essay_questions')->insert([
+                            'course_modul_id' => $modul_id,
+                            'pertanyaan' => $content,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
                 }
             }
         }
 
         return response()->json(['success' => true, 'message' => 'Semua pertanyaan berhasil disimpan!']);
     }
+
+    public function updateEssay(Request $request, $course_id, $modul_id, $id)
+    {
+        // Temukan modul dan essay berdasarkan ID
+        $essay = ModulEssay::where('course_modul_id', $modul_id)->find($id);
+
+        if (!$essay) {
+            return response()->json(['success' => false, 'message' => 'Essay tidak ditemukan'], 404);
+        }
+
+        // Validasi input
+        $request->validate([
+            'pertanyaan' => 'required|string|max:1000',
+        ]);
+
+        // Update data essay
+        $essay->pertanyaan = $request->pertanyaan;
+        $essay->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteEssay($course_id, $modul_id, $id)
+    {
+        // Temukan essay berdasarkan ID
+        $essay = ModulEssay::where('course_modul_id', $modul_id)->find($id);
+
+        if (!$essay) {
+            return response()->json(['success' => false, 'message' => 'Essay tidak ditemukan'], 404);
+        }
+
+        // Hapus data essay
+        $essay->delete();
+
+        return response()->json(['success' => true, 'message' => 'Essay berhasil dihapus']);
+    }
+
+
 
 
 
