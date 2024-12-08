@@ -1035,6 +1035,10 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
 
             const formData = new FormData(this);
+            document.querySelectorAll('textarea[data-id]').forEach(textarea => {
+                const id = textarea.getAttribute('data-id'); // Bisa berupa ID atau key arbitrary
+                formData.append(`essay[${id}]`, textarea.value);
+            });
 
             fetch(this.action, {
                 method: 'POST',
@@ -1173,67 +1177,4 @@ document.querySelectorAll('.modal').forEach(modal => {
     });
 });
 </script>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('textarea[data-id]').forEach(textarea => {
-    textarea.addEventListener('change', function (e) {
-        e.preventDefault(); // Jangan submit form jika tidak diperlukan
-        const essayId = e.target.getAttribute('data-id');
-        const courseId = e.target.getAttribute('data-course-id');
-        const modulId = e.target.getAttribute('data-modul-id');
-        const pertanyaan = e.target.value;
-
-        // Buat URL sesuai dengan route
-        const url = `/admin/course/course/${courseId}/modul/${modulId}/update-essay/${essayId}`;
-
-        // Kirim request AJAX untuk mengupdate data
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({ pertanyaan })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                $.notify({
-                    icon: "icon-check",
-                    title: 'Sukses',
-                    message: 'Essay berhasil diperbarui!'
-                }, {
-                    type: 'success',
-                    delay: 2000
-                });
-            } else {
-                $.notify({
-                    icon: "icon-exclamation",
-                    title: 'Gagal',
-                    message: 'Terjadi kesalahan saat memperbarui essay.'
-                }, {
-                    type: 'danger',
-                    delay: 2000
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            $.notify({
-                icon: "icon-exclamation",
-                title: 'Gagal',
-                message: 'Terjadi kesalahan jaringan.'
-            }, {
-                type: 'danger',
-                delay: 2000
-            });
-        });
-    });
-});
-
-});
-</script>
-
 @endsection
