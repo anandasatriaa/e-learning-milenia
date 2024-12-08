@@ -189,42 +189,35 @@ class CourseModulController extends Controller
 
     public function importEssayProcess(Request $request, $course_id, $modul_id)
     {
+        Log::info('importEssayProcess');
+        Log::info("Backend".print_r($request->all(), true));
+
         // Ambil array essay dari form
         $essays = $request->input('essay', []); 
 
         if (is_array($essays)) {
-            foreach ($essays as $id => $content) {
+            foreach ($essays as $content) {
                 if (!empty($content)) {
-                    // Jika ID adalah angka valid, cari essay berdasarkan ID untuk update
-                    if (is_numeric($id)) {
-                        $essay = ModulEssay::where('course_modul_id', $modul_id)->find($id);
-                        if ($essay) {
-                            // Update essay jika ditemukan
-                            $essay->pertanyaan = $content;
-                            $essay->updated_at = now();
-                            $essay->save();
-                        }
-                    } else {
-                        // Jika ID tidak valid (biasanya key default array), maka tambahkan data baru
-                        $exists = DB::table('modul_essay_questions')
-                            ->where('course_modul_id', $modul_id)
-                            ->where('pertanyaan', $content)
-                            ->exists();
+                    // Periksa apakah pertanyaan sudah ada di database
+                    $exists = DB::table('modul_essay_questions')
+                        ->where('course_modul_id', $modul_id)
+                        ->where('pertanyaan', $content)
+                        ->exists();
 
-                        if (!$exists) {
-                            DB::table('modul_essay_questions')->insert([
-                                'course_modul_id' => $modul_id,
-                                'pertanyaan' => $content,
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ]);
-                        }
+                    if (!$exists) {
+                        // Insert data baru
+                        DB::table('modul_essay_questions')->insert([
+                            'course_modul_id' => $modul_id,
+                            'pertanyaan' => $content,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
                     }
                 }
             }
         }
 
-        return response()->json(['success' => true, 'message' => 'Semua pertanyaan berhasil diproses!']);
+        return response()->json(['success' => true, 'message' => 'Semua pertanyaan berhasil disimpan!']);
     }
 
     public function deleteEssay($course_id, $modul_id, $id)
