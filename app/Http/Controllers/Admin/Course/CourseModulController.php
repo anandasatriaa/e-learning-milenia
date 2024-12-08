@@ -189,7 +189,7 @@ class CourseModulController extends Controller
 
     public function importEssayProcess(Request $request, $course_id, $modul_id)
     {
-        $essays = $request->input('essay'); // Mengambil array essay dari form
+        $essays = $request->input('essay', []); // Mengambil array essay dari form
 
         if (is_array($essays)) {
             foreach ($essays as $content) {
@@ -250,10 +250,6 @@ class CourseModulController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Essay berhasil dihapus']);
     }
-
-
-
-
 
     public function isActive(Request $request, $course_id, $modul_id)
     {

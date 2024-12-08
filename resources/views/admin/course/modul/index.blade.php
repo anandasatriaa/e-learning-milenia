@@ -322,7 +322,7 @@
                                                 </button>
                                             </td>
                                             <td class="text-center">
-                                                <p class="form-text mb-1">Total soal : </p>
+                                                <p class="form-text mb-1">Total soal : {{ count($item->modulEssay) }}</p>
                                                 <button type="button" class="btn btn-primary btn-sm"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#modalImportEssay{{ $item->id }}">
@@ -458,7 +458,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                                            <button type="submit" id="submit-essay" class="btn btn-primary">Simpan</button>
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                                                         </div>
                                                     </form>
@@ -976,7 +976,7 @@
         });
     });
 
-    // Increment menambah soal essay
+// Soal Essay
 document.addEventListener('DOMContentLoaded', function () {
     // Menambahkan event listener untuk tombol "Tambah Essay"
     document.querySelectorAll('.addEssay').forEach(button => {
@@ -1026,6 +1026,62 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Perbarui nomor urut setelah elemen dihapus
                 updateEssayNumbers(essayContainer);
             });
+        });
+    });
+
+    // Mengirimkan data saat form disubmit
+    document.querySelectorAll('[id^="essayForm"]').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle response
+                if (data.success) {
+                    $.notify({
+                        icon: "icon-check",
+                        title: 'Sukses',
+                        message: 'Essay berhasil disimpan!'
+                    }, {
+                        type: 'success',
+                        delay: 2000
+                    });
+
+                    // Menutup modal yang sesuai
+                    const modalId = `#modalImportEssay${form.id.replace('essayForm', '')}`;
+                    $(modalId).modal('hide'); // Menggunakan Bootstrap Modal
+
+                } else {
+                    $.notify({
+                        icon: "icon-exclamation",
+                        title: 'Gagal',
+                        message: 'Terjadi kesalahan saat memperbarui urutan.'
+                    }, {
+                        type: 'danger',
+                        delay: 2000
+                    });
+                }
+            })
+                .catch(error => {
+                    console.error('Error:', error);
+                    $.notify({
+                        icon: "icon-exclamation",
+                        title: 'Gagal',
+                        message: 'Terjadi kesalahan jaringan.'
+                    }, {
+                        type: 'danger',
+                        delay: 2000
+                    });
+                });
         });
     });
 
@@ -1116,89 +1172,33 @@ document.querySelectorAll('.modal').forEach(modal => {
         }
     });
 });
-
-    // Mengirimkan data saat form disubmit
-    document.querySelectorAll('[id^="essayForm"]').forEach(form => {
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-
-            fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Handle response
-                if (data.success) {
-                    $.notify({
-                        icon: "icon-check",
-                        title: 'Sukses',
-                        message: 'Essay berhasil disimpan!'
-                    }, {
-                        type: 'success',
-                        delay: 2000
-                    });
-
-                    // Menutup modal yang sesuai
-                    const modalId = `#modalImportEssay${form.id.replace('essayForm', '')}`;
-                    $(modalId).modal('hide'); // Menggunakan Bootstrap Modal
-
-                } else {
-                    $.notify({
-                        icon: "icon-exclamation",
-                        title: 'Gagal',
-                        message: 'Terjadi kesalahan saat memperbarui urutan.'
-                    }, {
-                        type: 'danger',
-                        delay: 2000
-                    });
-                }
-            })
-                .catch(error => {
-                    console.error('Error:', error);
-                    $.notify({
-                        icon: "icon-exclamation",
-                        title: 'Gagal',
-                        message: 'Terjadi kesalahan jaringan.'
-                    }, {
-                        type: 'danger',
-                        delay: 2000
-                    });
-                });
-        });
-    });
 </script>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('textarea[data-id]').forEach(textarea => {
-        textarea.addEventListener('change', (event) => {
-            const essayId = event.target.getAttribute('data-id');
-            const courseId = event.target.getAttribute('data-course-id');
-            const modulId = event.target.getAttribute('data-modul-id');
-            const pertanyaan = event.target.value;
+    textarea.addEventListener('change', function (e) {
+        e.preventDefault(); // Jangan submit form jika tidak diperlukan
+        const essayId = e.target.getAttribute('data-id');
+        const courseId = e.target.getAttribute('data-course-id');
+        const modulId = e.target.getAttribute('data-modul-id');
+        const pertanyaan = e.target.value;
 
-            // Buat URL sesuai dengan route
-            const url = `/admin/course/course/${courseId}/modul/${modulId}/update-essay/${essayId}`;
+        // Buat URL sesuai dengan route
+        const url = `/admin/course/course/${courseId}/modul/${modulId}/update-essay/${essayId}`;
 
-            // Kirim request AJAX untuk mengupdate data
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({ pertanyaan })
-            })
-            .then(response => response.json())
-            .then(data => {
-            // Handle response
+        // Kirim request AJAX untuk mengupdate data
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ pertanyaan })
+        })
+        .then(response => response.json())
+        .then(data => {
             if (data.success) {
                 $.notify({
                     icon: "icon-check",
@@ -1208,7 +1208,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     type: 'success',
                     delay: 2000
                 });
-
             } else {
                 $.notify({
                     icon: "icon-exclamation",
@@ -1231,8 +1230,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 delay: 2000
             });
         });
-        });
     });
+});
+
 });
 </script>
 
