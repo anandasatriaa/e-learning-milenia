@@ -119,7 +119,7 @@
                                                             <p class="card-category fw-bold text-success align-middle"> Telah diselesaikan <i class="fas fa-check-circle"></i></p>
                                                         @endif
                                                         <h5 class="card-text text-truncate" style="line-height: 1.5rem;">{{ $courseEnrolleds->course->nama_kelas }}</h5>
-                                                        <h6 class="text-muted" style="font-size: 0.8rem; line-height: 0.5rem;">Dimulai </h6>
+                                                        <h6 class="text-muted" style="font-size: 0.8rem; line-height: 0.5rem;">Dimulai {{ \Carbon\Carbon::parse($courseEnrolleds->enroll_date)->format('d M Y') }}</h6>
                                                     </div>
                                                 </div>
                                             </div>
