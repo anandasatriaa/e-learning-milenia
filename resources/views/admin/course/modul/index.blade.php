@@ -588,26 +588,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Modal -->
-                        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form id="deleteForm" method="POST">
-                                        @method('DELETE')
-                                        @csrf
-                                        <div class="modal-body">
-                                            <h4 class="text-danger mb-4">Hapus data</h4>
-                                            <p>Apakah anda yakin?</p>
-                                        </div>
-                                        <div class="modal-footer d-flex justify-content-center">
-                                            <button type="button" class="btn btn-default" data-bs-dismiss="modal">Tutup</button>
-                                            <button type="submit" class="btn btn-danger">Hapus</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Existing Template -->
                         <div class="card-list py-4 overflow-y-scroll" style="max-height: 720px">
                             @foreach ($data->user as $enrollUser)
@@ -623,9 +603,14 @@
                                         <div class="username">{{ $enrollUser->Nama }}</div>
                                         <div class="status">{{ $enrollUser->Jabatan }}</div>
                                     </div>
-                                    <button class="btn btn-icon btn-round btn-light text-danger me-3" onclick="confirmDelete('{{ route('admin.course.course.destroy-user', ['course_id' => $data->id, 'user_id' => $enrollUser->ID]) }}')">
-                                        <i class="fas fa-ban"></i>
-                                    </button>
+                                    <form id="deleteForm" action="{{ route('admin.course.course.destroy-user', ['course_id' => $data->id, 'user_id' => $enrollUser->ID]) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" id="alertHapus" class="btn btn-icon btn-round btn-light text-danger me-3">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    </form>
+
                                 </a>
                             @endforeach
                         </div>
@@ -905,17 +890,6 @@
             location.reload();
         }
 
-        // Konfirmasi Modal User Unenroll
-        function confirmDelete(url) {
-            // Set action form untuk delete
-            document.getElementById('deleteForm').action = url;
-            // Buka modal
-            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'), {
-                keyboard: false
-            });
-            deleteModal.show();
-        }
-
     document.getElementById("simpanUbahUrut").addEventListener("click", function() {
         const listItems = document.querySelectorAll('#my-list tr');
         let order = [];
@@ -1140,93 +1114,128 @@ document.querySelectorAll('.modal').forEach(modal => {
         }
 
         // Submit Form
-document.querySelectorAll("form").forEach(form => {
-    form.addEventListener("submit", function (e) {
-        e.preventDefault();
+        document.querySelectorAll("form").forEach(form => {
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
 
-        const modalId = this.getAttribute("id").replace("essayForm", "");
-        const container = document.getElementById(`essay-container${modalId}`);
-        const textareas = container.querySelectorAll("textarea");
+                const modalId = this.getAttribute("id").replace("essayForm", "");
+                const container = document.getElementById(`essay-container${modalId}`);
+                const textareas = container.querySelectorAll("textarea");
 
-        const formData = new FormData(this);
+                const formData = new FormData(this);
 
-        // Tambahkan data essay dari textarea
-        textareas.forEach(textarea => {
-            const essayId = textarea.getAttribute('data-id'); // Mendapatkan ID jika ada
-            const essayValue = textarea.value;
+                // Tambahkan data essay dari textarea
+                textareas.forEach(textarea => {
+                    const essayId = textarea.getAttribute('data-id'); // Mendapatkan ID jika ada
+                    const essayValue = textarea.value;
 
-            if (essayId) {
-                // Jika ada ID, kirimkan ID dan value untuk update
-                formData.append("essay_id[]", essayId); // Mengirim ID untuk update
-            }
-            formData.append("essay[]", essayValue); // Kirim value dari textarea
-        });
-
-        // Debugging untuk melihat data yang dikirim
-        formData.forEach((value, key) => {
-            console.log(`Key: ${key}, Value: ${value}`);
-        });
-
-        // Kirim data menggunakan fetch
-        fetch(this.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Handle response dari server
-            if (data.success) {
-                $.notify({
-                    icon: "icon-check",
-                    title: 'Sukses',
-                    message: 'Essay berhasil disimpan!'
-                }, {
-                    type: 'success',
-                    delay: 2000
+                    if (essayId) {
+                        // Jika ada ID, kirimkan ID dan value untuk update
+                        formData.append("essay_id[]", essayId); // Mengirim ID untuk update
+                    }
+                    formData.append("essay[]", essayValue); // Kirim value dari textarea
                 });
 
-                // Menutup modal yang sesuai
-                $(`#modalImportEssay${modalId}`).modal('hide'); // Bootstrap modal
-
-                // Reset form setelah sukses
-                form.reset();
-                const essayContainer = document.getElementById(`essay-container${modalId}`);
-                essayContainer.innerHTML = ''; // Hapus semua textarea tambahan
-
-                // Reload halaman setelah delay untuk memberi waktu notifikasi tampil
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-            } else {
-                $.notify({
-                    icon: "icon-exclamation",
-                    title: 'Gagal',
-                    message: data.message || 'Terjadi kesalahan saat menyimpan data.'
-                }, {
-                    type: 'danger',
-                    delay: 2000
+                // Debugging untuk melihat data yang dikirim
+                formData.forEach((value, key) => {
+                    console.log(`Key: ${key}, Value: ${value}`);
                 });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            $.notify({
-                icon: "icon-exclamation",
-                title: 'Gagal',
-                message: 'Terjadi kesalahan jaringan.'
-            }, {
-                type: 'danger',
-                delay: 2000
+
+                // Kirim data menggunakan fetch
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle response dari server
+                    if (data.success) {
+                        $.notify({
+                            icon: "icon-check",
+                            title: 'Sukses',
+                            message: 'Essay berhasil disimpan!'
+                        }, {
+                            type: 'success',
+                            delay: 2000
+                        });
+
+                        // Menutup modal yang sesuai
+                        $(`#modalImportEssay${modalId}`).modal('hide'); // Bootstrap modal
+
+                        // Reset form setelah sukses
+                        form.reset();
+                        const essayContainer = document.getElementById(`essay-container${modalId}`);
+                        essayContainer.innerHTML = ''; // Hapus semua textarea tambahan
+
+                        // Reload halaman setelah delay untuk memberi waktu notifikasi tampil
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        $.notify({
+                            icon: "icon-exclamation",
+                            title: 'Gagal',
+                            message: data.message || 'Terjadi kesalahan saat menyimpan data.'
+                        }, {
+                            type: 'danger',
+                            delay: 2000
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    $.notify({
+                        icon: "icon-exclamation",
+                        title: 'Gagal',
+                        message: 'Terjadi kesalahan jaringan.'
+                    }, {
+                        type: 'danger',
+                        delay: 2000
+                    });
+                });
             });
         });
     });
-});
+</script>
 
+<script>
+    // Hapus peserta dari enroll
+    $('#alertHapus').click(function(e) {
+        e.preventDefault(); // Cegah aksi default agar tidak terjadi redirect langsung
 
+        var deleteUrl = $(this).closest('form').attr('action'); // Ambil URL untuk penghapusan dari data-url
+        console.log(deleteUrl);
+
+        swal({
+            title: 'Apakah anda yakin?',
+            text: "Anda akan menghapus user ini dari course!",
+            icon: 'warning',
+            buttons: {
+                confirm: {
+                    text: 'Ya, hapus!',
+                    className: 'btn btn-success'
+                },
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-danger'
+                }
+            }
+        }).then((Delete) => {
+            if (Delete) {
+                // Jika dihapus, kirim formulir untuk menghapus user
+                $(this).closest('form').submit();
+            } else {
+                // Jika dibatalkan, tutup swal
+                swal.close();
+            }
+        });
     });
 </script>
+
+
+
 
 @endsection

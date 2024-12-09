@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin\Course;
 
 use App\Http\Controllers\Controller;
 use App\Models\UserCourseEnroll;
+use App\Models\Course\Course;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -33,13 +35,11 @@ class UserCourseEnrollController extends Controller
     public function destroyUser($course_id, $user_id)
     {
         try {
-            DB::beginTransaction();
-            $enroll = UserCourseEnroll::where('course_id', $course_id)
-                                        ->where('user_id', $user_id)
-                                        ->firstOrFail();
-            $enroll->delete();
-    
-            DB::commit();
+            $course = Course::findOrFail($course_id);
+            $user = User::findOrFail($user_id);
+
+            // Hapus user dari course (misalnya melalui pivot table)
+            $course->user()->detach($user_id);
             return redirect()->route('admin.course.modul.index', $course_id)->with([
                 'success' => [
                     'title' => 'Sukses',
