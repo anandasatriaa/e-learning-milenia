@@ -189,36 +189,72 @@ class CourseModulController extends Controller
 
     public function importEssayProcess(Request $request, $course_id, $modul_id)
     {
-        Log::info('importEssayProcess');
-        Log::info("Backend".print_r($request->all(), true));
+        try {
+            $essay_ids = $request->input('essay_id', []);
+            $essays = $request->input('essay', []);
 
-        // Ambil array essay dari form
-        $essays = $request->input('essay', []); 
+            // Log incoming data
+            Log::info('Received Essay Data:', [
+                'essay_ids' => $essay_ids,
+                'essays' => $essays,
+            ]);
 
-        if (is_array($essays)) {
-            foreach ($essays as $content) {
-                if (!empty($content)) {
-                    // Periksa apakah pertanyaan sudah ada di database
-                    $exists = DB::table('modul_essay_questions')
+            foreach ($essays as $index => $essay) {
+                $essayId = isset($essay_ids[$index]) ? $essay_ids[$index] : null;
+
+                if ($essayId) {
+                    // Update existing essay
+                    $existingEssay = ModulEssay::find($essayId);
+                    if ($existingEssay) {
+                        $existingEssay->pertanyaan = $essay;
+                        $existingEssay->save();
+
+                        // Log the updated essay
+                        Log::info('Updated Essay:', [
+                            'essay_id' => $essayId,
+                            'pertanyaan' => $essay
+                        ]);
+                    }
+                } else {
+                    // Only create new essay if there's no matching essay_id
+                    // Check if essay already exists to prevent duplicate data
+                    $existingEssayCheck = ModulEssay::where('pertanyaan', $essay)
                         ->where('course_modul_id', $modul_id)
-                        ->where('pertanyaan', $content)
-                        ->exists();
+                        ->first();
 
-                    if (!$exists) {
-                        // Insert data baru
-                        DB::table('modul_essay_questions')->insert([
+                    if (!$existingEssayCheck) {
+                        // Add new essay only if not already present
+                        $newEssay = ModulEssay::create([
                             'course_modul_id' => $modul_id,
-                            'pertanyaan' => $content,
+                            'pertanyaan' => $essay,
                             'created_at' => now(),
                             'updated_at' => now(),
+                        ]);
+
+                        // Log the newly created essay
+                        Log::info('Created New Essay:', [
+                            'new_essay_id' => $newEssay->id,
+                            'pertanyaan' => $essay
+                        ]);
+                    } else {
+                        // Log if the essay already exists (skip creation)
+                        Log::info('Essay already exists, skipping creation:', [
+                            'pertanyaan' => $essay
                         ]);
                     }
                 }
             }
-        }
 
-        return response()->json(['success' => true, 'message' => 'Semua pertanyaan berhasil disimpan!']);
+            // Return a JSON response on success
+            return response()->json(['success' => true, 'message' => 'Essay updated successfully']);
+        } catch (\Exception $e) {
+            // Handle errors and return JSON error message
+            Log::error('Error occurred during essay import:', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
+
+
 
     public function deleteEssay($course_id, $modul_id, $id)
     {

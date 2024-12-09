@@ -976,196 +976,6 @@
         });
     });
 
-// Soal Essay
-// document.addEventListener('DOMContentLoaded', function () {
-//     // Menambahkan event listener untuk tombol "Tambah Essay"
-//     document.querySelectorAll('.addEssay').forEach(button => {
-//         button.addEventListener('click', function () {
-//             const modalId = this.getAttribute('data-modal-id');
-//             const essayContainer = document.getElementById(`essay-container${modalId}`);
-
-//             // Ambil semua nomor essay yang ada
-//             const essayDivs = essayContainer.querySelectorAll('.d-flex.mb-3');
-//             let essayNumbers = [];
-//             essayDivs.forEach(div => {
-//                 const numberSpan = div.querySelector('.number');
-//                 if (numberSpan) {
-//                     essayNumbers.push(parseInt(numberSpan.textContent));
-//                 }
-//             });
-
-//             // Cari nomor urut terkecil yang belum digunakan
-//             let newEssayId = 1;
-//             while (essayNumbers.includes(newEssayId)) {
-//                 newEssayId++;
-//             }
-
-//             // Buat div baru untuk essay
-//             const newEssayDiv = document.createElement('div');
-//             newEssayDiv.classList.add('d-flex', 'mb-3');
-//             newEssayDiv.id = `essay-${newEssayId}`;
-
-//             newEssayDiv.innerHTML = `
-//                 <div class="me-2" style="width: 30px; text-align: center; line-height: 2;">
-//                     <span class="number">${newEssayId}</span>
-//                 </div>
-//                 <textarea class="form-control" name="essay[]" rows="3" required></textarea>
-//                 <button type="button" class="btn btn-outline-danger btn-sm deleteEssay" style="margin-left: 10px;">
-//                     <i class="bi bi-trash"></i> Hapus Essay
-//                 </button>
-//             `;
-
-//             // Tambahkan elemen baru ke container
-//             essayContainer.appendChild(newEssayDiv);
-
-//             // Tambahkan event listener untuk tombol hapus
-//             const deleteButton = newEssayDiv.querySelector('.deleteEssay');
-//             deleteButton.addEventListener('click', function () {
-//                 newEssayDiv.remove();
-
-//                 // Perbarui nomor urut setelah elemen dihapus
-//                 updateEssayNumbers(essayContainer);
-//             });
-//         });
-//     });
-
-//     // Mengirimkan data saat form disubmit
-//     document.querySelectorAll('[id^="essayForm"]').forEach(form => {
-//         form.addEventListener('submit', function (e) {
-//             e.preventDefault();
-
-//             const formData = new FormData(this);
-//             document.querySelectorAll('textarea[data-id]').forEach(textarea => {
-//                 const id = textarea.getAttribute('data-id'); // Bisa berupa ID atau key arbitrary
-//                 formData.append(`essay[${id}]`, textarea.value);
-//             });
-
-//             formData.forEach((value, key) => {
-//                 console.log(`Key: ${key}, Value: ${value}`);
-//             });
-
-
-//             fetch(this.action, {
-//                 method: 'POST',
-//                 body: formData,
-//                 headers: {
-//                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-//                 }
-//             })
-//             .then(response => response.json())
-//             .then(data => {
-//                 // Handle response
-//                 if (data.success) {
-//                     $.notify({
-//                         icon: "icon-check",
-//                         title: 'Sukses',
-//                         message: 'Essay berhasil disimpan!'
-//                     }, {
-//                         type: 'success',
-//                         delay: 2000
-//                     });
-
-//                     // Menutup modal yang sesuai
-//                     const modalId = `#modalImportEssay${form.id.replace('essayForm', '')}`;
-//                     $(modalId).modal('hide'); // Menggunakan Bootstrap Modal
-
-//                 } else {
-//                     $.notify({
-//                         icon: "icon-exclamation",
-//                         title: 'Gagal',
-//                         message: 'Terjadi kesalahan saat memperbarui urutan.'
-//                     }, {
-//                         type: 'danger',
-//                         delay: 2000
-//                     });
-//                 }
-//             })
-//                 .catch(error => {
-//                     console.error('Error:', error);
-//                     $.notify({
-//                         icon: "icon-exclamation",
-//                         title: 'Gagal',
-//                         message: 'Terjadi kesalahan jaringan.'
-//                     }, {
-//                         type: 'danger',
-//                         delay: 2000
-//                     });
-//                 });
-//         });
-//     });
-
-//     // Tambahkan event listener untuk semua tombol "Hapus Essay" awal
-//     document.querySelectorAll('.deleteEssay').forEach(button => {
-//         button.addEventListener('click', function () {
-//             const modalId = this.getAttribute('data-modal-id');
-//             const courseId = this.getAttribute('data-course-id');
-//             const modulId = this.getAttribute('data-modul-id');
-//             const essayId = this.getAttribute('data-id'); // Ambil ID essay yang akan dihapus
-//             const essayDiv = this.closest('.d-flex.mb-3'); // Elemen terkait
-
-//             // Kirim request AJAX untuk menghapus data di server
-//             fetch(`/admin/course/course/${courseId}/modul/${modulId}/delete-essay/${essayId}`, {
-//                 method: 'DELETE',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-//                 }
-//             })
-//                 .then(response => response.json())
-//                 .then(data => {
-//                     if (data.success) {
-//                         // Hapus elemen dari DOM
-//                         if (essayDiv) {
-//                             essayDiv.remove();
-//                         }
-
-//                         // Perbarui nomor urut setelah elemen dihapus
-//                         const essayContainer = document.getElementById(`essay-container${modalId}`);
-//                         updateEssayNumbers(essayContainer);
-
-//                         // Tampilkan notifikasi sukses
-//                         $.notify({
-//                             icon: "icon-check",
-//                             title: 'Sukses',
-//                             message: 'Essay berhasil dihapus!'
-//                         }, { type: 'success', delay: 2000 });
-//                     } else {
-//                         // Notifikasi jika gagal
-//                         $.notify({
-//                             icon: "icon-exclamation",
-//                             title: 'Gagal',
-//                             message: 'Terjadi kesalahan saat menghapus data.'
-//                         }, { type: 'danger', delay: 2000 });
-//                     }
-//                 })
-//                 .catch(error => {
-//                     console.error('Error:', error);
-//                     // Tampilkan notifikasi kesalahan jaringan
-//                     $.notify({
-//                         icon: "icon-exclamation",
-//                         title: 'Gagal',
-//                         message: 'Terjadi kesalahan jaringan.'
-//                     }, { type: 'danger', delay: 2000 });
-//                 });
-//         });
-//     });
-
-//     // Fungsi untuk memperbarui nomor essay setelah ada perubahan
-//     function updateEssayNumbers(container) {
-//         const essays = container.querySelectorAll('.d-flex.mb-3');
-//         let counter = 1;
-
-//         essays.forEach(essay => {
-//             const numberSpan = essay.querySelector('.number');
-//             numberSpan.textContent = counter++;
-//         });
-//     }
-// });
-
-
-
-
-
 
 // Pastikan tombol "Hapus Essay" muncul jika data ada di textarea (diambil dari database)
 document.querySelectorAll('.modal').forEach(modal => {
@@ -1273,9 +1083,9 @@ document.querySelectorAll('.modal').forEach(modal => {
                                 delay: 2000
                             });
                             // Reload halaman setelah delay untuk memberi waktu notifikasi tampil
-                            setTimeout(() => {
-                                location.reload();
-                            }, 1000);
+                            // setTimeout(() => {
+                            //     location.reload();
+                            // }, 1000);
                         } else {
                             // Tampilkan pesan error jika server mengembalikan kesalahan
                             $.notify({
@@ -1330,83 +1140,92 @@ document.querySelectorAll('.modal').forEach(modal => {
         }
 
         // Submit Form
-        document.querySelectorAll("form").forEach(form => {
-            form.addEventListener("submit", function (e) {
-                e.preventDefault();
-                const modalId = this.getAttribute("id").replace("essayForm", "");
-                const container = document.getElementById(`essay-container${modalId}`);
-                const textareas = container.querySelectorAll("textarea");
+document.querySelectorAll("form").forEach(form => {
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
 
-                const formData = new FormData(this);
-                textareas.forEach(textarea => {
-                    formData.append("essay[]", textarea.value);
-                    console.log(textarea.value); // Debugging untuk melihat data textarea
+        const modalId = this.getAttribute("id").replace("essayForm", "");
+        const container = document.getElementById(`essay-container${modalId}`);
+        const textareas = container.querySelectorAll("textarea");
+
+        const formData = new FormData(this);
+
+        // Tambahkan data essay dari textarea
+        textareas.forEach(textarea => {
+            const essayId = textarea.getAttribute('data-id'); // Mendapatkan ID jika ada
+            const essayValue = textarea.value;
+
+            if (essayId) {
+                // Jika ada ID, kirimkan ID dan value untuk update
+                formData.append("essay_id[]", essayId); // Mengirim ID untuk update
+            }
+            formData.append("essay[]", essayValue); // Kirim value dari textarea
+        });
+
+        // Debugging untuk melihat data yang dikirim
+        formData.forEach((value, key) => {
+            console.log(`Key: ${key}, Value: ${value}`);
+        });
+
+        // Kirim data menggunakan fetch
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Handle response dari server
+            if (data.success) {
+                $.notify({
+                    icon: "icon-check",
+                    title: 'Sukses',
+                    message: 'Essay berhasil disimpan!'
+                }, {
+                    type: 'success',
+                    delay: 2000
                 });
 
-                formData.forEach((value, key) => {
-                 console.log(`Key: ${key}, Value: ${value}`);
-             });
+                // Menutup modal yang sesuai
+                $(`#modalImportEssay${modalId}`).modal('hide'); // Bootstrap modal
 
-            // Kirim data menggunakan fetch
-            fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Handle response dari server
-                if (data.success) {
-                    $.notify({
-                        icon: "icon-check",
-                        title: 'Sukses',
-                        message: 'Essay berhasil disimpan!'
-                    }, {
-                        type: 'success',
-                        delay: 2000
-                    });
+                // Reset form setelah sukses
+                form.reset();
+                const essayContainer = document.getElementById(`essay-container${modalId}`);
+                essayContainer.innerHTML = ''; // Hapus semua textarea tambahan
 
-                    // Menutup modal yang sesuai
-                    const modalId = `#modalImportEssay${form.id.replace('essayForm', '')}`;
-                    $(modalId).modal('hide'); // Bootstrap modal
-
-                    // Opsional: Reset form setelah sukses
-                    form.reset();
-                    const essayContainer = document.getElementById(`essay-container${form.id.replace('essayForm', '')}`);
-                    essayContainer.innerHTML = ''; // Hapus semua textarea tambahan
-
-                    // Reload halaman setelah delay untuk memberi waktu notifikasi tampil
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
-                } else {
-                    $.notify({
-                        icon: "icon-exclamation",
-                        title: 'Gagal',
-                        message: data.message || 'Terjadi kesalahan saat menyimpan data.'
-                    }, {
-                        type: 'danger',
-                        delay: 2000
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+                // Reload halaman setelah delay untuk memberi waktu notifikasi tampil
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
                 $.notify({
                     icon: "icon-exclamation",
                     title: 'Gagal',
-                    message: 'Terjadi kesalahan jaringan.'
+                    message: data.message || 'Terjadi kesalahan saat menyimpan data.'
                 }, {
                     type: 'danger',
                     delay: 2000
                 });
-            });
-
-                // Opsional: Tambahkan validasi jika diperlukan
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            $.notify({
+                icon: "icon-exclamation",
+                title: 'Gagal',
+                message: 'Terjadi kesalahan jaringan.'
+            }, {
+                type: 'danger',
+                delay: 2000
             });
         });
+    });
+});
+
+
     });
 </script>
 
