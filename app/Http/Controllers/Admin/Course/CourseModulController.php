@@ -222,17 +222,12 @@ class CourseModulController extends Controller
 
     public function deleteEssay($course_id, $modul_id, $id)
     {
-        // Temukan essay berdasarkan ID
-        $essay = ModulEssay::where('course_modul_id', $modul_id)->find($id);
-
-        if (!$essay) {
-            return response()->json(['success' => false, 'message' => 'Essay tidak ditemukan'], 404);
+        $essay = ModulEssay::find($id);
+        if ($essay) {
+            $essay->delete();
+            return response()->json(['success' => true, 'message' => 'Essay berhasil dihapus.']);
         }
-
-        // Hapus data essay
-        $essay->delete();
-
-        return response()->json(['success' => true, 'message' => 'Essay berhasil dihapus']);
+        return response()->json(['success' => false, 'message' => 'Essay tidak ditemukan.']);
     }
 
     public function isActive(Request $request, $course_id, $modul_id)

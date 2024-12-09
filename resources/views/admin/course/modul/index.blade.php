@@ -1221,12 +1221,105 @@ document.querySelectorAll('.modal').forEach(modal => {
         // Hapus Essay
         document.querySelectorAll(".deleteEssay").forEach(button => {
             button.addEventListener("click", function () {
-                const modalId = this.getAttribute("data-modal-id");
-                const container = document.getElementById(`essay-container${modalId}`);
-                this.closest(".d-flex").remove();
-                renumberEssay(container); // Update nomor setelah penghapusan
+                const modalId = this.getAttribute("data-modal-id"); // Ambil ID modal
+                const container = document.getElementById(`essay-container${modalId}`); // Cari container spesifik
+
+                if (!container) {
+                    console.warn(`Container dengan ID essay-container${modalId} tidak ditemukan!`);
+                    return;
+                }
+
+                // Elemen essay yang akan dihapus
+                const essayDiv = this.closest(".d-flex");
+                if (!essayDiv) {
+                    console.error("Elemen essay untuk dihapus tidak ditemukan!");
+                    return;
+                }
+
+
+
+                // Kirim permintaan hapus ke server
+                const essayId = this.getAttribute("data-id");
+                if (!essayId) {
+                    console.warn("ID Essay tidak ditemukan!");
+                    return;
+                }
+
+                // Logging informasi elemen yang akan dihapus
+                console.log("Elemen yang akan dihapus:", {
+                    essayId: essayId,
+                    content: essayDiv.querySelector(".form-control").value.trim()
+                });
+
+                if (essayId) {
+                    fetch(`/admin/course/course/{course_id}/modul/{modul_id}/delete-essay/${essayId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            essayDiv.remove(); // Hapus elemen essay dari DOM
+                            renumberEssay(container); // Perbarui nomor
+                            $.notify({
+                                icon: "icon-check",
+                                title: 'Sukses',
+                                message: 'Essay berhasil dihapus!'
+                            }, {
+                                type: 'success',
+                                delay: 2000
+                            });
+                            // Reload halaman setelah delay untuk memberi waktu notifikasi tampil
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+                        } else {
+                            // Tampilkan pesan error jika server mengembalikan kesalahan
+                            $.notify({
+                                icon: "icon-exclamation",
+                                title: 'Gagal',
+                                message: data.message || 'Terjadi kesalahan saat menghapus data.'
+                            }, {
+                                type: 'danger',
+                                delay: 2000
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        // Tampilkan pesan error jika terjadi kesalahan jaringan
+                        console.error('Error:', error);
+                        $.notify({
+                            icon: "icon-exclamation",
+                            title: 'Gagal',
+                            message: 'Terjadi kesalahan jaringan.'
+                        }, {
+                            type: 'danger',
+                            delay: 2000
+                        });
+                    });
+                } else {
+                    console.log("Elemen belum tersimpan di server, menghapus langsung:", {
+                        content: essayDiv.innerHTML.trim()
+                    });
+                    // Jika ID essay tidak tersedia, hapus langsung dari DOM
+                    essayDiv.remove();
+                    renumberEssay(container); // Perbarui nomor
+                    $.notify({
+                        icon: "icon-check",
+                        title: 'Sukses',
+                        message: 'Essay berhasil dihapus!'
+                    }, {
+                        type: 'success',
+                        delay: 2000
+                    });
+                }
             });
         });
+
+
 
         // Fungsi untuk memperbarui nomor urut
         function renumberEssay(container) {
@@ -1283,6 +1376,11 @@ document.querySelectorAll('.modal').forEach(modal => {
                     form.reset();
                     const essayContainer = document.getElementById(`essay-container${form.id.replace('essayForm', '')}`);
                     essayContainer.innerHTML = ''; // Hapus semua textarea tambahan
+
+                    // Reload halaman setelah delay untuk memberi waktu notifikasi tampil
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
                 } else {
                     $.notify({
                         icon: "icon-exclamation",
