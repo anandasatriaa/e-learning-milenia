@@ -9,6 +9,9 @@ class ModulQuiz extends Model
 {
     use HasFactory;
 
+    protected $table = 'modul_quizzes';
+    protected $fillable = ['pertanyaan']; 
+
     public function courseModul()
     {
         return $this->belongsTo(CourseModul::class);

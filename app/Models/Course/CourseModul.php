@@ -11,6 +11,7 @@ class CourseModul extends Model
     use HasFactory;
 
     protected $appends = ['url_media_link'];
+    protected $table = 'course_moduls';
     protected $fillable = [
         'course_id',
         'nama_modul',
@@ -55,6 +56,18 @@ class CourseModul extends Model
     public function modulEssay()
     {
         return $this->hasMany(ModulEssay::class);
+    }
+
+    // Relasi ke tabel modul_quizzes
+    public function quizzes()
+    {
+        return $this->hasMany(ModulQuiz::class, 'course_modul_id');
+    }
+
+    // Relasi ke tabel modul_essay_questions
+    public function essays()
+    {
+        return $this->hasMany(ModulEssay::class, 'course_modul_id');
     }
 
     public function nilai()

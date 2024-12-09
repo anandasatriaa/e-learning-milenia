@@ -77,8 +77,9 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/{course_id}/', [CourseController::class, 'detailcourse'])->name('course.detail');
             Route::get('/embed-video/{course_modul_id}/', [CourseController::class, 'embedVideo'])->name('course.video');
             Route::get('/{course_id}/first-modul', [CourseController::class, 'getFirstModul']);
-            // Route::get('/{course_id}/first-modul/{course_modul_id}/', [CourseController::class, 'getFirstModul']);
-            // Route::get('/quiz/{modul_quiz_id}/', [CourseController::class, 'quiz'])->name('course.quiz');
+        
+            Route::get('/quiz/{quiz_id}', [CourseController::class, 'quiz'])->name('course.quiz');
+            Route::get('/essay/{essay_id}', [CourseController::class, 'essay'])->name('course.essay');
             // Route::post('/quiz/{modul_quiz_id}/submit', [CourseController::class, 'submitQuiz'])->name('course.submitQuiz');
 
         });

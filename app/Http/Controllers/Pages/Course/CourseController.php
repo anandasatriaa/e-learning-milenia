@@ -6,15 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Course\CourseModul;
 use App\Models\Course\ModulQuiz;
+use App\Models\Course\ModulEssay;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {
     public function detailcourse(Request $request, $course_id)
     {
-        $course = Course::with('modul')->where('id', $course_id)->first();
+        $course = Course::with(['modul','modul.quizzes', 'modul.essays'])->where('id', $course_id)->first();
         return view('pages.course.course.index', compact('course'));
     }
 
@@ -71,15 +73,39 @@ class CourseController extends Controller
         ]);
     }
 
-    public function quiz($modul_quiz_id)
+    public function quiz($quiz_id)
     {
-        // Ambil quiz berdasarkan modul_quiz_id
-        $quiz = ModulQuiz::with('answers') // Memuat soal dan jawabannya
-        ->where('id', $modul_quiz_id)
-            ->firstOrFail();
+        // Fetch quiz question and its answers from the database
+        $quiz = ModulQuiz::with('answers')->find($quiz_id);
 
-        // Kirim data quiz ke view
-        return view('pages.course.course.index', compact('quiz'));
+        $totalQuizzes = DB::table('modul_quizzes')->pluck('id')->toArray();
+        $quizIndex = array_search($quiz_id, $totalQuizzes) + 1;
+
+        if ($quiz) {
+            return response()->json([
+                'question' => $quiz->pertanyaan,
+                'kunci_jawaban' => $quiz->answers->pluck('pilihan')->toArray(),
+                'totalQuizzes' => count($totalQuizzes), // Menghitung total quiz
+                'quizIds' => $totalQuizzes, // Mengirimkan array ID quiz
+                'quizIndex' => $quizIndex,
+            ]);
+        }
+
+        return response()->json(['message' => 'Quiz not found'], 404);
+    }
+
+    public function essay($essay_id)
+    {
+        // Fetch essay question from the database
+        $essay = ModulEssay::find($essay_id);
+
+        if ($essay) {
+            return response()->json([
+                'question' => $essay->pertanyaan,
+            ]);
+        }
+
+        return response()->json(['message' => 'Essay not found'], 404);
     }
 
     public function submitQuiz(Request $request, $modul_quiz_id)
