@@ -8,10 +8,10 @@
                 </h3>
                 <h6 class="op-7 mb-2">Semoga aktivitas belajarmu menyenangkan</h6>
             </div>
-            <div class="ms-md-auto py-2 py-md-0">
+            {{-- <div class="ms-md-auto py-2 py-md-0">
                 <a href="#" class="btn btn-label-info btn-round me-2">Manage</a>
                 <a href="#" class="btn btn-primary btn-round">Add Customer</a>
-            </div>
+            </div> --}}
         </div>
         <div class="row">
             <div class="col-sm-6 col-md-3">
@@ -26,7 +26,7 @@
                             <div class="col col-stats ms-3 ms-sm-0">
                                 <div class="numbers">
                                     <p class="card-category">Kursus Tersedia</p>
-                                    <h4 class="card-title">5</h4>
+                                    <h4 class="card-title">{{ $totalCourses }}</h4>
                                 </div>
                             </div>
                         </div>
@@ -45,7 +45,7 @@
                             <div class="col col-stats ms-3 ms-sm-0">
                                 <div class="numbers">
                                     <p class="card-category">Kursus Diikuti</p>
-                                    <h4 class="card-title">2</h4>
+                                    <h4 class="card-title">{{ $coursesFollowed }}</h4>
                                 </div>
                             </div>
                         </div>
@@ -64,7 +64,7 @@
                             <div class="col col-stats ms-3 ms-sm-0">
                                 <div class="numbers">
                                     <p class="card-category">Kursus Sedang Dipelajari</p>
-                                    <h4 class="card-title">2</h4>
+                                    <h4 class="card-title">{{ $coursesInProgress }}</h4>
                                 </div>
                             </div>
                         </div>
@@ -83,7 +83,7 @@
                             <div class="col col-stats ms-3 ms-sm-0">
                                 <div class="numbers">
                                     <p class="card-category">Kursus Telah Diselesaikan</p>
-                                    <h4 class="card-title">0</h4>
+                                    <h4 class="card-title">{{ $coursesCompleted }}</h4>
                                 </div>
                             </div>
                         </div>
@@ -92,7 +92,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-8 col-lg-12">
+            <div class="col-md-12 col-lg-12">
                 <div class="card card-round">
                     <div class="card-header">
                         <div class="card-head-row">
@@ -102,46 +102,43 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        @foreach ($courseEnrolled as $courseEnrolleds)
-                            <div
-                                class="card card-stats card-round shadow-none {{ $courseEnrolleds->status != 'complete' ? 'bg-light' : 'bg-white border' }} ">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-icon">
-                                            <img class="w-100 rounded" src="{{ $courseEnrolleds->course->thumbnail_url }}"
-                                                alt="{{ $courseEnrolleds->course->thumbnail_url }}">
-                                        </div>
-                                        <div class="col col-stats ms-3 ms-sm-0">
-                                            <div class="number">
+                        <div class="row">
+                            @foreach ($courseEnrolled as $courseEnrolleds)
+                                <div class="col-12 col-md-6">
+                                    <div class="card card-stats card-round shadow-none {{ $courseEnrolleds->status != 'complete' ? 'bg-light' : 'bg-white border' }}">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-icon">
+                                                    <img class="w-100 rounded" src="{{ $courseEnrolleds->course->thumbnail_url }}" alt="{{ $courseEnrolleds->course->thumbnail_url }}">
+                                                </div>
+                                                <div class="col col-stats ms-3 ms-sm-0">
+                                                    <div class="number">
+                                                        @if ($courseEnrolleds->status != 'complete')
+                                                            <p class="card-category fw-bold text-danger"> Sedang dipelajari </p>
+                                                        @else
+                                                            <p class="card-category fw-bold text-success align-middle"> Telah diselesaikan <i class="fas fa-check-circle"></i></p>
+                                                        @endif
+                                                        <h5 class="card-text text-truncate" style="line-height: 1.5rem;">{{ $courseEnrolleds->course->nama_kelas }}</h5>
+                                                        <h6 class="text-muted" style="font-size: 0.8rem; line-height: 0.5rem;">Dimulai </h6>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
                                                 @if ($courseEnrolleds->status != 'complete')
-                                                    <p class="card-category fw-bold text-danger"> Sedang dipelajari </p>
+                                                    <a href="{{ route('pages.course.course.detail', $courseEnrolleds->course_id) }}" class="btn btn-label-warning btn-round btn-sm me-2 stretched-link">
+                                                        Lanjutkan <i class="fas fa-arrow-right"></i>
+                                                    </a>
                                                 @else
-                                                    <p class="card-category fw-bold text-success align-middle"> Telah
-                                                        diselesaikan
-                                                        <i class="fas fa-check-circle"></i>
-                                                    </p>
+                                                    <a href="{{ route('pages.course.course.detail', $courseEnrolleds->course_id) }}" class="btn btn-label-info btn-round btn-sm me-2 stretched-link">
+                                                        Detail <i class="fas fa-search"></i>
+                                                    </a>
                                                 @endif
-                                                <h5 class="card-text text-truncate">
-                                                    {{ $courseEnrolleds->course->nama_kelas }}</h5>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="text-end">
-                                        @if ($courseEnrolleds->status != 'complete')
-                                            <a href="{{ route('pages.course.course.detail', $courseEnrolleds->course_id) }}"
-                                                class="btn btn-label-warning btn-round btn-sm me-2 stretched-link">
-                                                Lanjutkan <i class="fas fa-arrow-right"></i>
-                                            </a>
-                                        @else
-                                            <a href="{{ route('pages.course.course.detail', $courseEnrolleds->course_id) }}"
-                                                class="btn btn-label-info btn-round btn-sm me-2 stretched-link">
-                                                Detail <i class="fas fa-search"></i>
-                                            </a>
-                                        @endif
-                                    </div>
                                 </div>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>
