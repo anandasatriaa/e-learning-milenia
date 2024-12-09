@@ -445,15 +445,15 @@
                                                                         <textarea class="form-control post-data" name="essay[]" rows="3" required data-id="{{ $essay->id }}" data-course-id="{{ $data->id }}" data-modul-id="{{ $item->id }}">{{ $essay->pertanyaan }}</textarea>
                                                                         <button type="button" class="btn btn-outline-danger btn-sm deleteEssay" data-modal-id="{{ $item->id }}" 
                                                                             data-id="{{ $essay->id }}" data-course-id="{{ $data->id }}" data-modul-id="{{ $item->id }}">
-                                                                            <i class="bi bi-trash"></i> Hapus Essay
+                                                                            <i class="fas fa-trash"></i>
                                                                         </button>
                                                                     </div>
                                                                 @endforeach
                                                             </div>
                                                             <!-- Ikon untuk menambah nomor dan textarea baru -->
                                                             <div class="text-center">
-                                                                <button type="button" class="btn btn-outline-secondary btn-sm addEssay" data-modal-id="{{ $item->id }}">
-                                                                    <i class="bi bi-plus"></i> Tambah Essay
+                                                                <button type="button" class="btn btn-secondary btn-sm addEssay" data-modal-id="{{ $item->id }}">
+                                                                    <i class="fas fa-arrow-down"></i> Tambah Essay <i class="fas fa-arrow-down"></i>
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -1013,7 +1013,7 @@ document.querySelectorAll('.modal').forEach(modal => {
                     </div>
                     <textarea class="form-control post-data" name="essay[]" rows="3" required></textarea>
                     <button type="button" class="btn btn-outline-danger btn-sm deleteEssay">
-                        <i class="bi bi-trash"></i> Hapus Essay
+                        <i class="fas fa-trash"></i>
                     </button>
                 `;
 
