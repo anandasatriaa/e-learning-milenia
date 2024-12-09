@@ -606,11 +606,10 @@
                                     <form id="deleteForm" action="{{ route('admin.course.course.destroy-user', ['course_id' => $data->id, 'user_id' => $enrollUser->ID]) }}" method="POST" style="display: inline;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" id="alertHapus" class="btn btn-icon btn-round btn-light text-danger me-3">
+                                        <button type="submit" class="alertHapus btn btn-icon btn-round btn-light text-danger me-3">
                                             <i class="fas fa-ban"></i>
                                         </button>
                                     </form>
-
                                 </a>
                             @endforeach
                         </div>
@@ -1203,7 +1202,7 @@ document.querySelectorAll('.modal').forEach(modal => {
 
 <script>
     // Hapus peserta dari enroll
-    $('#alertHapus').click(function(e) {
+    $('.alertHapus').click(function(e) {
         e.preventDefault(); // Cegah aksi default agar tidak terjadi redirect langsung
 
         var deleteUrl = $(this).closest('form').attr('action'); // Ambil URL untuk penghapusan dari data-url
