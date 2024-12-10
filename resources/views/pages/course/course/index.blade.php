@@ -56,7 +56,7 @@
                                 <button type="button" class="btn btn-label-info btn-round btn-sm me-2" id="goToLastAccess">
                                     Last access : <span id="lastAccess">00:00</span> <i class="fas fa-history ms-1"></i>
                                 </button>
-                                <a href="#" id="" class="btn btn-primary btn-round btn-sm me-2">
+                                <a href="#" id="selesaiKelas" class="btn btn-primary btn-round btn-sm me-2">
                                     Selesai Kelas <i class="fas fa-arrow-right ms-2"></i>
                                 </a>
                             </div>

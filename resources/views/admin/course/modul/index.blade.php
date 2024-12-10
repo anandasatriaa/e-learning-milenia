@@ -433,7 +433,7 @@
                                                         <h5 class="modal-title" id="modalImportEssayLabel">Tambah Essay {{ $item->nama_modul }}</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <form id="essayForm{{ $item->id }}" action="{{ route('admin.course.modul.question-import-essay', ['course_id' => $data->id, 'modul_id' => $item->id]) }}" method="POST" enctype="multipart/form-data">
+                                                    <form id="essayForm{{ $item->id }}" class="essay-form" action="{{ route('admin.course.modul.question-import-essay', ['course_id' => $data->id, 'modul_id' => $item->id]) }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="modal-body">
                                                             <div id="essay-container{{ $item->id }}">
@@ -888,8 +888,10 @@
         function redirectOnClose() {
             location.reload();
         }
+</script>
 
-    document.getElementById("simpanUbahUrut").addEventListener("click", function() {
+<script>
+        document.getElementById("simpanUbahUrut").addEventListener("click", function() {
         const listItems = document.querySelectorAll('#my-list tr');
         let order = [];
 
@@ -951,21 +953,21 @@
 
 
 // Pastikan tombol "Hapus Essay" muncul jika data ada di textarea (diambil dari database)
-document.querySelectorAll('.modal').forEach(modal => {
-    modal.addEventListener('show.bs.modal', function () {
-        const modalId = this.id.replace('modalImportEssay', '');
-        const essayContainer = document.getElementById(`essay-container${modalId}`);
-        const deleteButton = document.querySelector(`.deleteEssay[data-modal-id="${modalId}"]`);
+// document.querySelectorAll('.modal').forEach(modal => {
+//     modal.addEventListener('show.bs.modal', function () {
+//         const modalId = this.id.replace('modalImportEssay', '');
+//         const essayContainer = document.getElementById(`essay-container${modalId}`);
+//         const deleteButton = document.querySelector(`.deleteEssay[data-modal-id="${modalId}"]`);
 
-        // Periksa apakah ada data di dalam essay container
-        const allEssayDivs = essayContainer.querySelectorAll('.d-flex.mb-3');
-        if (allEssayDivs.length > 0) {
-            deleteButton.style.display = 'inline-block'; // Munculkan tombol "Hapus Essay"
-        } else {
-            deleteButton.style.display = 'none'; // Sembunyikan tombol jika tidak ada data
-        }
-    });
-});
+//         // Periksa apakah ada data di dalam essay container
+//         const allEssayDivs = essayContainer.querySelectorAll('.d-flex.mb-3');
+//         if (allEssayDivs.length > 0) {
+//             deleteButton.style.display = 'inline-block'; // Munculkan tombol "Hapus Essay"
+//         } else {
+//             deleteButton.style.display = 'none'; // Sembunyikan tombol jika tidak ada data
+//         }
+//     });
+// });
 </script>
 
 <script>
@@ -1113,7 +1115,7 @@ document.querySelectorAll('.modal').forEach(modal => {
         }
 
         // Submit Form
-        document.querySelectorAll("form").forEach(form => {
+        document.querySelectorAll(".essay-form").forEach(form => {
             form.addEventListener("submit", function (e) {
                 e.preventDefault();
 
