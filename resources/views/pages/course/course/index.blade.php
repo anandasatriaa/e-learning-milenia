@@ -33,12 +33,6 @@
                 <li class="nav-item">
                     <a>{{ $course->nama_kelas }}</a>
                 </li>
-                <li class="separator">
-                    <i class="icon-arrow-right"></i>
-                </li>
-                <li class="nav-item">
-                    <a>Introduction</a>
-                </li>
             </ul>
         </div>
         <div class="card card-round">
@@ -54,16 +48,16 @@
                     </div>
                     <div class="pb-3 px-3">
                         <div class="card-head-row">
-                            <div class="card-title"> <span class="bg-light p-1 rounded me-1">
+                            {{-- <div class="card-title"> <span class="bg-light p-1 rounded me-1">
                                     <i class="icon-pin"></i></span>
                                 Introduction
-                            </div>
+                            </div> --}}
                             <div class="card-tools">
                                 <button type="button" class="btn btn-label-info btn-round btn-sm me-2" id="goToLastAccess">
                                     Last access : <span id="lastAccess">00:00</span> <i class="fas fa-history ms-1"></i>
                                 </button>
-                                <a href="#" id="mulaiBelajarBtn" class="btn btn-primary btn-round btn-sm me-2">
-                                    Mulai Belajar <i class="fas fa-arrow-right ms-2"></i>
+                                <a href="#" id="" class="btn btn-primary btn-round btn-sm me-2">
+                                    Selesai Kelas <i class="fas fa-arrow-right ms-2"></i>
                                 </a>
                             </div>
                         </div>
@@ -89,6 +83,18 @@
                             </div>
                         </div>
 <div class="accordion accordion-flush" id="modulAccordion">
+    <!-- Introduction Card -->
+    <div class="card mb-2 border rounded m-2">
+        <div class="card-header" onclick="loadIntroductionVideo()">
+            <div class="span-title">
+                <span class="me-2 bg-success px-2 py-1 my-auto rounded text-white">
+                    <i class="fas fa-play-circle"></i></span>
+                Introduction
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Modules -->
     @foreach ($course->modul as $index => $modul)
         <div class="card mb-2 border rounded m-2">
             <div class="card-header" onclick="updateIframeSource('{{ $modul->tipe_media }}', '{{ $modul->url_media_link }}')" id="heading{{ $index }}" data-bs-toggle="collapse" data-bs-target="#collapse{{ $index }}" aria-expanded="false" aria-controls="collapse{{ $index }}">
@@ -199,15 +205,42 @@
 @endsection
 @section('js')
     <script src="{{ asset('vendor/ckeditor/ckeditor.js') }}"></script>
-    {{-- <script>
-        CKEDITOR.replace('essayFrame');
-    </script> --}}
+
     <script>
+        function loadIntroductionVideo() {
+            var course_id = "{{ $course->id }}";
+            var videoUrl = "{{ url('/course/embed-video/') }}" + "/" + course_id;
+            const iframe = document.getElementById("videoSource");
+            const iframeContent = document.getElementById("iframeContent");
+            const ratio = document.querySelector('.ratio'); // Class ratio to be toggled
+
+            // Clear existing content and reset iframe
+            iframeContent.innerHTML = ""; // Clear iframe content
+            iframe.src = videoUrl; // Set the new video URL
+
+            // Ensure the iframe and ratio are displayed
+            ratio.style.display = "block"; // Show ratio class (iframe container)
+            iframe.style.display = "block"; // Show iframe
+
+            // Change the border to primary for the clicked card
+            var card = event.target.closest('.card'); // Get the clicked card
+            card.classList.add('border-primary');
+
+            // Remove primary border color from all other cards
+            var allCards = document.querySelectorAll('.card');
+            allCards.forEach(function(otherCard) {
+                if (otherCard !== card) {
+                    otherCard.classList.remove('border-primary');
+                }
+            });
+        }
+
         $(document).ready(function() {
             var course_id = "{{ $course->id }}";
             var videoUrl = "{{ url('/course/embed-video/') }}" + "/" + course_id;
             $('#videoSource').attr('src', videoUrl);
         });
+
         $('#videoSource').on("load", function() {
             const iframeVideo = $(this)[0].contentWindow.document.querySelector('video');
             if (iframeVideo) {
@@ -287,10 +320,24 @@ function updateIframeSource(mediaType, mediaLink, index) {
         iframe.style.display = "block"; // Show iframe
         iframe.src = mediaLink;
     }
+
+    // Change the border to primary for the clicked card
+        var card = event.target.closest('.card'); // Get the clicked card
+        card.classList.add('border-primary');
+
+        // Remove primary border color from all other cards
+        var allCards = document.querySelectorAll('.card');
+        allCards.forEach(function(otherCard) {
+            if (otherCard !== card) {
+                otherCard.classList.remove('border-primary');
+            }
+        });
 }
 </script>
 
 <script>
+let userAnswers = {};
+
 function loadQuiz(quizId) {
     // Clear iframe and hide ratio
     const iframe = document.getElementById("videoSource");
@@ -319,12 +366,23 @@ function loadQuiz(quizId) {
                     <div class="card-body">
                         <p class="fw-bold">Jawaban:</p>
                         <form>
-                            ${data.kunci_jawaban.map((answer, index) => `
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="answer" id="answer${index + 1}" value="${answer}">
-                                    <label class="form-check-label" for="answer${index + 1}">${answer}</label>
-                                </div>
-                            `).join('')}
+                            ${data.kunci_jawaban.map((answer, index) => {
+                                const isChecked = userAnswers[quizId] === answer ? 'checked' : '';
+                                return `
+                                    <div class="form-check">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="radio" 
+                                            name="answer" 
+                                            id="answer${index + 1}" 
+                                            value="${answer}" 
+                                            ${isChecked}
+                                            onclick="saveAnswer(${quizId}, '${answer}')"
+                                        >
+                                        <label class="form-check-label" for="answer${index + 1}">${answer}</label>
+                                    </div>
+                                `;
+                            }).join('')}
                         </form>
                     </div>
                     <div class="card-footer text-muted">
@@ -336,8 +394,67 @@ function loadQuiz(quizId) {
                 </div>
             `;
             document.getElementById('iframeContent').innerHTML = iframeContent;
+
+            // Update the active button and color
+            updateQuestionNavState(data.quizIds, quizId);
         })
         .catch(err => console.error('Error loading quiz:', err));
+
+        // Get the clicked Quiz item and add border-primary
+    var quizItem = event.target.closest('li');
+    quizItem.classList.add('border-primary');
+
+    // Remove primary border from all other Essay and Quiz items
+    var allItems = document.querySelectorAll('.list-group-item');
+    allItems.forEach(function(item) {
+        if (item !== quizItem) {
+            item.classList.remove('border-primary');
+        }
+    });
+}
+
+function saveAnswer(quizId, answer) {
+    const radioButtons = document.getElementsByName('answer'); // Mendapatkan semua radio button dalam form
+
+    // Jika jawaban sudah dipilih, batalkan jika diklik lagi
+    if (userAnswers[quizId] === answer) {
+        delete userAnswers[quizId]; // Batalkan jawaban
+        // Menghapus status checked dari semua radio button
+        radioButtons.forEach(button => {
+            button.checked = false;
+        });
+    } else {
+        userAnswers[quizId] = answer; // Simpan jawaban
+    }
+
+    console.log('Current user answers:', userAnswers);
+    updateQuestionNavState(Object.keys(userAnswers), quizId); // Update tombol navigasi setelah jawaban dipilih
+}
+
+
+
+function updateQuestionNavState(quizIds, currentQuizId) {
+    // Update button states based on quizIds and the currentQuizId
+    quizIds.forEach((quizId, index) => {
+        const button = document.getElementById(`quizButton-${quizId}`);
+        if (button) {
+            // Aktifkan tombol berdasarkan quizId yang aktif
+            if (quizId === currentQuizId) {
+                button.classList.add('btn-primary');
+                button.classList.remove('btn-outline-primary');
+            } else {
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-outline-primary');
+            }
+
+            // Ubah warna tombol menjadi hijau jika sudah ada jawaban
+            if (userAnswers[quizId]) {
+                button.classList.add('btn-info');
+            } else {
+                button.classList.remove('btn-info');
+            }
+        }
+    });
 }
 
 function generateQuestionNav(quizIds, currentQuizId) {
@@ -351,7 +468,10 @@ function generateQuestionNav(quizIds, currentQuizId) {
     let buttons = '';
     quizIds.forEach((id, index) => {
         buttons += `
-            <button class="btn btn-outline-primary mx-1" onclick="loadQuiz(${id})">
+            <button 
+                id="quizButton-${id}" 
+                class="btn btn-outline-primary mx-1" 
+                onclick="loadQuiz(${id})">
                 ${index + 1} <!-- Increment button number starting from 1 -->
             </button>
         `;
@@ -360,7 +480,7 @@ function generateQuestionNav(quizIds, currentQuizId) {
 }
 
 
-    function loadEssay(courseModulId) {
+function loadEssay(courseModulId) {
     // Clear iframe and hide ratio
     const iframe = document.getElementById("videoSource");
     const ratio = document.querySelector('.ratio');
@@ -368,6 +488,7 @@ function generateQuestionNav(quizIds, currentQuizId) {
     ratio.style.display = "none";
 
     console.log('courseModulId:', courseModulId);
+
     // Fetch essay data from the backend using the course module ID
     fetch(`/course/essay/${courseModulId}`)
         .then(response => response.json())
@@ -391,7 +512,7 @@ function generateQuestionNav(quizIds, currentQuizId) {
                         <div class="mb-3">${questionsList}</div>
                     </div>
                     <div class="card-body">
-                        <textarea class="form-control" id="essayFrame" rows="6" required></textarea>
+                        <textarea class="form-control" id="essayFrame-${courseModulId}" rows="6" required></textarea>
                     </div>
                 </div>
             `;
@@ -400,14 +521,22 @@ function generateQuestionNav(quizIds, currentQuizId) {
             document.getElementById('iframeContent').innerHTML = iframeContent;
 
             // Initialize CKEditor for each textarea
-            data.questions.forEach(question => {
-                CKEDITOR.replace(`essayFrame`);
-            });
+            CKEDITOR.replace(`essayFrame-${courseModulId}`);
         })
         .catch(err => console.error('Error loading essay:', err));
+
+        // Get the clicked Essay item and add border-primary
+    var essayItem = event.target.closest('li');
+    essayItem.classList.add('border-primary');
+
+    // Remove primary border from all other Essay and Quiz items
+    var allItems = document.querySelectorAll('.list-group-item');
+    allItems.forEach(function(item) {
+        if (item !== essayItem) {
+            item.classList.remove('border-primary');
+        }
+    });
 }
-
 </script>
-
 
 @endsection
