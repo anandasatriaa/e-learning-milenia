@@ -94,19 +94,24 @@ class CourseController extends Controller
         return response()->json(['message' => 'Quiz not found'], 404);
     }
 
-    public function essay($essay_id)
+    public function essay($course_modul_id)
     {
-        // Fetch essay question from the database
-        $essay = ModulEssay::find($essay_id);
+        $essays = ModulEssay::where('course_modul_id', $course_modul_id)->get();
 
-        if ($essay) {
+        if ($essays->isNotEmpty()) {
             return response()->json([
-                'question' => $essay->pertanyaan,
+                'questions' => $essays->map(function ($essay) {
+                    return [
+                        'id' => $essay->id,
+                        'question' => $essay->pertanyaan,
+                    ];
+                }),
             ]);
         }
 
-        return response()->json(['message' => 'Essay not found'], 404);
+        return response()->json(['message' => 'No essays found for this module'], 404);
     }
+
 
     public function submitQuiz(Request $request, $modul_quiz_id)
     {

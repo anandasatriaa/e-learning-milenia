@@ -15,13 +15,13 @@ class CreateModulEssayAnswersTable extends Migration
     {
         Schema::create('modul_essay_answers', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('modul_essay_question_id');
+            $table->unsignedBigInteger('course_modul_id');
             $table->unsignedInteger('user_id');
             $table->longText('jawaban');
             $table->timestamps();
 
             // Foreign key constraint
-            $table->foreign('modul_essay_question_id')->references('id')->on('modul_essay_questions')->onDelete('cascade');
+            $table->foreign('course_modul_id')->references('id')->on('course_moduls')->onDelete('cascade');
         });
     }
 

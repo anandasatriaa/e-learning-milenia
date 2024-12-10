@@ -125,7 +125,7 @@
                                     <i class="far fa-comment-dots"></i></span> Quiz</li>
                         @endif
                         @if ($modul->essays->isNotEmpty())
-                            <li class="list-group-item bg-body p-2 border rounded" onclick="loadEssay({{ $modul->essays->first()->id }})"><span class="me-2 bg-warning px-1 py-1 my-auto rounded text-white">
+                            <li class="list-group-item bg-body p-2 border rounded" onclick="loadEssay({{ $modul->essays->first()->course_modul_id }})"><span class="me-2 bg-warning px-1 py-1 my-auto rounded text-white">
                                     <i class="far fa-file-alt"></i></span> Essay</li>
                         @endif
                     </ul>
@@ -360,42 +360,53 @@ function generateQuestionNav(quizIds, currentQuizId) {
 }
 
 
-    function loadEssay(essayId) {
+    function loadEssay(courseModulId) {
     // Clear iframe and hide ratio
     const iframe = document.getElementById("videoSource");
     const ratio = document.querySelector('.ratio');
     iframe.style.display = "none";
     ratio.style.display = "none";
-    
-        // Fetch essay data from the backend using the essay ID
-        fetch(`/course/essay/${essayId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    alert(data.message); // In case of an error
-                    return;
-                }
 
-                const iframeContent = `
-                    <div class="">
-                        <div class="card-header">
-                            <p class="fw-bold">Pertanyaan:</p>
-                            <p class="mt-2">${data.question}</p>
-                        </div>
-                        <div class="card-body">
-                            <textarea class="form-control" id="essayFrame" rows="3" required></textarea>
-                        </div>
-                        <div class="card-footer text-muted">
-                        </div>
+    console.log('courseModulId:', courseModulId);
+    // Fetch essay data from the backend using the course module ID
+    fetch(`/course/essay/${courseModulId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message); // In case of an error
+                return;
+            }
+            console.log(data);
+
+            // Combine all questions into a single list
+            const questionsList = data.questions.map((question, index) => `
+                <p><strong>${index + 1}. </strong> ${question.question}</p>
+            `).join('');
+
+            // Create a container for all questions
+            const iframeContent = `
+                <div class="">
+                    <div class="card-header">
+                        <p><strong>Pertanyaan:</strong></p>
+                        <div class="mb-3">${questionsList}</div>
                     </div>
-                `;
-                document.getElementById('iframeContent').innerHTML = iframeContent;
+                    <div class="card-body">
+                        <textarea class="form-control" id="essayFrame" rows="6" required></textarea>
+                    </div>
+                </div>
+            `;
 
-                // Initialize CKEditor after the content has been loaded into the DOM
-            CKEDITOR.replace('essayFrame');
-            })
-            .catch(err => console.error('Error loading essay:', err));
-    }
+            // Insert the content into the iframeContent container
+            document.getElementById('iframeContent').innerHTML = iframeContent;
+
+            // Initialize CKEditor for each textarea
+            data.questions.forEach(question => {
+                CKEDITOR.replace(`essayFrame`);
+            });
+        })
+        .catch(err => console.error('Error loading essay:', err));
+}
+
 </script>
 
 
