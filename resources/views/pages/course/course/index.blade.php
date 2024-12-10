@@ -336,7 +336,7 @@ function updateIframeSource(mediaType, mediaLink, index) {
 </script>
 
 <script>
-let userAnswers = {};
+let userAnswers = JSON.parse(localStorage.getItem('userAnswers')) || {};
 
 function loadQuiz(quizId) {
     // Clear iframe and hide ratio
@@ -428,6 +428,10 @@ function saveAnswer(quizId, answer) {
     }
 
     console.log('Current user answers:', userAnswers);
+
+    // Simpan jawaban di localStorage
+    localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
+    
     updateQuestionNavState(Object.keys(userAnswers), quizId); // Update tombol navigasi setelah jawaban dipilih
 }
 
@@ -522,6 +526,18 @@ function loadEssay(courseModulId) {
 
             // Initialize CKEditor for each textarea
             CKEDITOR.replace(`essayFrame-${courseModulId}`);
+
+            // Retrieve saved answer from localStorage if available
+            const savedAnswer = localStorage.getItem(`essayAnswer-${courseModulId}`);
+            if (savedAnswer) {
+                CKEDITOR.instances[`essayFrame-${courseModulId}`].setData(savedAnswer);
+            }
+
+            // Add event listener to save the content when the user types
+            CKEDITOR.instances[`essayFrame-${courseModulId}`].on('change', function() {
+                const currentContent = CKEDITOR.instances[`essayFrame-${courseModulId}`].getData();
+                localStorage.setItem(`essayAnswer-${courseModulId}`, currentContent);
+            });
         })
         .catch(err => console.error('Error loading essay:', err));
 
