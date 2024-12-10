@@ -431,7 +431,7 @@ function saveAnswer(quizId, answer) {
 
     // Simpan jawaban di localStorage
     localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
-    
+
     updateQuestionNavState(Object.keys(userAnswers), quizId); // Update tombol navigasi setelah jawaban dipilih
 }
 
@@ -469,9 +469,8 @@ function generateQuestionNav(quizIds, currentQuizId) {
     }
 
     // Create buttons for each quiz ID
-    let buttons = '';
-    quizIds.forEach((id, index) => {
-        buttons += `
+    let buttons = quizIds.map((id, index) => {
+        return `
             <button 
                 id="quizButton-${id}" 
                 class="btn btn-outline-primary mx-1" 
@@ -479,7 +478,7 @@ function generateQuestionNav(quizIds, currentQuizId) {
                 ${index + 1} <!-- Increment button number starting from 1 -->
             </button>
         `;
-    });
+    }).join('');
     return buttons;
 }
 

@@ -78,21 +78,24 @@ class CourseController extends Controller
         // Fetch quiz question and its answers from the database
         $quiz = ModulQuiz::with('answers')->find($quiz_id);
 
-        $totalQuizzes = DB::table('modul_quizzes')->pluck('id')->toArray();
-        $quizIndex = array_search($quiz_id, $totalQuizzes) + 1;
-
         if ($quiz) {
+            // Fetch quizzes only for the same `course_modul_id`
+            $quizzesInModule = ModulQuiz::where('course_modul_id', $quiz->course_modul_id)->pluck('id')->toArray();
+            $quizIndex = array_search($quiz_id, $quizzesInModule) + 1;
+
             return response()->json([
                 'question' => $quiz->pertanyaan,
                 'kunci_jawaban' => $quiz->answers->pluck('pilihan')->toArray(),
-                'totalQuizzes' => count($totalQuizzes), // Menghitung total quiz
-                'quizIds' => $totalQuizzes, // Mengirimkan array ID quiz
+                'totalQuizzes' => count($quizzesInModule), // Count quizzes in the module
+                'quizIds' => $quizzesInModule, // Send only IDs from the same module
                 'quizIndex' => $quizIndex,
+                'course_modul_id' => $quiz->course_modul_id, // Include the module ID
             ]);
         }
 
         return response()->json(['message' => 'Quiz not found'], 404);
     }
+
 
     public function essay($course_modul_id)
     {
