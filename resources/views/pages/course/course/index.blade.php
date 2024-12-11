@@ -338,24 +338,23 @@ function updateIframeSource(mediaType, mediaLink, index) {
 <script>
 let userAnswers = JSON.parse(localStorage.getItem('userAnswers')) || {};
 
-function loadQuiz(quizId) {
+function loadQuiz(courseModulId) {
     // Clear iframe and hide ratio
     const iframe = document.getElementById("videoSource");
     const ratio = document.querySelector('.ratio');
     iframe.style.display = "none";
     ratio.style.display = "none";
 
-    // Fetch quiz data from the backend using the quiz ID
-    fetch(`/course/quiz/${quizId}`)
+    console.log('courseModulId:', courseModulId);
+
+    // Fetch quiz data from the backend using the course module ID
+    fetch(`/course/quiz/${courseModulId}`)
         .then(response => response.json())
         .then(data => {
             if (data.message) {
                 alert(data.message); // In case of an error
                 return;
             }
-
-            // Log data to check quizIds
-            console.log("Received data:", data);
 
             const iframeContent = `
                 <div class="">
@@ -367,7 +366,7 @@ function loadQuiz(quizId) {
                         <p class="fw-bold">Jawaban:</p>
                         <form>
                             ${data.kunci_jawaban.map((answer, index) => {
-                                const isChecked = userAnswers[quizId] === answer ? 'checked' : '';
+                                const isChecked = userAnswers[courseModulId] === answer ? 'checked' : '';
                                 return `
                                     <div class="form-check">
                                         <input 
@@ -377,7 +376,7 @@ function loadQuiz(quizId) {
                                             id="answer${index + 1}" 
                                             value="${answer}" 
                                             ${isChecked}
-                                            onclick="saveAnswer(${quizId}, '${answer}')"
+                                            onclick="saveAnswer(${courseModulId}, '${answer}')"
                                         >
                                         <label class="form-check-label" for="answer${index + 1}">${answer}</label>
                                     </div>
@@ -389,18 +388,18 @@ function loadQuiz(quizId) {
                         Pilih salah satu jawaban di atas.
                     </div>
                     <div class="d-flex justify-content-center mt-3">
-                        ${generateQuestionNav(data.quizIds, quizId)} <!-- Passing quizIds array -->
+                        ${generateQuestionNav(data.quizIds, courseModulId)} <!-- Passing quizIds array -->
                     </div>
                 </div>
             `;
             document.getElementById('iframeContent').innerHTML = iframeContent;
 
             // Update the active button and color
-            updateQuestionNavState(data.quizIds, quizId);
+            updateQuestionNavState(data.quizIds, courseModulId);
         })
         .catch(err => console.error('Error loading quiz:', err));
 
-        // Get the clicked Quiz item and add border-primary
+    // Get the clicked Quiz item and add border-primary
     var quizItem = event.target.closest('li');
     quizItem.classList.add('border-primary');
 
@@ -413,18 +412,18 @@ function loadQuiz(quizId) {
     });
 }
 
-function saveAnswer(quizId, answer) {
+function saveAnswer(courseModulId, answer) {
     const radioButtons = document.getElementsByName('answer'); // Mendapatkan semua radio button dalam form
 
     // Jika jawaban sudah dipilih, batalkan jika diklik lagi
-    if (userAnswers[quizId] === answer) {
-        delete userAnswers[quizId]; // Batalkan jawaban
+    if (userAnswers[courseModulId] === answer) {
+        delete userAnswers[courseModulId]; // Batalkan jawaban
         // Menghapus status checked dari semua radio button
         radioButtons.forEach(button => {
             button.checked = false;
         });
     } else {
-        userAnswers[quizId] = answer; // Simpan jawaban
+        userAnswers[courseModulId] = answer; // Simpan jawaban
     }
 
     console.log('Current user answers:', userAnswers);
@@ -432,10 +431,8 @@ function saveAnswer(quizId, answer) {
     // Simpan jawaban di localStorage
     localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
 
-    updateQuestionNavState(Object.keys(userAnswers), quizId); // Update tombol navigasi setelah jawaban dipilih
+    updateQuestionNavState(Object.keys(userAnswers), courseModulId); // Update tombol navigasi setelah jawaban dipilih
 }
-
-
 
 function updateQuestionNavState(quizIds, currentQuizId) {
     // Update button states based on quizIds and the currentQuizId
@@ -481,8 +478,9 @@ function generateQuestionNav(quizIds, currentQuizId) {
     }).join('');
     return buttons;
 }
+</script>
 
-
+<script>
 function loadEssay(courseModulId) {
     // Clear iframe and hide ratio
     const iframe = document.getElementById("videoSource");
@@ -553,5 +551,82 @@ function loadEssay(courseModulId) {
     });
 }
 </script>
+
+{{-- POST jawaban ke database --}}
+<script>
+document.getElementById('selesaiKelas').addEventListener('click', function (e) {
+    e.preventDefault();
+
+    // Ambil jawaban dari localStorage
+    const userId = @json(auth()->user()->ID); // Mendapatkan userId dari Blade
+    const userAnswers = JSON.parse(localStorage.getItem('userAnswers')) || {};
+    const essayAnswers = Object.keys(localStorage).filter(key => key.startsWith('essayAnswer-'));
+
+    // Kirim jawaban quiz
+    Object.keys(userAnswers).forEach((modulquizzesId) => {
+        const answer = userAnswers[modulquizzesId]; // Ambil jawaban berdasarkan course_modul_id
+        const quizData = {
+            user_id: userId,
+            modul_quizzes_id: modulquizzesId, // Menggunakan modulquizzesId yang sesuai
+            jawaban: answer,
+            kode_jawaban: answer,
+        };
+
+        // Log data yang akan dikirim
+        console.log(`Mengirim jawaban quiz:`, quizData);
+
+        // Kirim jawaban quiz ke backend
+        fetch(`/quiz/${quizData.course_modul_id}/submit/${quizData.user_id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(quizData),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(`Jawaban quiz ${quizData.course_modul_id} berhasil dikirim`);
+                } else {
+                    console.error(`Error mengirim jawaban quiz ${quizData.course_modul_id}`);
+                }
+            })
+            .catch(err => console.error('Error:', err));
+    });
+
+    // Kirim jawaban essay
+    essayAnswers.forEach((key) => {
+        const courseModulId = key.replace('essayAnswer-', ''); // Ambil course_modul_id dari key
+        const essayContent = localStorage.getItem(key);
+        const essayData = {
+            user_id: userId,
+            course_modul_id: courseModulId,
+            jawaban: essayContent,
+        };
+
+        // Log data yang akan dikirim
+        console.log(`Mengirim jawaban essay untuk modul ${courseModulId}:`, essayData);
+
+        // Kirim jawaban essay ke backend
+        fetch(`/essay/${essayData.course_modul_id}/submit/${essayData.user_id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(essayData),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(`Jawaban essay untuk modul ${courseModulId} berhasil dikirim`);
+                } else {
+                    console.error(`Error mengirim jawaban essay untuk modul ${courseModulId}`);
+                }
+            })
+            .catch(err => console.error('Error:', err));
+    });
+});
+</script>
+
 
 @endsection

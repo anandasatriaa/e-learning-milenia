@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\Nilai\NilaiController;
 use App\Http\Controllers\Pages\Course\CourseController;
 use App\Http\Controllers\Pages\HomeController;
+use App\Http\Controllers\Pages\HomeCourseController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', [AuthController::class, 'login'])->name('login');
@@ -73,14 +74,20 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/dashboard', [HomeController::class, 'index']);
         Route::get('/home', [HomeController::class, 'index']);
         Route::get('/', [HomeController::class, 'index'])->name('dashboard');
+        Route::get('/course', [HomeCourseController::class, 'index'])->name('homeCourse');
+
         Route::group(['prefix' => 'course', 'as' => 'course.'], function () {
             Route::get('/{course_id}/', [CourseController::class, 'detailcourse'])->name('course.detail');
             Route::get('/embed-video/{course_modul_id}/', [CourseController::class, 'embedVideo'])->name('course.video');
             Route::get('/{course_id}/first-modul', [CourseController::class, 'getFirstModul']);
         
-            Route::get('/quiz/{quiz_id}', [CourseController::class, 'quiz'])->name('course.quiz');
+            Route::get('/quiz/{course_modul_id}', [CourseController::class, 'quiz'])->name('course.quiz');
             Route::get('/essay/{course_modul_id}', [CourseController::class, 'essay'])->name('course.essay');
+            // Route::post('/{course_id}/kirim-jawaban-essay-quiz', [CourseController::class, 'kirimJawaban'])->name('course.kirimJawaban');
             // Route::post('/quiz/{modul_quiz_id}/submit', [CourseController::class, 'submitQuiz'])->name('course.submitQuiz');
+
+            Route::post('/quiz/{course_modul_id}/submit/{user_id}',[CourseController::class, 'quiz'])->name('course.quiz');
+            Route::post('/essay/{course_modul_id}/submit/{user_id}',[CourseController::class, 'essay'])->name('course.essay');
 
         });
     });

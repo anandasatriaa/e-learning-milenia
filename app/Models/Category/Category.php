@@ -10,6 +10,7 @@ class Category extends Model
     use HasFactory;
 
     protected $appends = ['image_url'];
+    protected $fillable = ['divisi_category_id', 'nama', 'image', 'deskripsi', 'active'];
 
     public function getImageUrlAttribute()
     {

@@ -79,8 +79,15 @@ class CourseController extends Controller
         $quiz = ModulQuiz::with('answers')->find($quiz_id);
 
         if ($quiz) {
+            // Pastikan `course_modul_id` benar-benar berasal dari tabel `course_moduls`
+            $courseModulId = $quiz->course_modul_id;
+
+            if (!$courseModulId) {
+                return response()->json(['message' => 'Course module ID not found'], 404);
+            }
+
             // Fetch quizzes only for the same `course_modul_id`
-            $quizzesInModule = ModulQuiz::where('course_modul_id', $quiz->course_modul_id)->pluck('id')->toArray();
+            $quizzesInModule = ModulQuiz::where('course_modul_id', $courseModulId)->pluck('id')->toArray();
             $quizIndex = array_search($quiz_id, $quizzesInModule) + 1;
 
             return response()->json([
@@ -89,7 +96,7 @@ class CourseController extends Controller
                 'totalQuizzes' => count($quizzesInModule), // Count quizzes in the module
                 'quizIds' => $quizzesInModule, // Send only IDs from the same module
                 'quizIndex' => $quizIndex,
-                'course_modul_id' => $quiz->course_modul_id, // Include the module ID
+                'course_modul_id' => $courseModulId, // Include the module ID
             ]);
         }
 
@@ -116,18 +123,18 @@ class CourseController extends Controller
     }
 
 
-    public function submitQuiz(Request $request, $modul_quiz_id)
-    {
-        $quiz = ModulQuiz::findOrFail($modul_quiz_id);
-        $correctAnswer = $quiz->kunci_jawaban;
+    // public function submitQuiz(Request $request, $modul_quiz_id)
+    // {
+    //     $quiz = ModulQuiz::findOrFail($modul_quiz_id);
+    //     $correctAnswer = $quiz->kunci_jawaban;
 
-        if ($request->input('answer') == $correctAnswer) {
-            // Logika untuk jawaban benar
-            return back()->with('success', 'Jawaban benar!');
-        } else {
-            // Logika untuk jawaban salah
-            return back()->with('error', 'Jawaban salah. Coba lagi!');
-        }
-    }
+    //     if ($request->input('answer') == $correctAnswer) {
+    //         // Logika untuk jawaban benar
+    //         return back()->with('success', 'Jawaban benar!');
+    //     } else {
+    //         // Logika untuk jawaban salah
+    //         return back()->with('error', 'Jawaban salah. Coba lagi!');
+    //     }
+    // }
 
 }

@@ -10,11 +10,11 @@ class ModulQuiz extends Model
     use HasFactory;
 
     protected $table = 'modul_quizzes';
-    protected $fillable = ['pertanyaan']; 
+    protected $fillable = ['course_modul_id', 'pertanyaan']; 
 
     public function courseModul()
     {
-        return $this->belongsTo(CourseModul::class);
+        return $this->belongsTo(CourseModul::class, 'course_modul_id');
     }
 
     public function modulQuizAnswer()

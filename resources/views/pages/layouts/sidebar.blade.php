@@ -37,23 +37,11 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
-                <li class="nav-item {{ request()->routeIs('admin.course.*') ? 'active' : '' }}">
-                    <a data-bs-toggle="collapse" href="#kelas_sidebar">
+                <li class="nav-item {{ request()->routeIs('pages.homeCourse') ? 'active' : '' }}">
+                    <a href="{{ route('pages.homeCourse') }}">
                         <i class="fas fa-book-reader"></i>
-                        <p>Kursus</p>
-                        <span class="caret"></span>
+                        <p>Courses</p>
                     </a>
-                    <div class="collapse {{ request()->routeIs('admin.course.*') ? 'show' : '' }}" id="kelas_sidebar">
-                        <ul class="nav nav-collapse">
-                            <li class="ms-3">
-                                <a class="{{ request()->routeIs('admin.course.course.*') ? 'text-white fw-bold active border-start border-2' : '' }}"
-                                    href="{{ route('admin.course.course.index') }}">
-                                    <i class="fas fa-book"></i>
-                                    <span>Kelas</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
                 </li>
             </ul>
         </div>

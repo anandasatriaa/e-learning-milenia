@@ -41,7 +41,7 @@
     <div class="row" id="categoryCards">
         @foreach ($categories as $category)
         <div class="col-12 col-md-4 mb-3 category-card">
-            <a href="" class="card" style="width: 18rem;">
+            <a href="" class="card" style="width: 20rem;">
                 <img class="card-img-top" src="{{ asset('storage/category/kategori/'.$category->image) }}" alt="{{ $category->nama }}">
                 <div class="card-body">
                     <button class="btn" style="background-color: #6861ce; color: white;">{{ $category->nama }}</button>
