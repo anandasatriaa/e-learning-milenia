@@ -1,96 +1,112 @@
 @extends('pages.layouts.app')
 @section('title', 'Dashboard')
+@section('css')
+
+@endsection
 @section('content')
     <div class="page-inner">
-        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-            <div>
-                <h3 class="fw-bold mb-3">Selamat Datang, {{ ucfirst(strtolower(Str::before(Auth::user()->Nama, ' '))) }} !
-                </h3>
-                <h6 class="op-7 mb-2">Semoga aktivitas belajarmu menyenangkan</h6>
-            </div>
-            {{-- <div class="ms-md-auto py-2 py-md-0">
-                <a href="#" class="btn btn-label-info btn-round me-2">Manage</a>
-                <a href="#" class="btn btn-primary btn-round">Add Customer</a>
-            </div> --}}
-        </div>
         <div class="row">
-            <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body ">
+            <!-- Kolom untuk Card Selamat Datang -->
+            <div class="col-md-8">
+                <div class="card border-0">
+                    <div class="card-body px-5">
                         <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big text-center icon-primary bubble-shadow-small">
-                                    <i class="fas fa-users"></i>
+                            <!-- Kolom untuk teks -->
+                            <div class="col-md-8 text-center text-md-start">
+                                <h1 class="fw-bold mb-3">Hello,
+                                    {{ ucfirst(strtolower(Str::before(Auth::user()->Nama, ' '))) }} !</h1>
+                                <h3 class="op-7 mb-2">Lets learn something today!</h3>
+                            </div>
+                            <!-- Kolom untuk gambar -->
+                            <div class="col-md-4 text-center text-md-end">
+                                <img src="{{ asset('img/hello-rafiki.svg') }}" alt="Hello Img" class="img-fluid">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Card 1 -->
+                    <div class="col-sm-6 col-md-4">
+                        <div class="card card-stats card-round">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-icon">
+                                        <div class="icon-big text-center icon-primary bubble-shadow-small">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col col-stats ms-3 ms-sm-0">
+                                        <div class="numbers">
+                                            <p class="card-category">Progress</p>
+                                            <h4 class="card-title">{{ $totalCourses }}</h4>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col col-stats ms-3 ms-sm-0">
-                                <div class="numbers">
-                                    <p class="card-category">Kursus Tersedia</p>
-                                    <h4 class="card-title">{{ $totalCourses }}</h4>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="col-sm-6 col-md-4">
+                        <div class="card card-stats card-round">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-icon">
+                                        <div class="icon-big text-center icon-info bubble-shadow-small">
+                                            <i class="fas fa-tachometer-alt"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col col-stats ms-3 ms-sm-0">
+                                        <div class="numbers">
+                                            <p class="card-category">Time Spend</p>
+                                            <h4 class="card-title">{{ $coursesFollowed }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="col-sm-6 col-md-4">
+                        <div class="card card-stats card-round">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-icon">
+                                        <div class="icon-big text-center icon-success bubble-shadow-small">
+                                            <i class="fas fa-book-reader"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col col-stats ms-3 ms-sm-0">
+                                        <div class="numbers">
+                                            <p class="card-category">Course In Progress</p>
+                                            <h4 class="card-title">{{ $coursesInProgress }}</h4>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
+
+            <!-- Kolom untuk Kalender -->
+            <div class="col-md-4">
+                <!-- Tambahkan kalender di sini (misalnya menggunakan library seperti FullCalendar atau lainnya) -->
+                <div class="card">
                     <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big text-center icon-info bubble-shadow-small">
-                                    <i class="fas fa-user-check"></i>
-                                </div>
-                            </div>
-                            <div class="col col-stats ms-3 ms-sm-0">
-                                <div class="numbers">
-                                    <p class="card-category">Kursus Diikuti</p>
-                                    <h4 class="card-title">{{ $coursesFollowed }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big text-center icon-success bubble-shadow-small">
-                                    <i class="fas fa-luggage-cart"></i>
-                                </div>
-                            </div>
-                            <div class="col col-stats ms-3 ms-sm-0">
-                                <div class="numbers">
-                                    <p class="card-category">Kursus Sedang Dipelajari</p>
-                                    <h4 class="card-title">{{ $coursesInProgress }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big text-center icon-secondary bubble-shadow-small">
-                                    <i class="far fa-check-circle"></i>
-                                </div>
-                            </div>
-                            <div class="col col-stats ms-3 ms-sm-0">
-                                <div class="numbers">
-                                    <p class="card-category">Kursus Telah Diselesaikan</p>
-                                    <h4 class="card-title">{{ $coursesCompleted }}</h4>
-                                </div>
-                            </div>
-                        </div>
+                        <h5 class="card-title">Calendar</h5>
+                        <!-- Kalender content -->
+                        <div id="calendar"></div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Kolom untuk Card Data -->
+
+
         <div class="row">
             <div class="col-md-12 col-lg-12">
                 <div class="card card-round">
@@ -105,31 +121,48 @@
                         <div class="row">
                             @foreach ($courseEnrolled as $courseEnrolleds)
                                 <div class="col-12 col-md-6">
-                                    <div class="card card-stats card-round shadow-none {{ $courseEnrolleds->status != 'complete' ? 'bg-light' : 'bg-white border' }}">
+                                    <div
+                                        class="card card-stats card-round shadow-none {{ $courseEnrolleds->status != 'complete' ? 'bg-light' : 'bg-white border' }}">
                                         <div class="card-body">
                                             <div class="row align-items-center">
                                                 <div class="col-icon">
-                                                    <img class="w-100 rounded" src="{{ $courseEnrolleds->course->thumbnail_url }}" alt="{{ $courseEnrolleds->course->thumbnail_url }}">
+                                                    <img class="w-100 rounded"
+                                                        src="{{ $courseEnrolleds->course->thumbnail_url }}"
+                                                        alt="{{ $courseEnrolleds->course->thumbnail_url }}">
                                                 </div>
-                                                <div class="col col-stats ms-3 ms-sm-0">
+                                                <div class="col ms-3 ms-sm-0">
                                                     <div class="number">
-                                                        @if ($courseEnrolleds->status != 'complete')
-                                                            <p class="card-category fw-bold text-danger"> Sedang dipelajari </p>
-                                                        @else
-                                                            <p class="card-category fw-bold text-success align-middle"> Telah diselesaikan <i class="fas fa-check-circle"></i></p>
-                                                        @endif
-                                                        <h5 class="card-text text-truncate" style="line-height: 1.5rem;">{{ $courseEnrolleds->course->nama_kelas }}</h5>
-                                                        <h6 class="text-muted" style="font-size: 0.8rem; line-height: 0.5rem;">Dimulai {{ \Carbon\Carbon::parse($courseEnrolleds->enroll_date)->format('d M Y') }}</h6>
+                                                        <h5 class="card-text text-truncate" style="line-height: 1.5rem;">
+                                                            {{ $courseEnrolleds->course->nama_kelas }}</h5>
+                                                        <h6 class="text-muted"
+                                                            style="font-size: 0.8rem; line-height: 0.8rem;">
+                                                            {{ $courseEnrolleds->modul_count }} Modul
+                                                        </h6>
+                                                        <div class="progress-card">
+                                                            <div class="progress-status">
+                                                                <span class="text-muted">{{ $courseEnrolleds->category_name }}</span>
+                                                                <span class="text-muted fw-bold"> 70%</span>
+                                                            </div>
+                                                            <div class="progress" style="height: 6px;">
+                                                                <div class="progress-bar bg-primary" role="progressbar"
+                                                                    style="width: 70%" aria-valuenow="70" aria-valuemin="0"
+                                                                    aria-valuemax="100" data-toggle="tooltip"
+                                                                    data-placement="top" title=""
+                                                                    data-original-title="70%"></div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="text-end">
                                                 @if ($courseEnrolleds->status != 'complete')
-                                                    <a href="{{ route('pages.course.course.detail', $courseEnrolleds->course_id) }}" class="btn btn-label-warning btn-round btn-sm me-2 stretched-link">
+                                                    <a href="{{ route('pages.course.course.detail', $courseEnrolleds->course_id) }}"
+                                                        class="btn btn-label-warning btn-round btn-sm me-2 stretched-link">
                                                         Lanjutkan <i class="fas fa-arrow-right"></i>
                                                     </a>
                                                 @else
-                                                    <a href="{{ route('pages.course.course.detail', $courseEnrolleds->course_id) }}" class="btn btn-label-info btn-round btn-sm me-2 stretched-link">
+                                                    <a href="{{ route('pages.course.course.detail', $courseEnrolleds->course_id) }}"
+                                                        class="btn btn-label-info btn-round btn-sm me-2 stretched-link">
                                                         Detail <i class="fas fa-search"></i>
                                                     </a>
                                                 @endif
@@ -139,9 +172,25 @@
                                 </div>
                             @endforeach
                         </div>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
+@endsection
+
+@section('js')
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth'
+            });
+            calendar.render();
+        });
+    </script>
+
 @endsection
