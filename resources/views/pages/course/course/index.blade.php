@@ -127,7 +127,8 @@
                     {{-- Sub-items for Quiz and Essay --}}
                     <ul class="list-unstyled">
                         @if ($modul->quizzes->isNotEmpty())
-                            <li class="list-group-item mb-2 bg-body p-2 border rounded" onclick="loadQuiz({{ $modul->quizzes->first()->id }})"><span class="me-2 bg-primary px-1 py-1 my-auto rounded text-white">
+                        {{ Log::info("Log modul quizzes". $modul->quizzes->first()->course_modul_id); }}
+                            <li class="list-group-item mb-2 bg-body p-2 border rounded" onclick="loadQuiz({{ $modul->quizzes->first()->course_modul_id }})"><span class="me-2 bg-primary px-1 py-1 my-auto rounded text-white">
                                     <i class="far fa-comment-dots"></i></span> Quiz</li>
                         @endif
                         @if ($modul->essays->isNotEmpty())
@@ -339,13 +340,14 @@ function updateIframeSource(mediaType, mediaLink, index) {
 let userAnswers = JSON.parse(localStorage.getItem('userAnswers')) || {};
 
 function loadQuiz(courseModulId) {
+    console.log("loadQuiz Course Modul ID",courseModulId);
     // Clear iframe and hide ratio
     const iframe = document.getElementById("videoSource");
     const ratio = document.querySelector('.ratio');
     iframe.style.display = "none";
     ratio.style.display = "none";
 
-    console.log('courseModulId:', courseModulId);
+    console.log('courseModulId Quiz:', courseModulId);
 
     // Fetch quiz data from the backend using the course module ID
     fetch(`/course/quiz/${courseModulId}`)
@@ -423,7 +425,7 @@ function saveAnswer(courseModulId, answer) {
             button.checked = false;
         });
     } else {
-        userAnswers[courseModulId] = answer; // Simpan jawaban
+        userAnswers[courseModulId] = { answer, course_modul_id: courseModulId }; // Simpan jawaban
     }
 
     console.log('Current user answers:', userAnswers);
@@ -459,6 +461,8 @@ function updateQuestionNavState(quizIds, currentQuizId) {
 }
 
 function generateQuestionNav(quizIds, currentQuizId) {
+    console.log("Quiz ID Generate:", quizIds);
+    console.log("Current ID Generate:", currentQuizId);
     // Check if quizIds is an array
     if (!Array.isArray(quizIds)) {
         console.error("quizIds is not an array:", quizIds);
@@ -467,16 +471,92 @@ function generateQuestionNav(quizIds, currentQuizId) {
 
     // Create buttons for each quiz ID
     let buttons = quizIds.map((id, index) => {
+        console.log("ID Generate MAP:", id);
         return `
             <button 
                 id="quizButton-${id}" 
                 class="btn btn-outline-primary mx-1" 
-                onclick="loadQuiz(${id})">
+                onclick="getQuiz(${id})">
                 ${index + 1} <!-- Increment button number starting from 1 -->
             </button>
         `;
     }).join('');
     return buttons;
+}
+
+function getQuiz(courseModulId) {
+    console.log("loadQuiz Course Modul ID",courseModulId);
+    // Clear iframe and hide ratio
+    const iframe = document.getElementById("videoSource");
+    const ratio = document.querySelector('.ratio');
+    iframe.style.display = "none";
+    ratio.style.display = "none";
+
+    console.log('courseModulId Quiz:', courseModulId);
+
+    // Fetch quiz data from the backend using the course module ID
+    fetch(`/course/getQuiz/${courseModulId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message); // In case of an error
+                return;
+            }
+
+            const iframeContent = `
+                <div class="">
+                    <div class="card-header">
+                        <p class="fw-bold">Pertanyaan ${data.quizIndex}:</p>
+                        <p class="mt-2">${data.question}</p>
+                    </div>
+                    <div class="card-body">
+                        <p class="fw-bold">Jawaban:</p>
+                        <form>
+                            ${data.kunci_jawaban.map((answer, index) => {
+                                const isChecked = userAnswers[courseModulId] === answer ? 'checked' : '';
+                                return `
+                                    <div class="form-check">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="radio" 
+                                            name="answer" 
+                                            id="answer${index + 1}" 
+                                            value="${answer}" 
+                                            ${isChecked}
+                                            onclick="saveAnswer(${courseModulId}, '${answer}')"
+                                        >
+                                        <label class="form-check-label" for="answer${index + 1}">${answer}</label>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </form>
+                    </div>
+                    <div class="card-footer text-muted">
+                        Pilih salah satu jawaban di atas.
+                    </div>
+                    <div class="d-flex justify-content-center mt-3">
+                        ${generateQuestionNav(data.quizIds, courseModulId)} <!-- Passing quizIds array -->
+                    </div>
+                </div>
+            `;
+            document.getElementById('iframeContent').innerHTML = iframeContent;
+
+            // Update the active button and color
+            updateQuestionNavState(data.quizIds, courseModulId);
+        })
+        .catch(err => console.error('Error loading quiz:', err));
+
+    // Get the clicked Quiz item and add border-primary
+    var quizItem = event.target.closest('li');
+    quizItem.classList.add('border-primary');
+
+    // Remove primary border from all other Essay and Quiz items
+    var allItems = document.querySelectorAll('.list-group-item');
+    allItems.forEach(function(item) {
+        if (item !== quizItem) {
+            item.classList.remove('border-primary');
+        }
+    });
 }
 </script>
 
@@ -560,14 +640,18 @@ document.getElementById('selesaiKelas').addEventListener('click', function (e) {
     // Ambil jawaban dari localStorage
     const userId = @json(auth()->user()->ID); // Mendapatkan userId dari Blade
     const userAnswers = JSON.parse(localStorage.getItem('userAnswers')) || {};
+    console.log("User Answer:", userAnswers);
     const essayAnswers = Object.keys(localStorage).filter(key => key.startsWith('essayAnswer-'));
 
     // Kirim jawaban quiz
     Object.keys(userAnswers).forEach((modulquizzesId) => {
-        const answer = userAnswers[modulquizzesId]; // Ambil jawaban berdasarkan course_modul_id
+        const { answer, course_modul_id } = userAnswers[modulquizzesId]; // Ambil course_modul_id
+        console.log(`Quiz ID: ${modulquizzesId}, Course Module ID: ${course_modul_id}, Answer: ${answer}`);
+
         const quizData = {
             user_id: userId,
             modul_quizzes_id: modulquizzesId, // Menggunakan modulquizzesId yang sesuai
+            course_modul_id: course_modul_id,
             jawaban: answer,
             kode_jawaban: answer,
         };
@@ -593,6 +677,8 @@ document.getElementById('selesaiKelas').addEventListener('click', function (e) {
             })
             .catch(err => console.error('Error:', err));
     });
+
+    console.log(`Jawaban essay: ${essayAnswers}`);
 
     // Kirim jawaban essay
     essayAnswers.forEach((key) => {

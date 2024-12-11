@@ -88,6 +88,7 @@ Route::group(['middleware' => 'auth'], function () {
 
             Route::post('/quiz/{course_modul_id}/submit/{user_id}',[CourseController::class, 'quiz'])->name('course.quiz');
             Route::post('/essay/{course_modul_id}/submit/{user_id}',[CourseController::class, 'essay'])->name('course.essay');
+            Route::get('/getQuiz/{quiz_id}', [CourseController::class, 'getQuiz'])->name('course.getQuiz');
 
         });
     });

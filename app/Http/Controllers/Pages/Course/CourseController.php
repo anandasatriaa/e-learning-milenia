@@ -2,21 +2,26 @@
 
 namespace App\Http\Controllers\Pages\Course;
 
-use App\Http\Controllers\Controller;
-use App\Models\Course\Course;
-use App\Models\Course\CourseModul;
-use App\Models\Course\ModulQuiz;
-use App\Models\Course\ModulEssay;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\Course\Course;
+use App\Models\Course\ModulQuiz;
+use App\Models\Course\ModulEssay;
+use App\Models\Course\CourseModul;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {
     public function detailcourse(Request $request, $course_id)
     {
+        
         $course = Course::with(['modul','modul.quizzes', 'modul.essays'])->where('id', $course_id)->first();
+        Log::info("Course Return: " . print_r($course, true));
+        $test = $course->toArray();
+        Log::info("Variabel test: " . print_r($test, true));
         return view('pages.course.course.index', compact('course'));
     }
 
@@ -73,10 +78,43 @@ class CourseController extends Controller
         ]);
     }
 
-    public function quiz($quiz_id)
+    public function getQuiz($quiz_id)
     {
         // Fetch quiz question and its answers from the database
         $quiz = ModulQuiz::with('answers')->find($quiz_id);
+
+        if ($quiz) {
+            // Pastikan course_modul_id benar-benar berasal dari tabel course_moduls
+            $courseModulId = $quiz->course_modul_id;
+
+            if (!$courseModulId) {
+                return response()->json(['message' => 'Course module ID not found'], 404);
+            }
+
+            // Fetch quizzes only for the same course_modul_id
+            $quizzesInModule = ModulQuiz::where('course_modul_id', $courseModulId)->pluck('id')->toArray();
+            $quizIndex = array_search($quiz_id, $quizzesInModule) + 1;
+
+            return response()->json([
+                'question' => $quiz->pertanyaan,
+                'kunci_jawaban' => $quiz->answers->pluck('pilihan')->toArray(),
+                'totalQuizzes' => count($quizzesInModule), // Count quizzes in the module
+                'quizIds' => $quizzesInModule, // Send only IDs from the same module
+                'quizIndex' => $quizIndex,
+                'course_modul_id' => $courseModulId, // Include the module ID
+            ]);
+        }
+
+        return response()->json(['message' => 'Quiz not found'], 404);
+    }
+
+    public function quiz($course_modul_id)
+    {
+        // Fetch quiz question and its answers from the database
+        $quiz = ModulQuiz::with('answers')->where('course_modul_id', $course_modul_id)->first();
+        Log::info('Quiz blablabla: ' . print_r($quiz, true));
+        $testquiz = $quiz->toArray();
+        Log::info('Variabel testquiz: ' . print_r($testquiz, true));
 
         if ($quiz) {
             // Pastikan `course_modul_id` benar-benar berasal dari tabel `course_moduls`
@@ -88,7 +126,7 @@ class CourseController extends Controller
 
             // Fetch quizzes only for the same `course_modul_id`
             $quizzesInModule = ModulQuiz::where('course_modul_id', $courseModulId)->pluck('id')->toArray();
-            $quizIndex = array_search($quiz_id, $quizzesInModule) + 1;
+            $quizIndex = array_search($course_modul_id, $quizzesInModule) + 1;
 
             return response()->json([
                 'question' => $quiz->pertanyaan,
