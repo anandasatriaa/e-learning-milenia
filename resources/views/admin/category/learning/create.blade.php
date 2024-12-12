@@ -1,21 +1,20 @@
 @extends('admin.layouts.app')
-@section('title', 'Tambah Kategori Divisi')
+@section('title', 'Add Learning Category')
 @section('css')
     <link href="{{ asset('vendor/dropify/css/dropify.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/croppie/croppie.css') }}" rel="stylesheet">
-    <link href="{{ asset('vendor/selectize/selectize.bootstrap5.css') }}" rel="stylesheet" crossorigin="anonymous" />
 @endsection
 @section('content')
     <div class="page-inner">
         <div class="card text-start">
             <div class="card-header">
                 <h4 class="card-title">
-                    <a href="{{ route('admin.category.divisi-category.index') }}"class="btn btn-icon btn-round btn-light">
+                    <a href="{{ route('admin.category.learning.index') }}"class="btn btn-icon btn-round btn-light">
                         <i class="fas fa-chevron-left"></i>
-                    </a> Tambah Data Kategori Divisi
+                    </a> Add Learning Category
                 </h4>
             </div>
-            <form action="{{ route('admin.category.divisi-category.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.category.learning.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="card-body">
                     @if ($errors->any())
@@ -34,24 +33,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="fw-bold" for="learning_cat_id">Learning category<span
-                                        class="text-danger">*</span></label>
-                                <select name="learning_cat_id" id="learning_cat_id" required>
-                                    <option value="">Pilih Learning Category</option>
-                                    @foreach ($learning as $item)
-                                        <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="fw-bold" for="nama">Divisi<span class="text-danger">*</span></label>
+                                <label class="fw-bold" for="nama">Learning<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="nama" id="nama"
-                                    placeholder="Nama Divisi">
+                                    placeholder="Learning Name">
                             </div>
                             <div class="form-group">
                                 <label for="image-dropify" class="fw-bold">Upload Thumbnail
-                                    Kategori <span class="text-danger">*</span></label></label>
+                                    Learning Category <span class="text-danger">*</span></label></label>
                                 <div class="form-group">
                                     @include('components.upload_image.html')
                                 </div>
@@ -61,8 +49,8 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="deskripsi" class="fw-bold">
-                                    Deskripsi
-                                    <span class="text-danger">*</span></label>
+                                    Description
+                                    {{-- <span class="text-danger">*</span></label> --}}
                                 <textarea class="form-control" name="deskripsi" id="deskripsi" rows="3" required></textarea>
                             </div>
                         </div>
@@ -76,20 +64,10 @@
     </div>
 @endsection
 @section('js')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/js/selectize.min.js"
-        integrity="sha512-IOebNkvA/HZjMM7MxL0NYeLYEalloZ8ckak+NDtOViP7oiYzG5vn6WVXyrJDiJPhl4yRdmNAG49iuLmhkUdVsQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="{{ asset('vendor/dropify/js/dropify.min.js') }}"></script>
     <script src="{{ asset('vendor/croppie/croppie.js') }}"></script>
     <script src="{{ asset('vendor/ckeditor/ckeditor.js') }}"></script>
     @include('components.upload_image.js')
-    <script>
-        var selectLearningCategory = $("#learning_cat_id").selectize({
-            respect_word_boundaries: false,
-            closeAfterSelect: true,
-            plugins: ["clear_button"],
-        });
-    </script>
     <script>
         CKEDITOR.replace('deskripsi');
     </script>

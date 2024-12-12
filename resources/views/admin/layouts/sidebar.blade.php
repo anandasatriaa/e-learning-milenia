@@ -71,22 +71,29 @@
                         id="kategori_sidebar">
                         <ul class="nav nav-collapse">
                             <li class="ms-3">
+                                <a class="{{ request()->routeIs('admin.category.learning.*') ? 'text-white fw-bold active border-start border-2' : '' }}"
+                                    href="{{ route('admin.category.learning.index') }}">
+                                    <i class="fas fa-list"></i>
+                                    <span>Learning Category</span>
+                                </a>
+                            </li>
+                            <li class="ms-3">
                                 <a class="{{ request()->routeIs('admin.category.divisi-category.*') ? 'text-white fw-bold active border-start border-2' : '' }}"
                                     href="{{ route('admin.category.divisi-category.index') }}">
-                                    <i class="fas fa-address-card"></i>
-                                    <span>Divisi</span>
+                                    <i class="fas fa-th-list"></i>
+                                    <span>Division</span>
                                 </a>
                             </li>
                             <li class="ms-3">
                                 <a class="{{ request()->routeIs('admin.category.category.*') ? 'text-white fw-bold active border-start border-2' : '' }}"
                                     href="{{ route('admin.category.category.index') }}">
-                                    <i class="fas fa-th-large"></i> Kategori
+                                    <i class="fas fa-th-large"></i> Category
                                 </a>
                             </li>
                             <li class="ms-3">
                                 <a class="{{ request()->routeIs('admin.category.sub-category.*') ? 'text-white fw-bold active border-start border-2' : '' }}"
                                     href="{{ route('admin.category.sub-category.index') }}">
-                                    <i class="fas fa-th"></i> Sub Kategori
+                                    <i class="fas fa-th"></i> Sub Category
                                 </a>
                             </li>
                         </ul>
@@ -95,7 +102,7 @@
                 <li class="nav-item {{ request()->routeIs('admin.course.*') ? 'active' : '' }}">
                     <a data-bs-toggle="collapse" href="#kelas_sidebar">
                         <i class="fas fa-book-reader"></i>
-                        <p>Kursus</p>
+                        <p>Course</p>
                         <span class="caret"></span>
                     </a>
                     <div class="collapse {{ request()->routeIs('admin.course.*') ? 'show' : '' }}" id="kelas_sidebar">
@@ -104,7 +111,7 @@
                                 <a class="{{ request()->routeIs('admin.course.course.*') ? 'text-white fw-bold active border-start border-2' : '' }}"
                                     href="{{ route('admin.course.course.index') }}">
                                     <i class="fas fa-book"></i>
-                                    <span>Kelas</span>
+                                    <span>Class</span>
                                 </a>
                             </li>
                             <li class="ms-3">

@@ -3,64 +3,57 @@
 namespace App\Http\Controllers\Admin\Category;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category\Category;
-use App\Models\Category\SubCategory;
+use App\Models\Category\LearningCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-class SubCategoryController extends Controller
+class LearningCategoryController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->get('search');
-        $show = $request->get('show') ?? 15;
-        $query = SubCategory::with('category.divisiCategory.learningCategory')->latest();
-        if ($search) {
-            $query->where('nama', 'LIKE', "%$search%");
-        }
-        $data = SubCategory::with('category.divisiCategory.learningCategory')->paginate($show);
+        $search = $request->query('search');
+        $show = $request->query('show', 15);
 
-        if ($request->ajax()) {
-            // Jika permintaan berasal dari AJAX, kembalikan hanya tabelnya
-            return view('admin.category.subcategory.index', compact('data'))->render();
-        }
+        $data = LearningCategory::query()
+            ->when($search, function ($query, $search) {
+                $query->where('nama', 'like', '%' . $search . '%')
+                    ->orWhere('deskripsi', 'like', '%' . $search . '%');
+            })
+            ->paginate($show);
 
-        return view('admin.category.subcategory.index', compact('data', 'search', 'show'));
+        return view('admin.category.learning.index', compact('data', 'search', 'show'));
     }
-
 
     public function create()
     {
-        $category = Category::with(['divisiCategory.learningCategory'])->get();
-        return view('admin.category.subcategory.create', compact('category'));
+        return view('admin.category.learning.create');
     }
 
     public function store(Request $request)
     {
         try {
             DB::beginTransaction();
-            $subCategory = new SubCategory();
-            $subCategory->category_id = $request->category_id;
-            $subCategory->nama = $request->nama;
+            $learningCategory = new LearningCategory();
+            $learningCategory->nama = $request->nama;
 
             $image_parts = explode(";base64,", $request->image);
             $image_type_aux = explode("image/", $image_parts[0]);
             $image_type = $image_type_aux[1];
             $image_base64 = base64_decode($image_parts[1]);
 
-            $folderPath = storage_path('app/public/category/subkategori/');
+            $folderPath = storage_path('app/public/category/learning/');
             $image_name =  date('YmdHi') .  '_' . $request->nama  . '.' . $image_type;
             $file = $folderPath . '' . $image_name;
-            $subCategory->image = $image_name;
+            $learningCategory->image = $image_name;
 
-            $subCategory->deskripsi = $request->deskripsi;
-            $subCategory->active = true;
-            $subCategory->save();
+            $learningCategory->deskripsi = $request->deskripsi;
+            $learningCategory->active = true;
+            $learningCategory->save();
             DB::commit();
             file_put_contents($file, $image_base64);
 
-            return redirect()->route('admin.category.sub-category.index')->with([
+            return redirect()->route('admin.category.learning.index')->with([
                 'success' => [
                     'title' => 'Sukses',
                     'message' => 'Berhasil menambah data!'
@@ -77,35 +70,28 @@ class SubCategoryController extends Controller
         }
     }
 
-    public function show($id)
-    {
-        //
-    }
-
     public function edit($id)
     {
-        $category = Category::with('divisiCategory:id,nama')->get();
-        $data = SubCategory::findOrFail($id);
-        return view('admin.category.subcategory.edit', compact('data', 'category'));
+        $data = LearningCategory::findOrFail($id);
+        return view('admin.category.learning.edit', compact('data'));
     }
 
     public function update(Request $request, $id)
     {
         try {
             DB::beginTransaction();
-            $subCategory = SubCategory::findOrfail($id);
+            $learningCategory = LearningCategory::findOrfail($id);
 
             if (isset($request->updateStatus) && $request->updateStatus) {
-                $subCategory->active = $request->active;
-                $subCategory->save();
+                $learningCategory->active = $request->active;
+                $learningCategory->save();
                 DB::commit();
 
-                return response()->json(['isActive' => intval($subCategory->active)], 200);
+                return response()->json(['isActive' => intval($learningCategory->active)], 200);
             }
-            $subCategory->category_id = $request->category_id;
-            $oldValueImageName = $subCategory->image;
+            $oldValueImageName = $learningCategory->image;
 
-            $subCategory->nama = $request->nama;
+            $learningCategory->nama = $request->nama;
 
             if (isset($request->image)) {
                 $image_parts = explode(";base64,", $request->image);
@@ -113,22 +99,22 @@ class SubCategoryController extends Controller
                 $image_type = $image_type_aux[1];
                 $image_base64 = base64_decode($image_parts[1]);
 
-                $folderPath = storage_path('app/public/category/subkategori/');
+                $folderPath = storage_path('app/public/category/learning/');
                 $image_name =  date('YmdHi') .  '_' . $request->nama  . '.' . $image_type;
                 $file = $folderPath . '' . $image_name;
-                $subCategory->image = $image_name;
+                $learningCategory->image = $image_name;
             }
 
-            $subCategory->deskripsi = $request->deskripsi;
-            $subCategory->save();
+            $learningCategory->deskripsi = $request->deskripsi;
+            $learningCategory->save();
             DB::commit();
 
             if (isset($request->image)) {
                 file_put_contents($file, $image_base64);
-                Storage::disk('public')->delete('category/subkategori/' . $oldValueImageName);
+                Storage::disk('public')->delete('category/learning/' . $oldValueImageName);
             }
 
-            return redirect()->route('admin.category.sub-category.index')->with([
+            return redirect()->route('admin.category.learning.index')->with([
                 'success' => [
                     'title' => 'Sukses',
                     'message' => 'Berhasil mengubah data!'
@@ -149,15 +135,15 @@ class SubCategoryController extends Controller
     {
         try {
             DB::beginTransaction();
-            $data = SubCategory::findOrFail($id);
+            $data = LearningCategory::findOrFail($id);
             $filename = $data->image;
             $data->delete();
             if ($data) {
-                Storage::disk('public')->delete('category/subkategori/' . $filename);
+                Storage::disk('public')->delete('category/learning/' . $filename);
             }
 
             DB::commit();
-            return redirect()->route('admin.category.sub-category.index')->with([
+            return redirect()->route('admin.category.learning.index')->with([
                 'success' => [
                     'title' => 'Sukses',
                     'message' => 'Berhasil menghapus data!'
@@ -172,5 +158,20 @@ class SubCategoryController extends Controller
                 ]
             ]);
         }
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'active' => 'required|boolean',
+        ]);
+
+        $category = LearningCategory::findOrFail($id);
+        $category->update(['active' => $request->active]);
+
+        return response()->json([
+            'isActive' => $category->active,
+            'message' => 'Status updated successfully.',
+        ]);
     }
 }

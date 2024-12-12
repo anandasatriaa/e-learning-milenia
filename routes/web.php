@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\Category\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\Category\DivisiCategoryController as AdminDivisiCategoryController;
 use App\Http\Controllers\Admin\Category\SubCategoryController as AdminSubCategoryController;
+use App\Http\Controllers\Admin\Category\LearningCategoryController as AdminLearningCategoryController;
 use App\Http\Controllers\Admin\Course\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\Course\CourseModulController as AdminCourseModulController;
 use App\Http\Controllers\Admin\Course\UserCourseEnrollController;
@@ -27,6 +28,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/', [AdminHomeController::class, 'index'])->name('dashboard');
 
         Route::group(['prefix' => 'category', 'as' => 'category.'], function () {
+            Route::resource('learning', AdminLearningCategoryController::class);
             Route::resource('divisi-category', AdminDivisiCategoryController::class);
             Route::resource('category', AdminCategoryController::class);
             Route::resource('sub-category', AdminSubCategoryController::class);

@@ -10,6 +10,7 @@ class SubCategory extends Model
     use HasFactory;
 
     protected $appends = ['image_url'];
+    protected $table = 'sub_categories';
 
     public function getImageUrlAttribute()
     {
@@ -18,6 +19,6 @@ class SubCategory extends Model
 
     public function category()
     {
-        return $this->belongsTo(category::class);
+        return $this->belongsTo(Category::class, 'category_id');
     }
 }

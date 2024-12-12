@@ -3,6 +3,8 @@
 @section('css')
     <link href="{{ asset('vendor/dropify/css/dropify.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/croppie/croppie.css') }}" rel="stylesheet">
+    <link href="{{ asset('vendor/selectize/selectize.bootstrap5.css') }}" rel="stylesheet" crossorigin="anonymous" />
+    <link href="{{ asset('vendor/selectize/selectize.css') }}" rel="stylesheet" crossorigin="anonymous" />
 @endsection
 @section('content')
     <div class="page-inner">
@@ -34,6 +36,18 @@
                     @endif
                     <div class="row">
                         <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="fw-bold" for="learning_cat_id">Learning category<span
+                                        class="text-danger">*</span></label>
+                                <select name="learning_cat_id" id="learning_cat_id" required>
+                                    <option value="">Pilih Learning Category</option>
+                                    @foreach ($learning as $item)
+                                        <option value="{{ $item->id }}"
+                                            {{ $item->id == $data->learning_cat_id ? 'selected' : '' }}>
+                                            {{ $item->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="form-group">
                                 <label class="fw-bold" for="nama">Divisi<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="nama" id="nama"
@@ -73,10 +87,20 @@
     </div>
 @endsection
 @section('js')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/js/selectize.min.js"
+        integrity="sha512-IOebNkvA/HZjMM7MxL0NYeLYEalloZ8ckak+NDtOViP7oiYzG5vn6WVXyrJDiJPhl4yRdmNAG49iuLmhkUdVsQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="{{ asset('vendor/dropify/js/dropify.min.js') }}"></script>
     <script src="{{ asset('vendor/croppie/croppie.js') }}"></script>
     <script src="{{ asset('vendor/ckeditor/ckeditor.js') }}"></script>
     @include('components.upload_image.js')
+    <script>
+        var selectDivisiCategory = $("#learning_cat_id").selectize({
+            respect_word_boundaries: false,
+            closeAfterSelect: true,
+            plugins: ["clear_button"],
+        });
+    </script>
     <script>
         CKEDITOR.replace('deskripsi');
         var test = `{!! $data->deskripsi !!}`;

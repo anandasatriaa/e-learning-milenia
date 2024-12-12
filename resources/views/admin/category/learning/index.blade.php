@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Divisi')
+@section('title', 'Learning')
 @section('css')
     <style>
         .table>tbody>tr>td,
@@ -12,14 +12,14 @@
     <div class="page-inner">
         <div class="card">
             <div class="card-header d-flex justify-content-between">
-                <div class="card-title">Divisi</div>
-                <a class="btn btn-primary btn-round ms-auto" href="{{ route('admin.category.divisi-category.create') }}">
+                <div class="card-title">Learning Category</div>
+                <a class="btn btn-primary btn-round ms-auto" href="{{ route('admin.category.learning.create') }}">
                     <i class="fa fa-plus me-1"></i>
-                    Tambah
+                    Add
                 </a>
             </div>
             <div class="card-body">
-                <form action="{{ route('admin.category.divisi-category.index') }}" id="formSearch">
+                <form action="{{ route('admin.category.learning.index') }}" id="formSearch">
                     <div class="row justify-content-between">
                         <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
                             <div class="form-group form-group-default">
@@ -41,7 +41,7 @@
                                     <input type="text" class="form-control" placeholder="Cari..." name="search" id="searchInput"
                                         value="{{ $search ?? '' }}">
                                     @if (!empty($search))
-                                        <a href="{{ route('admin.category.divisi-category.index') }}"
+                                        <a href="{{ route('admin.category.learning.index') }}"
                                             class="input-icon-addon">
                                             <i class="fa fa-times-circle text-danger"></i>
                                         </a>
@@ -57,7 +57,6 @@
                             <tr>
                                 <th class="text-center" style="width: 3%">No</th>
                                 <th class="text-center" style="width: 10%">Gambar</th>
-                                <th class="text-center">Learning Category</th>
                                 <th class="text-center">Nama</th>
                                 <th class="text-center">Deskripsi</th>
                                 <th class="text-center" colspan="2" style="width: 20%"><i class="fas fa-cogs"></i></th>
@@ -68,10 +67,9 @@
                                 <tr>
                                     <th class="text-center" scope="row"> {{ $data->firstItem() + $loop->index }}</th>
                                     <td class="text-center">
-                                        <img src="{{ Storage::url('category/divisi/'.$item->image) }}" alt="{{ $item->image }}"
+                                        <img src="{{ Storage::url('category/learning/'.$item->image) }}" alt="{{ $item->image }}"
                                                             class="img-fluid" style="max-height: 80vh; object-fit: contain;">
                                     </td>
-                                    <td>{{ $item->learningCategory->nama ?? 'Tidak ada'}}</td>
                                     <td>{{ $item->nama }}</td>
                                     <td>{!! $item->deskripsi !!}</td>
                                     <td class="text-center">
@@ -89,7 +87,7 @@
                                         </div>
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ route('admin.category.divisi-category.edit', $item->id) }}"
+                                        <a href="{{ route('admin.category.learning.edit', $item->id) }}"
                                             data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Ubah"
                                             class="btn btn-icon btn-round btn-warning my-1">
                                             <i class="fas fa-pen-square text-dark"></i>
@@ -104,14 +102,14 @@
                                             <div class="modal-dialog modal-dialog-centered" role="document">
                                                 <div class="modal-content">
                                                     <form
-                                                        action="{{ route('admin.category.divisi-category.destroy', $item->id) }}"
+                                                        action="{{ route('admin.category.learning.destroy', $item->id) }}"
                                                         class="d-inline my-1" method="POST">
                                                         @method('DELETE')
                                                         @csrf
                                                         <div class="modal-body">
                                                             <h4 class="text-danger mb-4">Hapus data</h4>
                                                             <p>
-                                                                Apakah anda yakin?
+                                                                Apakah Anda Yakin? <br> Menghapus Data Ini Akan Menghapus Divisi dan Kategori Yang Terelasi!!
                                                             </p>
                                                         </div>
                                                         <div class="modal-footer d-flex justify-content-center">
@@ -149,7 +147,7 @@
             var isActive = $('#is_active_' + id).is(':checked');
             $.ajax({
                 method: "POST",
-                url: "{{ url('/admin/category/divisi-category/') }}" + "/" + id,
+                url: "{{ url('/admin/category/learning/') }}" + "/" + id,
                 data: {
                     _token: "{{ csrf_token() }}",
                     _method: 'PATCH',
@@ -200,7 +198,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('searchInput');
             const tableContainer = document.querySelector('.table-responsive');
-            const baseUrl = "{{ route('admin.category.divisi-category.index') }}";
+            const baseUrl = "{{ route('admin.category.learning.index') }}";
 
             searchInput.addEventListener('input', function () {
                 const searchQuery = this.value;

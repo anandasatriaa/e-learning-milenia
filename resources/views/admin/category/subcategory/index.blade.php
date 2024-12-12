@@ -67,28 +67,10 @@
                                 <tr>
                                     <th class="text-center" scope="row"> {{ $data->firstItem() + $loop->index }}</th>
                                     <td class="text-center">
-                                        <button data-bs-toggle="modal" data-bs-target="#modal_image_{{ $item->id }}"
-                                            class="btn btn-link">Lihat Gambar
-                                        </button>
-                                        <div class="modal fade" id="modal_image_{{ $item->id }}" tabindex="-1"
-                                            role="dialog" aria-labelledby="modal_image_{{ $item->id }}Label"
-                                            aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close">
-                                                        </button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <img class="w-75 rounded " src="{{ $item->image_url }}"
+                                        <img class="w-75 rounded " src="{{ $item->image_url }}"
                                                             alt="{{ $item->image }}">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </td>
-                                    <td>[{{ $item->category->divisiCategory->nama }}] - {{ $item->category->nama }}</td>
+                                    <td>[{{ $item->category->divisiCategory->learningCategory->nama ?? 'Tidak ada' }}] - [{{ $item->category->divisiCategory->nama ?? 'Tidak ada' }}] - {{ $item->category->nama ?? 'Tidak ada' }}</td>
                                     <td>{{ $item->nama }}</td>
                                     <td>{!! $item->deskripsi !!}</td>
                                     <td class="text-center">

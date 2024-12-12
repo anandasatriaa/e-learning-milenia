@@ -15,11 +15,13 @@ class CategoryController extends Controller
     {
         $search = $request->get('search');
         $show = $request->get('show') ?? 15;
-        $query = Category::with('divisiCategory:id,nama')->latest();
+        $query = Category::with('divisiCategory.learningCategory')->latest();
+        // dd($query->toSql(), $query->get());
+
         if ($search) {
             $query->where('nama', 'LIKE', "%$search%");
         }
-        $data = $query->paginate($show)->withQueryString();
+        $data = Category::with('divisiCategory.learningCategory')->paginate($show);
 
         if ($request->ajax()) {
             // Jika permintaan berasal dari AJAX, kembalikan hanya tabelnya
@@ -31,7 +33,7 @@ class CategoryController extends Controller
 
     public function create()
     {
-        $divisi = DivisiCategory::get(['id', 'nama']);
+        $divisi = DivisiCategory::with('learningCategory:id,nama')->get();
         return view('admin.category.category.create', compact('divisi'));
     }
 
@@ -83,7 +85,7 @@ class CategoryController extends Controller
 
     public function edit($id)
     {
-        $divisi = DivisiCategory::get(['id', 'nama']);
+        $divisi = DivisiCategory::with('learningCategory:id,nama')->get();
         $data = Category::findOrFail($id);
         return view('admin.category.category.edit', compact('data', 'divisi'));
     }

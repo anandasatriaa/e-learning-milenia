@@ -39,7 +39,7 @@
                                 <select name="divisi_category_id" id="divisi_category_id" required>
                                     <option value="">Pilih Divisi</option>
                                     @foreach ($divisi as $item)
-                                        <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                                        <option value="{{ $item->id }}">[{{ $item->learningCategory->nama ?? 'Tidak ada' }}] - {{ $item->nama }}</option>
                                     @endforeach
                                 </select>
                             </div>

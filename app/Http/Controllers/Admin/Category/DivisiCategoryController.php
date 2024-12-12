@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Category;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category\DivisiCategory;
+use App\Models\Category\LearningCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,11 +15,11 @@ class DivisiCategoryController extends Controller
     {
         $search = $request->get('search');
         $show = $request->get('show') ?? 15;
-        $query = DivisiCategory::latest();
+        $query = DivisiCategory::with('learningCategory:id,nama')->latest();
         if ($search) {
             $query->where('nama', 'LIKE', "%$search%");
         }
-        $data = $query->paginate($show)->withQueryString();
+        $data = DivisiCategory::with('learningCategory')->paginate($show);
 
         if ($request->ajax()) {
             // Jika permintaan berasal dari AJAX, kembalikan hanya tabelnya
@@ -30,7 +31,8 @@ class DivisiCategoryController extends Controller
 
     public function create()
     {
-        return view('admin.category.divisi.create');
+        $learning = LearningCategory::get(['id', 'nama']);
+        return view('admin.category.divisi.create', compact('learning'));
     }
 
     public function store(Request $request)
@@ -38,6 +40,7 @@ class DivisiCategoryController extends Controller
         try {
             DB::beginTransaction();
             $divisiCategory = new DivisiCategory();
+            $divisiCategory->learning_cat_id = $request->learning_cat_id;
             $divisiCategory->nama = $request->nama;
 
             $image_parts = explode(";base64,", $request->image);
@@ -80,8 +83,9 @@ class DivisiCategoryController extends Controller
 
     public function edit($id)
     {
+        $learning = LearningCategory::get(['id', 'nama']);
         $data = DivisiCategory::findOrFail($id);
-        return view('admin.category.divisi.edit', compact('data'));
+        return view('admin.category.divisi.edit', compact('data', 'learning'));
     }
 
     public function update(Request $request, $id)
@@ -97,6 +101,7 @@ class DivisiCategoryController extends Controller
 
                 return response()->json(['isActive' => intval($divisiCategory->active)], 200);
             }
+            $divisiCategory->learning_cat_id = $request->learning_cat_id;
             $oldValueImageName = $divisiCategory->image;
 
             $divisiCategory->nama = $request->nama;

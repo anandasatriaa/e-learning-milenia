@@ -19,11 +19,11 @@ class Category extends Model
 
     public function divisiCategory()
     {
-        return $this->belongsTo(DivisiCategory::class);
+        return $this->belongsTo(DivisiCategory::class, 'divisi_category_id');
     }
 
-    public function subCategory()
+    public function subCategories()
     {
-        return $this->hasMany(SubCategory::class);
+        return $this->hasMany(SubCategory::class, 'category_id')->onDelete('cascade');
     }
 }
