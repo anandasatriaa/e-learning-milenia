@@ -12,14 +12,14 @@
     <div class="page-inner">
         <div class="card">
             <div class="card-header d-flex justify-content-between">
-                <div class="card-title">Kelas</div>
-                <a class="btn btn-primary btn-round ms-auto" href="{{ route('admin.course.course.create') }}">
+                <div class="card-title">Course</div>
+                <a class="btn btn-secondary btn-round ms-auto" href="{{ route('admin.course.course.create') }}">
                     <i class="fa fa-plus me-1"></i>
-                    Tambah
+                    Add Course
                 </a>
             </div>
             <div class="card-body">
-                <form action="{{ route('admin.course.course.index') }}" id="formSearch">
+                {{-- <form action="{{ route('admin.course.course.index') }}" id="formSearch">
                     <div class="row justify-content-between">
                         <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
                             <div class="form-group form-group-default">
@@ -38,8 +38,8 @@
                                     <span class="input-icon-addon">
                                         <i class="fa fa-search"></i>
                                     </span>
-                                    <input type="text" class="form-control" placeholder="Cari..." name="search" id="searchInput"
-                                        value="{{ $search ?? '' }}">
+                                    <input type="text" class="form-control" placeholder="Cari..." name="search"
+                                        id="searchInput" value="{{ $search ?? '' }}">
                                     @if (!empty($search))
                                         <a href="{{ route('admin.course.course.index') }}" class="input-icon-addon">
                                             <i class="fa fa-times-circle text-danger"></i>
@@ -49,8 +49,8 @@
                             </div>
                         </div>
                     </div>
-                </form>
-                <div class="table-responsive">
+                </form> --}}
+                {{-- <div class="table-responsive">
                     <table class="table table-bordered table-striped table-hover">
                         <thead>
                             <tr>
@@ -183,7 +183,109 @@
                     <div class="d-flex justify-content-end">
                         {!! $data->links() !!}
                     </div>
+                </div> --}}
+
+                <!-- Form Pencarian -->
+                <div class="mb-4">
+                    <div class="input-group justify-content-center" style="max-width: 400px; margin: 0 auto;">
+                        <input type="text" class="form-control" placeholder="Search Course" id="searchCourse"
+                            aria-label="Search Course">
+                        <button class="btn btn-secondary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
                 </div>
+                <div class="row" id="courseContainer">
+                    @foreach ($data as $item)
+                        <div class="col-md-4 course-item" data-nama-kelas="{{ strtolower($item->nama_kelas) }}">
+                            <div class="card card-profile">
+                                <div class="card-header" style="background-image: url('{{ asset('img/blogpost.jpg') }}')">
+                                    <div class="profile-picture">
+                                        <div class="avatar avatar-xl">
+                                            <img src="{{ $item->thumbnail_url }}" alt="{{ $item->thumbnail_url }}"
+                                                class="avatar-img rounded-circle" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="user-profile text-center">
+                                        <div class="name">{{ $item->nama_kelas }}</div>
+                                        <div class="job">{!! $item->deskripsi !!}</div>
+                                        <div class="social-media">
+                                            <a href="{{ route('admin.course.modul.index', $item->id) }}"
+                                                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Modul"
+                                                class="btn btn-icon btn-round btn-info my-1">
+                                                <i class="far fa-list-alt text-white"></i>
+                                            </a>
+                                            <a href="{{ route('admin.course.course.edit', $item->id) }}"
+                                                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"
+                                                class="btn btn-icon btn-round btn-warning my-1">
+                                                <i class="fas fa-pen-square text-dark"></i>
+                                            </a>
+                                            <a class="btn btn-icon btn-round btn-danger" data-bs-toggle="modal"
+                                                data-bs-target="#modal_delete_{{ $item->id }}">
+                                                <i class="fas fa-times-circle text-white"></i>
+                                            </a>
+                                            <div class="modal fade" id="modal_delete_{{ $item->id }}" tabindex="-1"
+                                                role="dialog" aria-labelledby="modal_delete_{{ $item->id }}Label"
+                                                aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                                    <div class="modal-content">
+                                                        <form
+                                                            action="{{ route('admin.course.course.destroy', $item->id) }}"
+                                                            class="d-inline my-1" method="POST">
+                                                            @method('DELETE')
+                                                            @csrf
+                                                            <div class="modal-body">
+                                                                <h4 class="text-danger mb-4">Hapus data</h4>
+                                                                <p>
+                                                                    Apakah anda yakin?
+                                                                </p>
+                                                            </div>
+                                                            <div class="modal-footer d-flex justify-content-center">
+                                                                <button type="button" class="btn btn-default"
+                                                                    data-bs-dismiss="modal">Tutup
+                                                                </button>
+                                                                <button type="submit" class="btn btn-danger">Hapus</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="view-profile">
+                                            <div class="form-check form-switch text-center p-1">
+                                                <div class="d-flex justify-content-center">
+                                                    <input class="form-check-input" type="checkbox" role="switch"
+                                                        onchange="setStatusActive({{ $item->id }})"
+                                                        id="is_active_{{ $item->id }}"
+                                                        {{ $item->active == 1 ? 'checked' : '' }}>
+                                                </div>
+                                                <label class="form-check-label" for="is_active_{{ $item->id }}"
+                                                    id="label_check_{{ $item->id }}">
+                                                    {{ $item->active == 1 ? 'Aktif' : 'Non Aktif' }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="row user-stats text-center">
+                                        <div class="col">
+                                            <div class="number">{{ $item->modul_count }}</div>
+                                            <div class="title">Modul</div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="number">{{ $item->user_count }}</div>
+                                            <div class="title">Participants</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
             </div>
         </div>
     </div>
@@ -247,28 +349,45 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('searchInput');
-            const tableContainer = document.querySelector('.table-responsive');
-            const baseUrl = "{{ route('admin.course.course.index') }}";
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     const searchInput = document.getElementById('searchInput');
+        //     const tableContainer = document.querySelector('.table-responsive');
+        //     const baseUrl = "{{ route('admin.course.course.index') }}";
 
-            searchInput.addEventListener('input', function () {
-                const searchQuery = this.value;
+        //     searchInput.addEventListener('input', function() {
+        //         const searchQuery = this.value;
 
-                // Kirim permintaan AJAX ke server
-                fetch(`${baseUrl}?search=${encodeURIComponent(searchQuery)}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        // Gantikan isi tabel dengan respons dari server
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const newTable = doc.querySelector('.table-responsive');
-                        if (newTable) {
-                            tableContainer.innerHTML = newTable.innerHTML;
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            });
-        });
+        //         // Kirim permintaan AJAX ke server
+        //         fetch(`${baseUrl}?search=${encodeURIComponent(searchQuery)}`)
+        //             .then(response => response.text())
+        //             .then(html => {
+        //                 // Gantikan isi tabel dengan respons dari server
+        //                 const parser = new DOMParser();
+        //                 const doc = parser.parseFromString(html, 'text/html');
+        //                 const newTable = doc.querySelector('.table-responsive');
+        //                 if (newTable) {
+        //                     tableContainer.innerHTML = newTable.innerHTML;
+        //                 }
+        //             })
+        //             .catch(error => console.error('Error:', error));
+        //     });
+        // });
     </script>
+
+<script>
+    // Event listener untuk input pencarian
+    document.getElementById('searchCourse').addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase();
+        const courses = document.querySelectorAll('.course-item');
+
+        courses.forEach(course => {
+            const namaKelas = course.getAttribute('data-nama-kelas');
+            if (namaKelas.includes(searchTerm)) {
+                course.style.display = ''; // Tampilkan
+            } else {
+                course.style.display = 'none'; // Sembunyikan
+            }
+        });
+    });
+</script>
 @endsection
