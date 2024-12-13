@@ -40,12 +40,25 @@
     <!-- Card Kategori -->
     <div class="row" id="categoryCards">
         @foreach ($learnings as $learning)
-        <div class="col-12 col-md-4 mb-3 category-card">
-            <a href="" class="card" style="width: 20rem;">
+        <div class="col-12 col-md-4 category-card">
+            <a href="" class="card" style="width: 30rem;">
                 <img class="card-img-top" src="{{ asset('storage/category/learning/'.$learning->image) }}" alt="{{ $learning->nama }}">
                 <div class="card-body">
-                    <button class="btn" style="background-color: #6861ce; color: white;">{{ $learning->nama }}</button>
-                </div>
+    <button class="btn 
+        @if($learning->nama == 'General Learning')
+            bg-secondary
+        @elseif($learning->nama == 'Mandatory Learning')
+            bg-warning
+        @elseif($learning->nama == 'Specific Learning')
+            bg-primary
+        @else
+            bg-info
+        @endif
+        text-white">
+        {{ $learning->nama }}
+    </button>
+</div>
+
             </a>
         </div>
         @endforeach

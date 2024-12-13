@@ -120,17 +120,22 @@
                             </div>
                             <div class="col-12 col-lg-6">
                                 <div class="mb-1">
-                                    <span class="text-muted">Divisi</span>
+                                    <span class="text-muted">Learning Category</span>
+                                    <h6 class="text-uppercase fw-bold">
+                                        {{ $data->subCategory->category->divisiCategory->learningCategory->nama }}</h6>
+                                </div>
+                                <div class="mb-1">
+                                    <span class="text-muted">Division</span>
                                     <h6 class="text-uppercase fw-bold">
                                         {{ $data->subCategory->category->divisiCategory->nama }}</h6>
                                 </div>
                                 <div class="mb-1">
-                                    <span class="text-muted">Kategori</span>
+                                    <span class="text-muted">Category</span>
                                     <h6 class="text-uppercase fw-bold">
                                         {{ $data->subCategory->category->nama }}</h6>
                                 </div>
                                 <div class="mb-3">
-                                    <span class="text-muted">Sub Kategori</span>
+                                    <span class="text-muted">Sub Category</span>
                                     <h6 class="text-uppercase fw-bold">
                                         {{ $data->subCategory->nama }}</h6>
                                 </div>

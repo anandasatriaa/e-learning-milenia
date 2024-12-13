@@ -24,7 +24,12 @@ class CourseModulController extends Controller
 {
     public function index(Request $request, $course_id)
     {
-        $data = Course::with('subCategory:id,nama,category_id', 'subCategory.category:id,nama,divisi_category_id', 'subCategory.category.divisiCategory:id,nama', 'user:ID,Nama,Jabatan')->findOrFail($course_id);
+        $data = Course::with([
+            'subCategory',
+            'subCategory.category',
+            'subCategory.category.divisiCategory',
+            'subCategory.category.divisiCategory.learningCategory'
+        ])->findOrFail($course_id);
         $courseModul = CourseModul::with('modulQuiz', 'modulQuiz.modulQuizAnswer')->where('course_id', $course_id)->get();
         $totalModul = $courseModul->count();
         $videoModul = $courseModul->where('tipe_media', 'video')->where('active', 1)->count();
