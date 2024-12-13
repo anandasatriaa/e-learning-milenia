@@ -37,10 +37,10 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="fw-bold" for="divisi_category_id">Divisi<span
+                                <label class="fw-bold" for="divisi_category_id">Division<span
                                         class="text-danger">*</span></label>
                                 <select name="divisi_category_id" id="divisi_category_id" required>
-                                    <option value="">Pilih Divisi</option>
+                                    <option value="">Choose Division</option>
                                     @foreach ($divisi as $item)
                                         <option value="{{ $item->id }}"
                                             {{ $item->id == $data->divisi_category_id ? 'selected' : '' }}>
@@ -49,13 +49,12 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="fw-bold" for="nama">Kategori<span class="text-danger">*</span></label>
+                                <label class="fw-bold" for="nama">Category<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="nama" id="nama"
                                     placeholder="Nama Kategori" value="{{ $data->nama }}">
                             </div>
                             <div class="form-group">
-                                <label for="image-dropify" class="fw-bold">Upload Thumbnail
-                                    Kategori <span class="text-danger">*</span></label></label>
+                                <label for="image-dropify" class="fw-bold">Upload Category Thumbnail <span class="text-danger">*</span></label></label>
                                 <div class="form-group" id="container_upload">
                                     @include('components.upload_image.html')
                                 </div>
@@ -72,7 +71,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="deskripsi" class="fw-bold">
-                                    Deskripsi
+                                    Description
                                     <span class="text-danger">*</span></label>
                                 <textarea class="form-control" name="deskripsi" id="deskripsi" rows="3" required></textarea>
                             </div>

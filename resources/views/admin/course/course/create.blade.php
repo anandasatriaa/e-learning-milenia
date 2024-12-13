@@ -12,7 +12,7 @@
                 <h4 class="card-title">
                     <a href="{{ route('admin.course.course.index') }}"class="btn btn-icon btn-round btn-light">
                         <i class="fas fa-chevron-left"></i>
-                    </a> Tambah Data Kelas
+                    </a> Add Course
                 </h4>
             </div>
             <form method="POST" enctype="multipart/form-data" id="uploadFormCourse">
@@ -34,13 +34,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="fw-bold" for="sub_category_id">Sub Kategori<span
+                                <label class="fw-bold" for="sub_category_id">Sub Category<span
                                         class="text-danger">*</span></label>
                                 <select name="sub_category_id" id="sub_category_id" required>
-                                    <option value="">Pilih Sub Kategori</option>
+                                    <option value="">Choose Sub Category</option>
                                     @foreach ($subCategory as $item)
-                                        <option value="{{ $item->id }}">
-                                            [{{ $item->category->divisiCategory->nama }}][{{ $item->category->nama }}] -
+                                        <option value="{{ $item->id }}"> [{{ $item->category->divisiCategory->learningCategory->nama }}] -
+                                            [{{ $item->category->divisiCategory->nama }}] - [{{ $item->category->nama }}] -
                                             {{ $item->nama }}</option>
                                     @endforeach
                                 </select>

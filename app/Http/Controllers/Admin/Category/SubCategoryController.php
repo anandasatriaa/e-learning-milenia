@@ -13,18 +13,15 @@ class SubCategoryController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->get('search');
-        $show = $request->get('show') ?? 15;
-        $query = SubCategory::with('category.divisiCategory.learningCategory')->latest();
-        if ($search) {
-            $query->where('nama', 'LIKE', "%$search%");
-        }
-        $data = SubCategory::with('category.divisiCategory.learningCategory')->paginate($show);
+        $search = $request->query('search');
+        $show = $request->query('show', 15);
 
-        if ($request->ajax()) {
-            // Jika permintaan berasal dari AJAX, kembalikan hanya tabelnya
-            return view('admin.category.subcategory.index', compact('data'))->render();
-        }
+        $data = SubCategory::query()
+            ->when($search, function ($query, $search) {
+                $query->where('nama', 'like', '%' . $search . '%')
+                    ->orWhere('deskripsi', 'like', '%' . $search . '%');
+            })
+            ->paginate($show);
 
         return view('admin.category.subcategory.index', compact('data', 'search', 'show'));
     }

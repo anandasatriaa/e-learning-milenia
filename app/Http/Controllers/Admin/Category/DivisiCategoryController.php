@@ -13,18 +13,15 @@ class DivisiCategoryController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->get('search');
-        $show = $request->get('show') ?? 15;
-        $query = DivisiCategory::with('learningCategory:id,nama')->latest();
-        if ($search) {
-            $query->where('nama', 'LIKE', "%$search%");
-        }
-        $data = DivisiCategory::with('learningCategory')->paginate($show);
+        $search = $request->query('search');
+        $show = $request->query('show', 15);
 
-        if ($request->ajax()) {
-            // Jika permintaan berasal dari AJAX, kembalikan hanya tabelnya
-            return view('admin.category.divisi.index', compact('data'))->render();
-        }
+        $data = DivisiCategory::query()
+            ->when($search, function ($query, $search) {
+                $query->where('nama', 'like', '%' . $search . '%')
+                    ->orWhere('deskripsi', 'like', '%' . $search . '%');
+            })
+            ->paginate($show);
 
         return view('admin.category.divisi.index', compact('data', 'search', 'show'));
     }

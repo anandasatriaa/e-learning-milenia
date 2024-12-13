@@ -2,6 +2,7 @@
 
 namespace App\Models\Category;
 
+use App\Models\Course\Course;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,5 +21,10 @@ class SubCategory extends Model
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function course()
+    {
+        return $this->hasMany(Course::class, 'sub_category_id');
     }
 }

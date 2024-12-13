@@ -31,7 +31,7 @@ class CourseController extends Controller
 
     public function create()
     {
-        $subCategory = SubCategory::with('category:id,nama,divisi_category_id', 'category.divisiCategory:id,nama')->get();
+        $subCategory = SubCategory::with('category.divisiCategory.learningCategory')->get();
         return view('admin.course.course.create', compact('subCategory'));
     }
 

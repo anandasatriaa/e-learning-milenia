@@ -40,8 +40,7 @@
                                     placeholder="Learning Category Name" value="{{ $data->nama }}">
                             </div>
                             <div class="form-group">
-                                <label for="image-dropify" class="fw-bold">Upload Thumbnail
-                                    Learning Category <span class="text-danger">*</span></label></label>
+                                <label for="image-dropify" class="fw-bold">Upload Learning Category Thumbnail <span class="text-danger">*</span></label></label>
                                 <div class="form-group" id="container_upload">
                                     @include('components.upload_image.html')
                                 </div>
@@ -59,7 +58,6 @@
                             <div class="form-group">
                                 <label for="deskripsi" class="fw-bold">
                                     Description
-                                    <span class="text-danger">*</span></label>
                                 <textarea class="form-control" name="deskripsi" id="deskripsi" rows="3" required></textarea>
                             </div>
                         </div>

@@ -38,7 +38,7 @@
                                     <span class="input-icon-addon">
                                         <i class="fa fa-search"></i>
                                     </span>
-                                    <input type="text" class="form-control" placeholder="Cari..." name="search" id="searchInput"
+                                    <input type="text" class="form-control" placeholder="Search..." name="search" id="searchInput"
                                         value="{{ $search ?? '' }}">
                                     @if (!empty($search))
                                         <a href="{{ route('admin.category.learning.index') }}"
@@ -56,9 +56,9 @@
                         <thead>
                             <tr>
                                 <th class="text-center" style="width: 3%">No</th>
-                                <th class="text-center" style="width: 10%">Gambar</th>
-                                <th class="text-center">Nama</th>
-                                <th class="text-center">Deskripsi</th>
+                                <th class="text-center" style="width: 10%">Image</th>
+                                <th class="text-center">Name</th>
+                                <th class="text-center">Description</th>
                                 <th class="text-center" colspan="2" style="width: 20%"><i class="fas fa-cogs"></i></th>
                             </tr>
                         </thead>
@@ -68,7 +68,7 @@
                                     <th class="text-center" scope="row"> {{ $data->firstItem() + $loop->index }}</th>
                                     <td class="text-center">
                                         <img src="{{ Storage::url('category/learning/'.$item->image) }}" alt="{{ $item->image }}"
-                                                            class="img-fluid" style="max-height: 80vh; object-fit: contain;">
+                                                            class="w-75 rounded">
                                     </td>
                                     <td>{{ $item->nama }}</td>
                                     <td>{!! $item->deskripsi !!}</td>
@@ -82,13 +82,13 @@
                                             </div>
                                             <label class="form-check-label" for="is_active_{{ $item->id }}"
                                                 id="label_check_{{ $item->id }}">
-                                                {{ $item->active == 1 ? 'Aktif' : 'Non Aktif' }}
+                                                {{ $item->active == 1 ? 'Active' : 'Non Active' }}
                                             </label>
                                         </div>
                                     </td>
                                     <td class="text-center">
                                         <a href="{{ route('admin.category.learning.edit', $item->id) }}"
-                                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Ubah"
+                                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"
                                             class="btn btn-icon btn-round btn-warning my-1">
                                             <i class="fas fa-pen-square text-dark"></i>
                                         </a>
@@ -109,7 +109,7 @@
                                                         <div class="modal-body">
                                                             <h4 class="text-danger mb-4">Hapus data</h4>
                                                             <p>
-                                                                Apakah Anda Yakin? <br> Menghapus Data Ini Akan Menghapus Divisi dan Kategori Yang Terelasi!!
+                                                                Apakah Anda Yakin? <br> Menghapus Data Ini Akan Menghapus Divisi, Kategori, dan Sub Kategori Yang Terelasi!!
                                                             </p>
                                                         </div>
                                                         <div class="modal-footer d-flex justify-content-center">
@@ -156,10 +156,10 @@
                 },
             }).done(function(data) {
                 if (data.isActive == 1) {
-                    $('#label_check_' + id).text('Aktif')
+                    $('#label_check_' + id).text('Active')
                     $('#is_active_' + id).prop('checked', true)
                 } else {
-                    $('#label_check_' + id).text('Non Aktif')
+                    $('#label_check_' + id).text('Non Active')
                     $('#is_active_' + id).prop('checked', false)
                 }
                 $.notify({

@@ -19,7 +19,7 @@ class LearningCategory extends Model
         return empty($this->image) ? asset('img/no_image.jpg') : asset('/storage/category/learning/' . $this->image);
     }
 
-    public function divisiCategory()
+    public function divisiCategories()
     {
         return $this->hasMany(DivisiCategory::class, 'learning_cat_id')->onDelete('cascade');
     }

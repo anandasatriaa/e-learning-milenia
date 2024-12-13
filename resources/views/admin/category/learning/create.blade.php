@@ -38,8 +38,7 @@
                                     placeholder="Learning Name">
                             </div>
                             <div class="form-group">
-                                <label for="image-dropify" class="fw-bold">Upload Thumbnail
-                                    Learning Category <span class="text-danger">*</span></label></label>
+                                <label for="image-dropify" class="fw-bold">Upload Learning Category Thumbnail <span class="text-danger">*</span></label></label>
                                 <div class="form-group">
                                     @include('components.upload_image.html')
                                 </div>
@@ -57,7 +56,7 @@
                     </div>
                 </div>
                 <div class="card-footer d-flex justify-content-center py-3">
-                    <button type="submit" class="btn btn-primary col-12 col-md-3 rounded-3">Simpan</button>
+                    <button type="submit" class="btn btn-primary col-12 col-md-3 rounded-3">Save</button>
                 </div>
             </form>
         </div>

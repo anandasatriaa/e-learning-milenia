@@ -12,10 +12,10 @@
     <div class="page-inner">
         <div class="card">
             <div class="card-header d-flex justify-content-between">
-                <div class="card-title">Divisi</div>
+                <div class="card-title">Division</div>
                 <a class="btn btn-primary btn-round ms-auto" href="{{ route('admin.category.divisi-category.create') }}">
                     <i class="fa fa-plus me-1"></i>
-                    Tambah
+                    Add
                 </a>
             </div>
             <div class="card-body">
@@ -38,8 +38,8 @@
                                     <span class="input-icon-addon">
                                         <i class="fa fa-search"></i>
                                     </span>
-                                    <input type="text" class="form-control" placeholder="Cari..." name="search" id="searchInput"
-                                        value="{{ $search ?? '' }}">
+                                    <input type="text" class="form-control" placeholder="Search..." name="search"
+                                        id="searchInput" value="{{ $search ?? '' }}">
                                     @if (!empty($search))
                                         <a href="{{ route('admin.category.divisi-category.index') }}"
                                             class="input-icon-addon">
@@ -56,10 +56,10 @@
                         <thead>
                             <tr>
                                 <th class="text-center" style="width: 3%">No</th>
-                                <th class="text-center" style="width: 10%">Gambar</th>
+                                <th class="text-center" style="width: 10%">Image</th>
                                 <th class="text-center">Learning Category</th>
-                                <th class="text-center">Nama</th>
-                                <th class="text-center">Deskripsi</th>
+                                <th class="text-center">Name</th>
+                                <th class="text-center">Description</th>
                                 <th class="text-center" colspan="2" style="width: 20%"><i class="fas fa-cogs"></i></th>
                             </tr>
                         </thead>
@@ -68,10 +68,10 @@
                                 <tr>
                                     <th class="text-center" scope="row"> {{ $data->firstItem() + $loop->index }}</th>
                                     <td class="text-center">
-                                        <img src="{{ Storage::url('category/divisi/'.$item->image) }}" alt="{{ $item->image }}"
-                                                            class="img-fluid" style="max-height: 80vh; object-fit: contain;">
+                                        <img src="{{ Storage::url('category/divisi/' . $item->image) }}"
+                                            alt="{{ $item->image }}" class="img-fluid w-75 rounded">
                                     </td>
-                                    <td>{{ $item->learningCategory->nama ?? 'Tidak ada'}}</td>
+                                    <td>{{ $item->learningCategory->nama ?? 'Tidak ada' }}</td>
                                     <td>{{ $item->nama }}</td>
                                     <td>{!! $item->deskripsi !!}</td>
                                     <td class="text-center">
@@ -84,13 +84,13 @@
                                             </div>
                                             <label class="form-check-label" for="is_active_{{ $item->id }}"
                                                 id="label_check_{{ $item->id }}">
-                                                {{ $item->active == 1 ? 'Aktif' : 'Non Aktif' }}
+                                                {{ $item->active == 1 ? 'Active' : 'Non Active' }}
                                             </label>
                                         </div>
                                     </td>
                                     <td class="text-center">
                                         <a href="{{ route('admin.category.divisi-category.edit', $item->id) }}"
-                                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Ubah"
+                                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"
                                             class="btn btn-icon btn-round btn-warning my-1">
                                             <i class="fas fa-pen-square text-dark"></i>
                                         </a>
@@ -158,10 +158,10 @@
                 },
             }).done(function(data) {
                 if (data.isActive == 1) {
-                    $('#label_check_' + id).text('Aktif')
+                    $('#label_check_' + id).text('Active')
                     $('#is_active_' + id).prop('checked', true)
                 } else {
-                    $('#label_check_' + id).text('Non Aktif')
+                    $('#label_check_' + id).text('Non Active')
                     $('#is_active_' + id).prop('checked', false)
                 }
                 $.notify({
@@ -202,7 +202,7 @@
             const tableContainer = document.querySelector('.table-responsive');
             const baseUrl = "{{ route('admin.category.divisi-category.index') }}";
 
-            searchInput.addEventListener('input', function () {
+            searchInput.addEventListener('input', function() {
                 const searchQuery = this.value;
 
                 // Kirim permintaan AJAX ke server
@@ -220,6 +220,5 @@
                     .catch(error => console.error('Error:', error));
             });
         });
-
     </script>
 @endsection

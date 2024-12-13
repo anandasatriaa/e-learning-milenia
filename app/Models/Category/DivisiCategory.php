@@ -20,7 +20,7 @@ class DivisiCategory extends Model
 
     public function learningCategory()
     {
-        return $this->belongsTo( LearningCategory::class, 'learning_cat_id');
+        return $this->belongsTo(LearningCategory::class, 'learning_cat_id');
     }
 
     public function categories()

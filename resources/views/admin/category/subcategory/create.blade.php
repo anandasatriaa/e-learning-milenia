@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Tambah Sub Kategori')
+@section('title', 'Add Sub Category')
 @section('css')
     <link href="{{ asset('vendor/dropify/css/dropify.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/croppie/croppie.css') }}" rel="stylesheet">
@@ -12,7 +12,7 @@
                 <h4 class="card-title">
                     <a href="{{ route('admin.category.sub-category.index') }}"class="btn btn-icon btn-round btn-light">
                         <i class="fas fa-chevron-left"></i>
-                    </a> Tambah Data Sub Kategori
+                    </a> Add Sub Category
                 </h4>
             </div>
             <form action="{{ route('admin.category.sub-category.store') }}" method="POST" enctype="multipart/form-data">
@@ -34,9 +34,9 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="fw-bold" for="category_id">Kategori<span class="text-danger">*</span></label>
+                                <label class="fw-bold" for="category_id">Category<span class="text-danger">*</span></label>
                                 <select name="category_id" id="category_id" required>
-                                    <option value="">Pilih Kategori</option>
+                                    <option value="">Choose Category</option>
                                     @foreach ($category as $item)
                                         <option value="{{ $item->id }}">[{{ $item->divisiCategory->learningCategory->nama ?? 'Tidak ada' }}] - [{{ $item->divisiCategory->nama ?? 'Tidak ada' }}] - {{ $item->nama }}</option>
                                     @endforeach
@@ -44,13 +44,12 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="fw-bold" for="nama">Sub Kategori<span class="text-danger">*</span></label>
+                                <label class="fw-bold" for="nama">Sub Category<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="nama" id="nama"
-                                    placeholder="Nama Sub Kategori" required>
+                                    placeholder="Sub Category Name" required>
                             </div>
                             <div class="form-group">
-                                <label for="image-dropify" class="fw-bold">Upload Thumbnail
-                                    Sub Kategori <span class="text-danger">*</span></label></label>
+                                <label for="image-dropify" class="fw-bold">Upload Sub Category Thumbnail <span class="text-danger">*</span></label></label>
                                 <div class="form-group">
                                     @include('components.upload_image.html')
                                 </div>
@@ -60,7 +59,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="deskripsi" class="fw-bold">
-                                    Deskripsi
+                                    Description
                                     <span class="text-danger">*</span></label>
                                 <textarea class="form-control" name="deskripsi" id="deskripsi" rows="3" required></textarea>
                             </div>
@@ -68,7 +67,7 @@
                     </div>
                 </div>
                 <div class="card-footer d-flex justify-content-center py-3">
-                    <button type="submit" class="btn btn-primary col-12 col-md-3 rounded-3">Simpan</button>
+                    <button type="submit" class="btn btn-primary col-12 col-md-3 rounded-3">Save</button>
                 </div>
             </form>
         </div>

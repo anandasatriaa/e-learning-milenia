@@ -13,20 +13,15 @@ class CategoryController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->get('search');
-        $show = $request->get('show') ?? 15;
-        $query = Category::with('divisiCategory.learningCategory')->latest();
-        // dd($query->toSql(), $query->get());
+        $search = $request->query('search');
+        $show = $request->query('show', 15);
 
-        if ($search) {
-            $query->where('nama', 'LIKE', "%$search%");
-        }
-        $data = Category::with('divisiCategory.learningCategory')->paginate($show);
-
-        if ($request->ajax()) {
-            // Jika permintaan berasal dari AJAX, kembalikan hanya tabelnya
-            return view('admin.category.category.index', compact('data'))->render();
-        }
+        $data = Category::query()
+            ->when($search, function ($query, $search) {
+                $query->where('nama', 'like', '%' . $search . '%')
+                    ->orWhere('deskripsi', 'like', '%' . $search . '%');
+            })
+            ->paginate($show);
 
         return view('admin.category.category.index', compact('data', 'search', 'show'));
     }

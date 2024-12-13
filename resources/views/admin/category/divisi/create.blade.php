@@ -12,7 +12,7 @@
                 <h4 class="card-title">
                     <a href="{{ route('admin.category.divisi-category.index') }}"class="btn btn-icon btn-round btn-light">
                         <i class="fas fa-chevron-left"></i>
-                    </a> Tambah Data Kategori Divisi
+                    </a> Add Division
                 </h4>
             </div>
             <form action="{{ route('admin.category.divisi-category.store') }}" method="POST" enctype="multipart/form-data">
@@ -34,10 +34,10 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="fw-bold" for="learning_cat_id">Learning category<span
+                                <label class="fw-bold" for="learning_cat_id">Learning Category<span
                                         class="text-danger">*</span></label>
                                 <select name="learning_cat_id" id="learning_cat_id" required>
-                                    <option value="">Pilih Learning Category</option>
+                                    <option value="">Choose Learning Category</option>
                                     @foreach ($learning as $item)
                                         <option value="{{ $item->id }}">{{ $item->nama }}</option>
                                     @endforeach
@@ -45,13 +45,12 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="fw-bold" for="nama">Divisi<span class="text-danger">*</span></label>
+                                <label class="fw-bold" for="nama">Division<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="nama" id="nama"
-                                    placeholder="Nama Divisi">
+                                    placeholder="Division Name">
                             </div>
                             <div class="form-group">
-                                <label for="image-dropify" class="fw-bold">Upload Thumbnail
-                                    Kategori <span class="text-danger">*</span></label></label>
+                                <label for="image-dropify" class="fw-bold">Upload Category Thumbnail <span class="text-danger">*</span></label></label>
                                 <div class="form-group">
                                     @include('components.upload_image.html')
                                 </div>
@@ -61,7 +60,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="deskripsi" class="fw-bold">
-                                    Deskripsi
+                                    Description
                                     <span class="text-danger">*</span></label>
                                 <textarea class="form-control" name="deskripsi" id="deskripsi" rows="3" required></textarea>
                             </div>
@@ -69,7 +68,7 @@
                     </div>
                 </div>
                 <div class="card-footer d-flex justify-content-center py-3">
-                    <button type="submit" class="btn btn-primary col-12 col-md-3 rounded-3">Simpan</button>
+                    <button type="submit" class="btn btn-primary col-12 col-md-3 rounded-3">Save</button>
                 </div>
             </form>
         </div>

@@ -15,7 +15,7 @@ class CreateDivisiCategoriesTable extends Migration
     {
         Schema::create('divisi_categories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('learning_cat_id')->constrained()->onDelete('cascade');
+            $table->foreignId('learning_cat_id')->constrained('learning_cat')->onDelete('cascade');
             $table->string('nama');
             $table->string('image');
             $table->longText('deskripsi')->nullable();
