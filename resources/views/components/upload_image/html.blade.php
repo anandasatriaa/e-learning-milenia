@@ -8,7 +8,7 @@
 <input id="image-dropify" type="file" class="form-control dropify" data-width="200" data-height="200" accept="image/*"
     data-max-file-size="2M">
 <p class="text-danger text-small font-weight-bold m-0">*Image size max 2MB</p>
-<div class="modal " tabindex="-1" data-backdrop="static" data-keyboard="false" id="myModal" aria-hidden="true">
+{{-- <div class="modal " tabindex="-1" data-backdrop="static" data-keyboard="false" id="myModal" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-black-gradient text-white text-center">
@@ -22,4 +22,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}

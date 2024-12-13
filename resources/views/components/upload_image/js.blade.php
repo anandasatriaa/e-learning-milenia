@@ -1,4 +1,4 @@
-<script>
+{{-- <script>
     $(document).ready(function() {
         $('.dropify').dropify();
     });
@@ -42,4 +42,35 @@
             $('#image-dropify-send').val(blob);
         });
     });
+</script> --}}
+
+{{-- Upload Image Tanpa Crop --}}
+<script>
+$(document).ready(function() {
+    // Inisialisasi Dropify
+    $('.dropify').dropify();
+
+    // Ketika file gambar dipilih
+    $('#image-dropify').on('change', function() {
+        var reader = new FileReader();
+
+        // Saat file dibaca
+        reader.onload = function(e) {
+            // Ambil base64 hasil pembacaan file
+            var base64Image = e.target.result;
+
+            // Masukkan base64 ke dalam textarea
+            $('#image-dropify-send').val(base64Image);
+
+            // Jika Anda ingin menampilkan gambar di halaman, Anda bisa melakukannya
+            // dengan menambahkan gambar ke elemen HTML tertentu
+            // Misalnya menampilkan gambar di elemen preview:
+            $('.dropify-render').empty(); // Mengosongkan elemen preview
+            $('.dropify-render').append('<img src="' + base64Image + '">');
+        };
+
+        // Baca file sebagai URL base64
+        reader.readAsDataURL(this.files[0]);
+    });
+});
 </script>
