@@ -210,7 +210,21 @@
                                 <div class="card-body">
                                     <div class="user-profile text-center">
                                         <div class="name">{{ $item->nama_kelas }}</div>
-                                        <div class="job">{!! $item->deskripsi !!}</div>
+                                        <div class="job">
+                                            @if (
+                                                $item->subCategory &&
+                                                    $item->subCategory->category &&
+                                                    $item->subCategory->category->divisiCategory &&
+                                                    $item->subCategory->category->divisiCategory->learningCategory)
+                                                {{ $item->subCategory->category->divisiCategory->learningCategory->nama }} >
+                                                {{ $item->subCategory->category->divisiCategory->nama }} >
+                                                {{ $item->subCategory->category->nama }} >
+                                                {{ $item->subCategory->nama }}
+                                            @else
+                                                Data tidak lengkap
+                                            @endif
+                                        </div>
+                                        <div class="desc">{!! $item->deskripsi !!}</div>
                                         <div class="social-media">
                                             <a href="{{ route('admin.course.modul.index', $item->id) }}"
                                                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Modul"
@@ -374,20 +388,20 @@
         // });
     </script>
 
-<script>
-    // Event listener untuk input pencarian
-    document.getElementById('searchCourse').addEventListener('input', function () {
-        const searchTerm = this.value.toLowerCase();
-        const courses = document.querySelectorAll('.course-item');
+    <script>
+        // Event listener untuk input pencarian
+        document.getElementById('searchCourse').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const courses = document.querySelectorAll('.course-item');
 
-        courses.forEach(course => {
-            const namaKelas = course.getAttribute('data-nama-kelas');
-            if (namaKelas.includes(searchTerm)) {
-                course.style.display = ''; // Tampilkan
-            } else {
-                course.style.display = 'none'; // Sembunyikan
-            }
+            courses.forEach(course => {
+                const namaKelas = course.getAttribute('data-nama-kelas');
+                if (namaKelas.includes(searchTerm)) {
+                    course.style.display = ''; // Tampilkan
+                } else {
+                    course.style.display = 'none'; // Sembunyikan
+                }
+            });
         });
-    });
-</script>
+    </script>
 @endsection

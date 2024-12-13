@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class AddLearningCatIdToDivisiCategoriesTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('divisi_categories', function (Blueprint $table) {
+            $table->foreignId('learning_cat_id')->constrained('learning_cat')->onDelete('cascade');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('divisi_categories', function (Blueprint $table) {
+            $table->dropForeign(['learning_cat_id']);
+            $table->dropColumn('learning_cat_id');
+        });
+    }
+}

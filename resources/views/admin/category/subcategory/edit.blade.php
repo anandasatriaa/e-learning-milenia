@@ -43,7 +43,7 @@
                                     @foreach ($category as $item)
                                         <option value="{{ $item->id }}"
                                             {{ $item->id == $data->category_id ? 'selected' : '' }}>
-                                            {{ $item->nama }}</option>
+                                            [{{ $item->divisiCategory->learningCategory->nama ?? 'Tidak ada' }}] - [{{ $item->divisiCategory->nama ?? 'Tidak ada' }}] - {{ $item->nama }}</option>
                                     @endforeach
                                 </select>
                             </div>

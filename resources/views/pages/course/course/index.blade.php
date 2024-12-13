@@ -56,8 +56,8 @@
                                 <button type="button" class="btn btn-label-info btn-round btn-sm me-2" id="goToLastAccess">
                                     Last access : <span id="lastAccess">00:00</span> <i class="fas fa-history ms-1"></i>
                                 </button>
-                                <a href="#" id="selesaiKelas" class="btn btn-primary btn-round btn-sm me-2">
-                                    Selesai Kelas <i class="fas fa-arrow-right ms-2"></i>
+                                <a href="#" id="selesaiKelas" class="btn btn-danger btn-round btn-sm me-2">
+                                    Submit & End Course <i class="fas fa-arrow-right ms-2"></i>
                                 </a>
                             </div>
                         </div>
@@ -66,6 +66,12 @@
                 <div class="col-lg-3">
                     <div class="card bg-light-subtle rounded-end-4 rounded-start-0 h-100 shadow-none ">
                         <div class="card-header">
+                            <div class="text-center border rounded">
+                                <div class="card-title">
+                                    <i class="fas fa-clock align-middle me-1"></i>
+                                    <span class="align-middle" id="time"></span>
+                                </div>
+                            </div>
                             <div class="card-head-row">
                                 <div class="card-title"><i class="icon-grid align-middle me-1"></i><span
                                         class="align-middle">
@@ -139,13 +145,15 @@
                                                     <li class="list-group-item mb-2 bg-body p-2 border rounded"
                                                         onclick="loadQuiz({{ $modul->quizzes->first()->course_modul_id }})">
                                                         <span class="me-2 bg-primary px-1 py-1 my-auto rounded text-white">
-                                                            <i class="far fa-comment-dots"></i></span> Quiz</li>
+                                                            <i class="far fa-comment-dots"></i></span> Quiz
+                                                    </li>
                                                 @endif
                                                 @if ($modul->essays->isNotEmpty())
                                                     <li class="list-group-item bg-body p-2 border rounded"
                                                         onclick="loadEssay({{ $modul->essays->first()->course_modul_id }})">
                                                         <span class="me-2 bg-warning px-1 py-1 my-auto rounded text-white">
-                                                            <i class="far fa-file-alt"></i></span> Essay</li>
+                                                            <i class="far fa-file-alt"></i></span> Essay
+                                                    </li>
                                                 @endif
                                             </ul>
                                             {{-- Media Link --}}
@@ -429,7 +437,7 @@
             localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
 
             updateQuestionNavState(Object.keys(userAnswers),
-            courseModulId); // Update tombol navigasi setelah jawaban dipilih
+                courseModulId); // Update tombol navigasi setelah jawaban dipilih
         }
 
         // Function to load the saved answers from localStorage and set the radio buttons
@@ -523,19 +531,19 @@
                             ${data.kunci_jawaban.map((answer, index) => {
                                 const isChecked = userAnswers[courseModulId] && userAnswers[courseModulId].answer === answer ? 'checked' : '';
                                 return `
-                                        <div class="form-check">
-                                            <input 
-                                                class="form-check-input" 
-                                                type="radio" 
-                                                name="answer" 
-                                                id="answer${index + 1}" 
-                                                value="${answer}" 
-                                                ${isChecked}
-                                                onclick="saveAnswer(${courseModulId}, '${answer}')"
-                                            >
-                                            <label class="form-check-label" for="answer${index + 1}">${answer}</label>
-                                        </div>
-                                    `;
+                                            <div class="form-check">
+                                                <input 
+                                                    class="form-check-input" 
+                                                    type="radio" 
+                                                    name="answer" 
+                                                    id="answer${index + 1}" 
+                                                    value="${answer}" 
+                                                    ${isChecked}
+                                                    onclick="saveAnswer(${courseModulId}, '${answer}')"
+                                                >
+                                                <label class="form-check-label" for="answer${index + 1}">${answer}</label>
+                                            </div>
+                                        `;
                             }).join('')}
                         </form>
                     </div>
@@ -665,7 +673,7 @@
                 } = userAnswers[modulquizzesId]; // Ambil course_modul_id
                 console.log(
                     `Quiz ID: ${modulquizzesId}, Course Module ID: ${course_modul_id}, Answer: ${answer}`
-                    );
+                );
 
                 const quizData = {
                     user_id: userId,
@@ -733,5 +741,25 @@
         });
     </script>
 
+<script>
+// Fungsi untuk format waktu
+function formatTime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
 
+// Menghitung waktu berjalan
+let timeElapsed = 0; // Waktu berjalan dalam detik
+
+function updateTime() {
+    timeElapsed++;
+    document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
+}
+
+// Memperbarui waktu setiap detik
+setInterval(updateTime, 1000);
+</script>
 @endsection

@@ -43,7 +43,8 @@
                                     @foreach ($subCategory as $item)
                                         <option value="{{ $item->id }}"
                                             {{ $data->sub_category_id == $item->id ? 'selected' : '' }}>
-                                            [{{ $item->category->divisiCategory->nama }}][{{ $item->category->nama }}] -
+                                            [{{ $item->category->divisiCategory->learningCategory->nama }}] -
+                                            [{{ $item->category->divisiCategory->nama }}] - [{{ $item->category->nama }}] -
                                             {{ $item->nama }}</option>
                                     @endforeach
                                 </select>

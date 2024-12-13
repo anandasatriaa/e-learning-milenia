@@ -44,7 +44,7 @@
                                     @foreach ($divisi as $item)
                                         <option value="{{ $item->id }}"
                                             {{ $item->id == $data->divisi_category_id ? 'selected' : '' }}>
-                                            {{ $item->nama }}</option>
+                                            [{{ $item->learningCategory->nama ?? 'Tidak ada' }}] - {{ $item->nama }}</option>
                                     @endforeach
                                 </select>
                             </div>

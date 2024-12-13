@@ -81,7 +81,7 @@ class SubCategoryController extends Controller
 
     public function edit($id)
     {
-        $category = Category::with('divisiCategory:id,nama')->get();
+        $category = Category::with(['divisiCategory.learningCategory'])->get();
         $data = SubCategory::findOrFail($id);
         return view('admin.category.subcategory.edit', compact('data', 'category'));
     }

@@ -15,10 +15,14 @@ class CourseController extends Controller
     {
         $search = $request->get('search');
         $show = $request->get('show') ?? 15;
-        $query = Course::withCount('modul', 'user')->latest();
+        $query = Course::withCount('modul', 'user')
+            ->with(['subCategory.category.divisiCategory.learningCategory']) // Memuat relasi yang diperlukan
+            ->latest();
+
         if ($search) {
             $query->where('nama_kelas', 'LIKE', "%$search%");
         }
+
         $data = $query->paginate($show)->withQueryString();
 
         if ($request->ajax()) {
@@ -87,7 +91,7 @@ class CourseController extends Controller
 
     public function edit($id)
     {
-        $subCategory = SubCategory::with('category:id,nama,divisi_category_id', 'category.divisiCategory:id,nama')->get();
+        $subCategory = SubCategory::with('category.divisiCategory.learningCategory')->get();
         $data = Course::findOrFail($id);
         return view('admin.course.course.edit', compact('data', 'subCategory'));
     }
