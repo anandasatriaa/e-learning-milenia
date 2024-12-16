@@ -80,4 +80,9 @@ class AuthController extends Controller
     {
         return 'uname';
     }
+
+    public function landingPage()
+    {
+        return view('landing-page');
+    }
 }

@@ -16,6 +16,7 @@ use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\HomeCourseController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/landing-page', [AuthController::class, 'landingPage'])->name('landing.page');
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login-process', [AuthController::class, 'authenticate'])->name('login.process');
 
