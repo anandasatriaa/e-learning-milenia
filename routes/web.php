@@ -77,7 +77,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/dashboard', [HomeController::class, 'index']);
         Route::get('/home', [HomeController::class, 'index']);
         Route::get('/', [HomeController::class, 'index'])->name('dashboard');
-        Route::get('/course', [HomeCourseController::class, 'index'])->name('homeCourse');
+        Route::get('/course-learning', [HomeCourseController::class, 'index'])->name('homeCourse');
+        Route::get('/course-learning/{learning_id}', [HomeCourseController::class, 'subCourse'])->name('subCourse');
 
         Route::group(['prefix' => 'course', 'as' => 'course.'], function () {
             Route::get('/{course_id}/', [CourseController::class, 'detailcourse'])->name('course.detail');
