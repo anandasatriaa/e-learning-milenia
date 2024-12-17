@@ -36,45 +36,90 @@
                             <div class="form-group">
                                 <label class="fw-bold" for="form_dropdown">Choose Category<span
                                         class="text-danger">*</span></label>
-                                <select name="form_dropdown" id="form_dropdown" required class="form-control">
-                                    <option value="">Choose Category</option>
-                                    @foreach ($subCategory as $item)
-                                        <!-- Learning Category Only -->
-                                        <option
-                                            value="learningCategory_{{ $item->category->divisiCategory->learningCategory->id }}">
-                                            [{{ $item->category->divisiCategory->learningCategory->nama }}]
-                                        </option>
+{{-- <select name="form_dropdown" id="form_dropdown" required class="form-control">
+    <option value="">Choose Category</option>
 
-                                        <!-- Learning Category & Divisi Category -->
-                                        <option
-                                            value="divisiCategory_{{ $item->category->divisiCategory->id }}_learningCategory_{{ $item->category->divisiCategory->learningCategory->id }}">
-                                            [{{ $item->category->divisiCategory->learningCategory->nama }}] -
-                                            [{{ $item->category->divisiCategory->nama }}]
-                                        </option>
+    <!-- Loop untuk menampilkan learningCategories -->
+    @foreach ($learningCategories as $category)
+        <option value="learningCategory_{{ $category->id }}">
+            [{{ $category->nama }}]
+        </option>
+    @endforeach
 
-                                        <!-- Learning Category, Divisi Category & Category -->
-                                        <option
-                                            value="category_{{ $item->category->id }}_divisiCategory_{{ $item->category->divisiCategory->id }}_learningCategory_{{ $item->category->divisiCategory->learningCategory->id }}">
-                                            [{{ $item->category->divisiCategory->learningCategory->nama }}] -
-                                            [{{ $item->category->divisiCategory->nama }}] -
-                                            [{{ $item->category->nama }}]
-                                        </option>
+    <!-- Loop untuk menampilkan semua courses dan relasinya -->
+    @foreach ($courses as $item)
+        @if ($item->learningCategory && !$item->divisiCategory && !$item->category && !$item->subCategory)
+            <!-- Learning Category Only -->
+            <option value="learningCategory_{{ $item->learningCategory->id }}">
+                [{{ $item->learningCategory->nama }}]
+            </option>
+        @elseif ($item->learningCategory && $item->divisiCategory && !$item->category && !$item->subCategory)
+            <!-- Learning Category & Divisi Category -->
+            <option value="divisiCategory_{{ $item->divisiCategory->id }}_learningCategory_{{ $item->learningCategory->id }}">
+                [{{ $item->learningCategory->nama }}] - [{{ $item->divisiCategory->nama }}]
+            </option>
+        @elseif ($item->learningCategory && $item->divisiCategory && $item->category && !$item->subCategory)
+            <!-- Learning Category, Divisi Category & Category -->
+            <option value="category_{{ $item->category->id }}_divisiCategory_{{ $item->divisiCategory->id }}_learningCategory_{{ $item->learningCategory->id }}">
+                [{{ $item->learningCategory->nama }}] - [{{ $item->divisiCategory->nama }}] - [{{ $item->category->nama }}]
+            </option>
+        @elseif ($item->learningCategory && $item->divisiCategory && $item->category && $item->subCategory)
+            <!-- Learning Category, Divisi Category, Category & Sub Category -->
+            <option value="subCategory_{{ $item->subCategory->id }}_category_{{ $item->category->id }}_divisiCategory_{{ $item->divisiCategory->id }}_learningCategory_{{ $item->learningCategory->id }}">
+                [{{ $item->learningCategory->nama }}] - [{{ $item->divisiCategory->nama }}] - [{{ $item->category->nama }}] - {{ $item->subCategory->nama }}
+            </option>
+        @endif
+    @endforeach
+</select> --}}
 
-                                        <!-- Learning Category, Divisi Category, Category & Sub Category -->
-                                        <option
-                                            value="subCategory_{{ $item->id }}_category_{{ $item->category->id }}_divisiCategory_{{ $item->category->divisiCategory->id }}_learningCategory_{{ $item->category->divisiCategory->learningCategory->id }}">
-                                            [{{ $item->category->divisiCategory->learningCategory->nama }}] -
-                                            [{{ $item->category->divisiCategory->nama }}] -
-                                            [{{ $item->category->nama }}] -
-                                            {{ $item->nama }}
-                                        </option>
-                                    @endforeach
-                                </select>
+<select name="form_dropdown" id="form_dropdown" required class="form-control">
+    <option value="">Choose Category</option>
+
+    <!-- Loop untuk menampilkan learningCategories -->
+    @foreach ($learningCategories as $category)
+        <option value="learningCategory_{{ $category->id }}">
+            [{{ $category->nama }}]
+        </option>
+    @endforeach
+
+    <!-- Loop untuk menampilkan kombinasi learningCategory dan divisiCategory -->
+    @foreach ($learningCategories as $category)
+        @foreach ($category->divisiCategories as $divisiCategory)
+            <option value="divisiCategory_{{ $divisiCategory->id }}_learningCategory_{{ $category->id }}">
+                [{{ $category->nama }}] - [{{ $divisiCategory->nama }}]
+            </option>
+        @endforeach
+    @endforeach
+
+    <!-- Loop untuk menampilkan kombinasi learningCategory, divisiCategory, dan category -->
+    @foreach ($learningCategories as $category)
+        @foreach ($category->divisiCategories as $divisiCategory)
+            @foreach ($divisiCategory->categories as $cat)
+                <option value="category_{{ $cat->id }}_divisiCategory_{{ $divisiCategory->id }}_learningCategory_{{ $category->id }}">
+                    [{{ $category->nama }}] - [{{ $divisiCategory->nama }}] - [{{ $cat->nama }}]
+                </option>
+            @endforeach
+        @endforeach
+    @endforeach
+
+    <!-- Loop untuk menampilkan kombinasi learningCategory, divisiCategory, category, dan subCategory -->
+    @foreach ($learningCategories as $category)
+        @foreach ($category->divisiCategories as $divisiCategory)
+            @foreach ($divisiCategory->categories as $cat)
+                @foreach ($cat->subCategories as $subCategory)
+                    <option value="subCategory_{{ $subCategory->id }}_category_{{ $cat->id }}_divisiCategory_{{ $divisiCategory->id }}_learningCategory_{{ $category->id }}">
+                        [{{ $category->nama }}] - [{{ $divisiCategory->nama }}] - [{{ $cat->nama }}] - [{{ $subCategory->nama }}]
+                    </option>
+                @endforeach
+            @endforeach
+        @endforeach
+    @endforeach
+</select>
+
+
+
 
                             </div>
-
-
-
                             <div class="form-group">
                                 <label class="fw-bold" for="nama_kelas">Judul/Nama<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="nama_kelas" id="nama_kelas"

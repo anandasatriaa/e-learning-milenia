@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Course;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category\SubCategory;
+use App\Models\Category\LearningCategory;
 use App\Models\Course\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -37,8 +38,10 @@ class CourseController extends Controller
 
     public function create()
     {
-        $subCategory = SubCategory::with('category.divisiCategory.learningCategory')->get();
-        return view('admin.course.course.create', compact('subCategory'));
+        $learningCategories = LearningCategory::with('divisiCategories.categories.subCategories')->get();
+        $courses = Course::with('learningCategory', 'divisiCategory', 'category', 'subCategory')->get();
+        // dd($courses);
+        return view('admin.course.course.create', compact('courses', 'learningCategories'));
     }
 
     public function store(Request $request)
@@ -130,9 +133,10 @@ class CourseController extends Controller
 
     public function edit($id)
     {
-        $subCategory = SubCategory::with('category.divisiCategory.learningCategory')->get();
+        $learningCategories = LearningCategory::with('divisiCategories.categories.subCategories')->get();
         $data = Course::findOrFail($id);
-        return view('admin.course.course.edit', compact('data', 'subCategory'));
+        
+        return view('admin.course.course.edit', compact('data', 'learningCategories'));
     }
 
     public function update(Request $request, $id)

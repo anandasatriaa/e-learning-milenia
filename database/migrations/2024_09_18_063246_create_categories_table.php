@@ -15,7 +15,7 @@ class CreateCategoriesTable extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('divisi_category_id')->constrained()->onDelete('cascade');
+            $table->foreignId('divisi_category_id')->constrained('divisi_categories')->onDelete('cascade');
             $table->string('nama');
             $table->string('image');
             $table->longText('deskripsi')->nullable();

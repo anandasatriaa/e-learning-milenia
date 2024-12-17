@@ -25,6 +25,6 @@ class DivisiCategory extends Model
 
     public function categories()
     {
-        return $this->hasMany(Category::class, 'divisi_category_id')->onDelete('cascade');
+        return $this->hasMany(Category::class, 'divisi_category_id');
     }    
 }

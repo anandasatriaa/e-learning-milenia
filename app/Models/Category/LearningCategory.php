@@ -21,7 +21,7 @@ class LearningCategory extends Model
 
     public function divisiCategories()
     {
-        return $this->hasMany(DivisiCategory::class, 'learning_cat_id')->onDelete('cascade');
+        return $this->hasMany(DivisiCategory::class, 'learning_cat_id');
     }
 
     public function category()
