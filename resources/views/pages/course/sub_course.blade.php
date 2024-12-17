@@ -142,7 +142,7 @@
                                                                                             @foreach ($subCategoryGroup['courses'] as $course)
                                                                                                 <div
                                                                                                     class="col-12 col-md-4 category-card mt-2">
-                                                                                                    <a href=""
+                                                                                                    <a href="{{ route('pages.course.course.detail', $course['id']) }}"
                                                                                                         class="card bg-white shadow"
                                                                                                         style="width: 30rem;">
                                                                                                         <img class="card-img-top"

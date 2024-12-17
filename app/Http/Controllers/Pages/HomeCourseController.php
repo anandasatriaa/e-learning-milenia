@@ -69,6 +69,7 @@ class HomeCourseController extends Controller
             // Inisialisasi Level SubCategory dan Tambahkan Courses
             $groupedCourses[$learningTitle]['children'][$divisiTitle]['children'][$categoryTitle]['children'][$subCategoryTitle]['title'] = $subCategoryTitle;
             $groupedCourses[$learningTitle]['children'][$divisiTitle]['children'][$categoryTitle]['children'][$subCategoryTitle]['courses'][] = [
+                'id' => $course->id,
                 'name' => $course->nama_kelas,
                 'progress' => $course->progress,
                 'thumbnail' => $course->thumbnail // Tambahkan thumbnail ke dalam array
