@@ -32,8 +32,8 @@ class HomeCourseController extends Controller
             'category.divisiCategory.learningCategory',
             'subCategory.category.divisiCategory.learningCategory'
         ])
-        ->where('learning_cat_id', $learning_id) // Filter berdasarkan learning_id
-        ->get();
+            ->where('learning_cat_id', $learning_id) // Filter berdasarkan learning_id
+            ->get();
 
         // Bangun struktur hierarki dinamis
         $groupedCourses = [];
@@ -41,8 +41,8 @@ class HomeCourseController extends Controller
 
         foreach ($courses as $course) {
             // Level 1: LearningCategory
-            if ($course->learningCategory && !$course->divisiCategory && !$course->category && !$course->subCategory) {
-                // Kursus hanya memiliki LearningCategory
+            // Kursus hanya memiliki LearningCategory
+            if ($course->learningCategory) {
                 $learningCategoryName = $course->learningCategory->nama;
                 if (!isset($groupedCourses[$learningCategoryName])) {
                     $groupedCourses[$learningCategoryName] = [
@@ -52,20 +52,21 @@ class HomeCourseController extends Controller
                     ];
                 }
 
-                // Tambahkan course ke LearningCategory jika belum ada
-                if (!isset($addedCourses[$course->id])) {
-                    $groupedCourses[$learningCategoryName]['courses'][] = [
-                        'id' => $course->id,
-                        'name' => $course->nama_kelas,
-                        'thumbnail' => $course->thumbnail,
-                        'progress' => $course->progress,
-                    ];
-                    $addedCourses[$course->id] = true; // Tandai course sudah ditambahkan
+                if ($course->learningCategory && !$course->divisiCategory && !$course->category && !$course->subCategory) {
+                    // Tambahkan course ke LearningCategory jika belum ada
+                    if (!isset($addedCourses[$course->id])) {
+                        $groupedCourses[$learningCategoryName]['courses'][] = [
+                            'id' => $course->id,
+                            'name' => $course->nama_kelas,
+                            'thumbnail' => $course->thumbnail,
+                            'progress' => $course->progress,
+                        ];
+                        $addedCourses[$course->id] = true; // Tandai course sudah ditambahkan
+                    }
                 }
             }
 
-            // Level 2: DivisionCategory
-            if ($course->learningCategory && $course->divisiCategory && !$course->category && !$course->subCategory) {
+            if ($course->learningCategory && $course->divisiCategory) {
                 // Kursus memiliki LearningCategory dan DivisionCategory
                 $learningCategoryName = $course->learningCategory->nama;
                 $divisionName = $course->divisiCategory->nama;
@@ -77,20 +78,22 @@ class HomeCourseController extends Controller
                     ];
                 }
 
-                // Tambahkan course ke DivisionCategory jika belum ada
-                if (!isset($addedCourses[$course->id])) {
-                    $groupedCourses[$learningCategoryName]['children'][$divisionName]['courses'][] = [
-                        'id' => $course->id,
-                        'name' => $course->nama_kelas,
-                        'thumbnail' => $course->thumbnail,
-                        'progress' => $course->progress,
-                    ];
-                    $addedCourses[$course->id] = true; // Tandai course sudah ditambahkan
+                // Level 2: DivisionCategory
+                if ($course->learningCategory && $course->divisiCategory && !$course->category && !$course->subCategory) {
+                    // Tambahkan course ke DivisionCategory jika belum ada
+                    if (!isset($addedCourses[$course->id])) {
+                        $groupedCourses[$learningCategoryName]['children'][$divisionName]['courses'][] = [
+                            'id' => $course->id,
+                            'name' => $course->nama_kelas,
+                            'thumbnail' => $course->thumbnail,
+                            'progress' => $course->progress,
+                        ];
+                        $addedCourses[$course->id] = true; // Tandai course sudah ditambahkan
+                    }
                 }
             }
 
-            // Level 3: Category
-            if ($course->learningCategory && $course->divisiCategory && $course->category && !$course->subCategory) {
+            if ($course->learningCategory && $course->divisiCategory && $course->category) {
                 // Kursus memiliki LearningCategory, DivisionCategory, dan Category
                 $learningCategoryName = $course->learningCategory->nama;
                 $divisionName = $course->divisiCategory->nama;
@@ -103,19 +106,21 @@ class HomeCourseController extends Controller
                     ];
                 }
 
-                // Tambahkan course ke Category jika belum ada
-                if (!isset($addedCourses[$course->id])) {
-                    $groupedCourses[$learningCategoryName]['children'][$divisionName]['children'][$categoryName]['courses'][] = [
-                        'id' => $course->id,
-                        'name' => $course->nama_kelas,
-                        'thumbnail' => $course->thumbnail,
-                        'progress' => $course->progress,
-                    ];
-                    $addedCourses[$course->id] = true; // Tandai course sudah ditambahkan
+                // Level 3: Category
+                if ($course->learningCategory && $course->divisiCategory && $course->category && !$course->subCategory) {
+                    // Tambahkan course ke Category jika belum ada
+                    if (!isset($addedCourses[$course->id])) {
+                        $groupedCourses[$learningCategoryName]['children'][$divisionName]['children'][$categoryName]['courses'][] = [
+                            'id' => $course->id,
+                            'name' => $course->nama_kelas,
+                            'thumbnail' => $course->thumbnail,
+                            'progress' => $course->progress,
+                        ];
+                        $addedCourses[$course->id] = true; // Tandai course sudah ditambahkan
+                    }
                 }
             }
 
-            // Level 4: SubCategory
             if ($course->learningCategory && $course->divisiCategory && $course->category && $course->subCategory) {
                 // Kursus memiliki LearningCategory, DivisionCategory, Category, dan SubCategory
                 $learningCategoryName = $course->learningCategory->nama;
@@ -129,15 +134,18 @@ class HomeCourseController extends Controller
                     ];
                 }
 
-                // Tambahkan course ke SubCategory jika belum ada
-                if (!isset($addedCourses[$course->id])) {
-                    $groupedCourses[$learningCategoryName]['children'][$divisionName]['children'][$categoryName]['children'][$subCategoryName]['courses'][] = [
-                        'id' => $course->id,
-                        'name' => $course->nama_kelas,
-                        'thumbnail' => $course->thumbnail,
-                        'progress' => $course->progress,
-                    ];
-                    $addedCourses[$course->id] = true; // Tandai course sudah ditambahkan
+                // Level 4: SubCategory
+                if ($course->learningCategory && $course->divisiCategory && $course->category && $course->subCategory) {
+                    // Tambahkan course ke SubCategory jika belum ada
+                    if (!isset($addedCourses[$course->id])) {
+                        $groupedCourses[$learningCategoryName]['children'][$divisionName]['children'][$categoryName]['children'][$subCategoryName]['courses'][] = [
+                            'id' => $course->id,
+                            'name' => $course->nama_kelas,
+                            'thumbnail' => $course->thumbnail,
+                            'progress' => $course->progress,
+                        ];
+                        $addedCourses[$course->id] = true; // Tandai course sudah ditambahkan
+                    }
                 }
             }
         }
@@ -190,7 +198,4 @@ class HomeCourseController extends Controller
         // Tandai course sudah ditambahkan
         $addedCourses[$course->id] = true;
     }
-
-
-
 }
