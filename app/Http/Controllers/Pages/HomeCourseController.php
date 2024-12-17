@@ -25,78 +25,172 @@ class HomeCourseController extends Controller
             abort(404, 'Learning Category not found');
         }
 
-        // Ambil semua courses dengan relasi dan filter berdasarkan learning_id
-        $courses = Course::with('subCategory.category.divisiCategory.learningCategory')
-        ->whereHas('subCategory.category.divisiCategory.learningCategory', function ($query) use ($learning_id) {
-            $query->where('id', $learning_id);
-        })
-            ->get();
+        // Ambil semua courses dengan relasi yang diperlukan
+        $courses = Course::with([
+            'learningCategory',
+            'divisiCategory.learningCategory',
+            'category.divisiCategory.learningCategory',
+            'subCategory.category.divisiCategory.learningCategory'
+        ])
+        ->where('learning_cat_id', $learning_id) // Filter berdasarkan learning_id
+        ->get();
 
-
-        // Bangun struktur hierarki
+        // Bangun struktur hierarki dinamis
         $groupedCourses = [];
+        $addedCourses = []; // Array untuk melacak ID course yang sudah ditambahkan
 
         foreach ($courses as $course) {
-            $learningTitle = $course->subCategory->category->divisiCategory->learningCategory->nama;
-            $divisiTitle = $course->subCategory->category->divisiCategory->nama;
-            $categoryTitle = $course->subCategory->category->nama;
-            $subCategoryTitle = $course->subCategory->nama;
+            // Level 1: LearningCategory
+            if ($course->learningCategory && !$course->divisiCategory && !$course->category && !$course->subCategory) {
+                // Kursus hanya memiliki LearningCategory
+                $learningCategoryName = $course->learningCategory->nama;
+                if (!isset($groupedCourses[$learningCategoryName])) {
+                    $groupedCourses[$learningCategoryName] = [
+                        'title' => $learningCategoryName,
+                        'courses' => [],
+                        'children' => [] // Menampung sub-level
+                    ];
+                }
 
-            // Inisialisasi Level Learning
-            if (!isset($groupedCourses[$learningTitle])) {
-                $groupedCourses[$learningTitle] = [
-                    'title' => $learningTitle,
-                    'children' => []
-                ];
+                // Tambahkan course ke LearningCategory jika belum ada
+                if (!isset($addedCourses[$course->id])) {
+                    $groupedCourses[$learningCategoryName]['courses'][] = [
+                        'id' => $course->id,
+                        'name' => $course->nama_kelas,
+                        'thumbnail' => $course->thumbnail,
+                        'progress' => $course->progress,
+                    ];
+                    $addedCourses[$course->id] = true; // Tandai course sudah ditambahkan
+                }
             }
 
-            // Inisialisasi Level Divisi
-            if (!isset($groupedCourses[$learningTitle]['children'][$divisiTitle])) {
-                $groupedCourses[$learningTitle]['children'][$divisiTitle] = [
-                    'title' => $divisiTitle,
-                    'children' => []
-                ];
+            // Level 2: DivisionCategory
+            if ($course->learningCategory && $course->divisiCategory && !$course->category && !$course->subCategory) {
+                // Kursus memiliki LearningCategory dan DivisionCategory
+                $learningCategoryName = $course->learningCategory->nama;
+                $divisionName = $course->divisiCategory->nama;
+                if (!isset($groupedCourses[$learningCategoryName]['children'][$divisionName])) {
+                    $groupedCourses[$learningCategoryName]['children'][$divisionName] = [
+                        'title' => $divisionName,
+                        'courses' => [],
+                        'children' => [] // Menampung category dan subCategory
+                    ];
+                }
+
+                // Tambahkan course ke DivisionCategory jika belum ada
+                if (!isset($addedCourses[$course->id])) {
+                    $groupedCourses[$learningCategoryName]['children'][$divisionName]['courses'][] = [
+                        'id' => $course->id,
+                        'name' => $course->nama_kelas,
+                        'thumbnail' => $course->thumbnail,
+                        'progress' => $course->progress,
+                    ];
+                    $addedCourses[$course->id] = true; // Tandai course sudah ditambahkan
+                }
             }
 
-            // Inisialisasi Level Category
-            if (!isset($groupedCourses[$learningTitle]['children'][$divisiTitle]['children'][$categoryTitle])) {
-                $groupedCourses[$learningTitle]['children'][$divisiTitle]['children'][$categoryTitle] = [
-                    'title' => $categoryTitle,
-                    'children' => []
-                ];
+            // Level 3: Category
+            if ($course->learningCategory && $course->divisiCategory && $course->category && !$course->subCategory) {
+                // Kursus memiliki LearningCategory, DivisionCategory, dan Category
+                $learningCategoryName = $course->learningCategory->nama;
+                $divisionName = $course->divisiCategory->nama;
+                $categoryName = $course->category->nama;
+                if (!isset($groupedCourses[$learningCategoryName]['children'][$divisionName]['children'][$categoryName])) {
+                    $groupedCourses[$learningCategoryName]['children'][$divisionName]['children'][$categoryName] = [
+                        'title' => $categoryName,
+                        'courses' => [],
+                        'children' => [] // Menampung subCategory
+                    ];
+                }
+
+                // Tambahkan course ke Category jika belum ada
+                if (!isset($addedCourses[$course->id])) {
+                    $groupedCourses[$learningCategoryName]['children'][$divisionName]['children'][$categoryName]['courses'][] = [
+                        'id' => $course->id,
+                        'name' => $course->nama_kelas,
+                        'thumbnail' => $course->thumbnail,
+                        'progress' => $course->progress,
+                    ];
+                    $addedCourses[$course->id] = true; // Tandai course sudah ditambahkan
+                }
             }
 
-            // Inisialisasi Level SubCategory dan Tambahkan Courses
-            $groupedCourses[$learningTitle]['children'][$divisiTitle]['children'][$categoryTitle]['children'][$subCategoryTitle]['title'] = $subCategoryTitle;
-            $groupedCourses[$learningTitle]['children'][$divisiTitle]['children'][$categoryTitle]['children'][$subCategoryTitle]['courses'][] = [
-                'id' => $course->id,
-                'name' => $course->nama_kelas,
-                'progress' => $course->progress,
-                'thumbnail' => $course->thumbnail // Tambahkan thumbnail ke dalam array
-            ];
+            // Level 4: SubCategory
+            if ($course->learningCategory && $course->divisiCategory && $course->category && $course->subCategory) {
+                // Kursus memiliki LearningCategory, DivisionCategory, Category, dan SubCategory
+                $learningCategoryName = $course->learningCategory->nama;
+                $divisionName = $course->divisiCategory->nama;
+                $categoryName = $course->category->nama;
+                $subCategoryName = $course->subCategory->nama;
+                if (!isset($groupedCourses[$learningCategoryName]['children'][$divisionName]['children'][$categoryName]['children'][$subCategoryName])) {
+                    $groupedCourses[$learningCategoryName]['children'][$divisionName]['children'][$categoryName]['children'][$subCategoryName] = [
+                        'title' => $subCategoryName,
+                        'courses' => []
+                    ];
+                }
+
+                // Tambahkan course ke SubCategory jika belum ada
+                if (!isset($addedCourses[$course->id])) {
+                    $groupedCourses[$learningCategoryName]['children'][$divisionName]['children'][$categoryName]['children'][$subCategoryName]['courses'][] = [
+                        'id' => $course->id,
+                        'name' => $course->nama_kelas,
+                        'thumbnail' => $course->thumbnail,
+                        'progress' => $course->progress,
+                    ];
+                    $addedCourses[$course->id] = true; // Tandai course sudah ditambahkan
+                }
+            }
         }
 
-        // Ubah ke array indexed untuk view
-        $groupedCourses = array_values($this->formatTree($groupedCourses));
+        // Ubah menjadi indexed array
+        $groupedCourses = array_values($groupedCourses);
+        foreach ($groupedCourses as &$group) {
+            foreach ($group['children'] as &$child) {
+                foreach ($child['children'] as &$subChild) {
+                    $subChild['children'] = array_values($subChild['children']);
+                }
+                $child['children'] = array_values($child['children']);
+            }
+        }
+        // dd($group);
 
         return view('pages.course.sub_course', compact('learning', 'groupedCourses'));
     }
 
 
-    // Fungsi Rekursif untuk Formatting
-    private function formatTree($array)
+
+
+
+    /**
+     * Fungsi untuk menambahkan course ke dalam grup jika belum pernah ditambahkan sebelumnya
+     */
+    private function addCourseToGroup(&$group, $title, $course, &$addedCourses)
     {
-        $result = [];
-        foreach ($array as $item) {
-            $children = isset($item['children']) ? $this->formatTree($item['children']) : [];
-            $result[] = [
-                'title' => $item['title'],
-                'children' => $children,
-                'courses' => $item['courses'] ?? null
+        // Cek apakah course sudah ditambahkan sebelumnya berdasarkan ID
+        if (isset($addedCourses[$course->id])) {
+            return; // Jika sudah, langsung return
+        }
+
+        // Jika grup belum ada, buat baru
+        if (!isset($group[$title])) {
+            $group[$title] = [
+                'title' => $title,
+                'courses' => []
             ];
         }
-        return $result;
+
+        // Tambahkan course ke grup
+        $group[$title]['courses'][] = [
+            'id' => $course->id,
+            'name' => $course->nama_kelas,
+            'thumbnail' => $course->thumbnail,
+            'progress' => $course->progress,
+        ];
+
+        // Tandai course sudah ditambahkan
+        $addedCourses[$course->id] = true;
     }
+
 
 
 }

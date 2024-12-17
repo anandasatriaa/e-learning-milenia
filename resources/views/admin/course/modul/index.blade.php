@@ -122,22 +122,23 @@
                                 <div class="mb-1">
                                     <span class="text-muted">Learning Category</span>
                                     <h6 class="text-uppercase fw-bold">
-                                        {{ $data->subCategory->category->divisiCategory->learningCategory->nama }}</h6>
+                                        {{ $data->learningCategory->nama ?? '-' }}
+                                    </h6>
                                 </div>
                                 <div class="mb-1">
                                     <span class="text-muted">Division</span>
                                     <h6 class="text-uppercase fw-bold">
-                                        {{ $data->subCategory->category->divisiCategory->nama }}</h6>
+                                        {{ $data->divisiCategory->nama ?? '-' }}</h6>
                                 </div>
                                 <div class="mb-1">
                                     <span class="text-muted">Category</span>
                                     <h6 class="text-uppercase fw-bold">
-                                        {{ $data->subCategory->category->nama }}</h6>
+                                        {{ $data->category->nama ?? '-' }}</h6>
                                 </div>
                                 <div class="mb-3">
                                     <span class="text-muted">Sub Category</span>
                                     <h6 class="text-uppercase fw-bold">
-                                        {{ $data->subCategory->nama }}</h6>
+                                        {{ $data->subCategory->nama ?? '-' }}</h6>
                                 </div>
                             </div>
                         </div>
@@ -431,25 +432,38 @@
                                             </div>
                                         </div>
                                         {{-- Modal Essay --}}
-                                        <div class="modal fade" id="modalImportEssay{{ $item->id }}" tabindex="-1" aria-labelledby="modalImportEssayLabel" aria-hidden="true">
+                                        <div class="modal fade" id="modalImportEssay{{ $item->id }}" tabindex="-1"
+                                            aria-labelledby="modalImportEssayLabel" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="modalImportEssayLabel">Tambah Essay {{ $item->nama_modul }}</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        <h5 class="modal-title" id="modalImportEssayLabel">Tambah Essay
+                                                            {{ $item->nama_modul }}</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
                                                     </div>
-                                                    <form id="essayForm{{ $item->id }}" class="essay-form" action="{{ route('admin.course.modul.question-import-essay', ['course_id' => $data->id, 'modul_id' => $item->id]) }}" method="POST" enctype="multipart/form-data">
+                                                    <form id="essayForm{{ $item->id }}" class="essay-form"
+                                                        action="{{ route('admin.course.modul.question-import-essay', ['course_id' => $data->id, 'modul_id' => $item->id]) }}"
+                                                        method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="modal-body">
                                                             <div id="essay-container{{ $item->id }}">
                                                                 @foreach ($item->modulEssay as $essay)
-                                                                    <div class="d-flex mb-3" id="essay-{{ $loop->iteration }}">
-                                                                        <div class="me-2" style="width: 30px; text-align: center; line-height: 2;">
-                                                                            <span class="number">{{ $loop->iteration }}</span>
+                                                                    <div class="d-flex mb-3"
+                                                                        id="essay-{{ $loop->iteration }}">
+                                                                        <div class="me-2"
+                                                                            style="width: 30px; text-align: center; line-height: 2;">
+                                                                            <span
+                                                                                class="number">{{ $loop->iteration }}</span>
                                                                         </div>
-                                                                        <textarea class="form-control post-data" name="essay[]" rows="3" required data-id="{{ $essay->id }}" data-course-id="{{ $data->id }}" data-modul-id="{{ $item->id }}">{{ $essay->pertanyaan }}</textarea>
-                                                                        <button type="button" class="btn btn-outline-danger btn-sm deleteEssay" data-modal-id="{{ $item->id }}" 
-                                                                            data-id="{{ $essay->id }}" data-course-id="{{ $data->id }}" data-modul-id="{{ $item->id }}">
+                                                                        <textarea class="form-control post-data" name="essay[]" rows="3" required data-id="{{ $essay->id }}"
+                                                                            data-course-id="{{ $data->id }}" data-modul-id="{{ $item->id }}">{{ $essay->pertanyaan }}</textarea>
+                                                                        <button type="button"
+                                                                            class="btn btn-outline-danger btn-sm deleteEssay"
+                                                                            data-modal-id="{{ $item->id }}"
+                                                                            data-id="{{ $essay->id }}"
+                                                                            data-course-id="{{ $data->id }}"
+                                                                            data-modul-id="{{ $item->id }}">
                                                                             <i class="fas fa-trash"></i>
                                                                         </button>
                                                                     </div>
@@ -457,14 +471,19 @@
                                                             </div>
                                                             <!-- Ikon untuk menambah nomor dan textarea baru -->
                                                             <div class="text-center">
-                                                                <button type="button" class="btn btn-secondary btn-sm addEssay" data-modal-id="{{ $item->id }}">
-                                                                    <i class="fas fa-arrow-down"></i> Tambah Essay <i class="fas fa-arrow-down"></i>
+                                                                <button type="button"
+                                                                    class="btn btn-secondary btn-sm addEssay"
+                                                                    data-modal-id="{{ $item->id }}">
+                                                                    <i class="fas fa-arrow-down"></i> Tambah Essay <i
+                                                                        class="fas fa-arrow-down"></i>
                                                                 </button>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="submit" id="submit-essay" class="btn btn-primary">Simpan</button>
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                            <button type="submit" id="submit-essay"
+                                                                class="btn btn-primary">Simpan</button>
+                                                            <button type="button" class="btn btn-secondary"
+                                                                data-bs-dismiss="modal">Tutup</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -608,10 +627,13 @@
                                         <div class="username">{{ $enrollUser->Nama }}</div>
                                         <div class="status">{{ $enrollUser->Jabatan }}</div>
                                     </div>
-                                    <form id="deleteForm" action="{{ route('admin.course.course.destroy-user', ['course_id' => $data->id, 'user_id' => $enrollUser->ID]) }}" method="POST" style="display: inline;">
+                                    <form id="deleteForm"
+                                        action="{{ route('admin.course.course.destroy-user', ['course_id' => $data->id, 'user_id' => $enrollUser->ID]) }}"
+                                        method="POST" style="display: inline;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="alertHapus btn btn-icon btn-round btn-light text-danger me-3">
+                                        <button type="submit"
+                                            class="alertHapus btn btn-icon btn-round btn-light text-danger me-3">
                                             <i class="fas fa-ban"></i>
                                         </button>
                                     </form>
@@ -893,298 +915,55 @@
         function redirectOnClose() {
             location.reload();
         }
-</script>
+    </script>
 
-<script>
+    <script>
         document.getElementById("simpanUbahUrut").addEventListener("click", function() {
-        const listItems = document.querySelectorAll('#my-list tr');
-        let order = [];
+            const listItems = document.querySelectorAll('#my-list tr');
+            let order = [];
 
-        listItems.forEach((item, index) => {
-            const id = item.id.split('-')[1]; // Extract module ID
-            order.push({ id: id, no_urut: index + 1 }); // Set the order
-        });
-
-        // Send the new order to the server
-        fetch("{{ route('admin.course.modul.update-order', ['course_id' => $data->id]) }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            },
-            body: JSON.stringify({ order: order })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Handle response
-            if (data.success) {
-                $.notify({
-                    icon: "icon-check",
-                    title: 'Sukses',
-                    message: 'Urutan berhasil diperbarui!'
-                }, {
-                    type: 'success',
-                    delay: 2000
-                });
-
-                // Delay reload for a few seconds to let the user see the notification
-                setTimeout(function() {
-                    window.location.reload();
-                }, 1000); // 2 seconds delay
-
-            } else {
-                $.notify({
-                    icon: "icon-exclamation",
-                    title: 'Gagal',
-                    message: 'Terjadi kesalahan saat memperbarui urutan.'
-                }, {
-                    type: 'danger',
-                    delay: 2000
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            $.notify({
-                icon: "icon-exclamation",
-                title: 'Gagal',
-                message: 'Terjadi kesalahan jaringan.'
-            }, {
-                type: 'danger',
-                delay: 2000
+            listItems.forEach((item, index) => {
+                const id = item.id.split('-')[1]; // Extract module ID
+                order.push({
+                    id: id,
+                    no_urut: index + 1
+                }); // Set the order
             });
-        });
-    });
 
-
-// Pastikan tombol "Hapus Essay" muncul jika data ada di textarea (diambil dari database)
-// document.querySelectorAll('.modal').forEach(modal => {
-//     modal.addEventListener('show.bs.modal', function () {
-//         const modalId = this.id.replace('modalImportEssay', '');
-//         const essayContainer = document.getElementById(`essay-container${modalId}`);
-//         const deleteButton = document.querySelector(`.deleteEssay[data-modal-id="${modalId}"]`);
-
-//         // Periksa apakah ada data di dalam essay container
-//         const allEssayDivs = essayContainer.querySelectorAll('.d-flex.mb-3');
-//         if (allEssayDivs.length > 0) {
-//             deleteButton.style.display = 'inline-block'; // Munculkan tombol "Hapus Essay"
-//         } else {
-//             deleteButton.style.display = 'none'; // Sembunyikan tombol jika tidak ada data
-//         }
-//     });
-// });
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Tambah Essay
-        document.querySelectorAll(".addEssay").forEach(button => {
-            button.addEventListener("click", function () {
-                const modalId = this.getAttribute("data-modal-id");
-                const container = document.getElementById(`essay-container${modalId}`);
-                const count = container.querySelectorAll(".d-flex").length + 1;
-
-                // Buat elemen baru
-                const newEssay = document.createElement("div");
-                newEssay.classList.add("d-flex", "mb-3");
-                newEssay.innerHTML = `
-                    <div class="me-2" style="width: 30px; text-align: center; line-height: 2;">
-                        <span class="number">${count}</span>
-                    </div>
-                    <textarea class="form-control post-data" name="essay[]" rows="3" required></textarea>
-                    <button type="button" class="btn btn-outline-danger btn-sm deleteEssay">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                `;
-
-                // Tambahkan elemen ke container
-                container.appendChild(newEssay);
-
-                // Tambahkan event listener untuk tombol hapus
-                newEssay.querySelector(".deleteEssay").addEventListener("click", function () {
-                    newEssay.remove();
-                    renumberEssay(container); // Update nomor setelah penghapusan
-                });
-            });
-        });
-
-        // Hapus Essay
-        document.querySelectorAll(".deleteEssay").forEach(button => {
-            button.addEventListener("click", function () {
-                const modalId = this.getAttribute("data-modal-id"); // Ambil ID modal
-                const container = document.getElementById(`essay-container${modalId}`); // Cari container spesifik
-
-                if (!container) {
-                    console.warn(`Container dengan ID essay-container${modalId} tidak ditemukan!`);
-                    return;
-                }
-
-                // Elemen essay yang akan dihapus
-                const essayDiv = this.closest(".d-flex");
-                if (!essayDiv) {
-                    console.error("Elemen essay untuk dihapus tidak ditemukan!");
-                    return;
-                }
-
-
-
-                // Kirim permintaan hapus ke server
-                const essayId = this.getAttribute("data-id");
-                if (!essayId) {
-                    console.warn("ID Essay tidak ditemukan!");
-                    return;
-                }
-
-                // Logging informasi elemen yang akan dihapus
-                console.log("Elemen yang akan dihapus:", {
-                    essayId: essayId,
-                    content: essayDiv.querySelector(".form-control").value.trim()
-                });
-
-                if (essayId) {
-                    fetch(`/admin/course/course/{course_id}/modul/{modul_id}/delete-essay/${essayId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            essayDiv.remove(); // Hapus elemen essay dari DOM
-                            renumberEssay(container); // Perbarui nomor
-                            $.notify({
-                                icon: "icon-check",
-                                title: 'Sukses',
-                                message: 'Essay berhasil dihapus!'
-                            }, {
-                                type: 'success',
-                                delay: 2000
-                            });
-                            // Reload halaman setelah delay untuk memberi waktu notifikasi tampil
-                            // setTimeout(() => {
-                            //     location.reload();
-                            // }, 1000);
-                        } else {
-                            // Tampilkan pesan error jika server mengembalikan kesalahan
-                            $.notify({
-                                icon: "icon-exclamation",
-                                title: 'Gagal',
-                                message: data.message || 'Terjadi kesalahan saat menghapus data.'
-                            }, {
-                                type: 'danger',
-                                delay: 2000
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        // Tampilkan pesan error jika terjadi kesalahan jaringan
-                        console.error('Error:', error);
-                        $.notify({
-                            icon: "icon-exclamation",
-                            title: 'Gagal',
-                            message: 'Terjadi kesalahan jaringan.'
-                        }, {
-                            type: 'danger',
-                            delay: 2000
-                        });
-                    });
-                } else {
-                    console.log("Elemen belum tersimpan di server, menghapus langsung:", {
-                        content: essayDiv.innerHTML.trim()
-                    });
-                    // Jika ID essay tidak tersedia, hapus langsung dari DOM
-                    essayDiv.remove();
-                    renumberEssay(container); // Perbarui nomor
-                    $.notify({
-                        icon: "icon-check",
-                        title: 'Sukses',
-                        message: 'Essay berhasil dihapus!'
-                    }, {
-                        type: 'success',
-                        delay: 2000
-                    });
-                }
-            });
-        });
-
-
-
-        // Fungsi untuk memperbarui nomor urut
-        function renumberEssay(container) {
-            const numbers = container.querySelectorAll(".number");
-            numbers.forEach((number, index) => {
-                number.textContent = index + 1;
-            });
-        }
-
-        // Submit Form
-        document.querySelectorAll(".essay-form").forEach(form => {
-            form.addEventListener("submit", function (e) {
-                e.preventDefault();
-
-                const modalId = this.getAttribute("id").replace("essayForm", "");
-                const container = document.getElementById(`essay-container${modalId}`);
-                const textareas = container.querySelectorAll("textarea");
-
-                const formData = new FormData(this);
-
-                // Tambahkan data essay dari textarea
-                textareas.forEach(textarea => {
-                    const essayId = textarea.getAttribute('data-id'); // Mendapatkan ID jika ada
-                    const essayValue = textarea.value;
-
-                    if (essayId) {
-                        // Jika ada ID, kirimkan ID dan value untuk update
-                        formData.append("essay_id[]", essayId); // Mengirim ID untuk update
-                    }
-                    formData.append("essay[]", essayValue); // Kirim value dari textarea
-                });
-
-                // Debugging untuk melihat data yang dikirim
-                formData.forEach((value, key) => {
-                    console.log(`Key: ${key}, Value: ${value}`);
-                });
-
-                // Kirim data menggunakan fetch
-                fetch(this.action, {
+            // Send the new order to the server
+            fetch("{{ route('admin.course.modul.update-order', ['course_id' => $data->id]) }}", {
                     method: 'POST',
-                    body: formData,
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        order: order
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Handle response dari server
+                    // Handle response
                     if (data.success) {
                         $.notify({
                             icon: "icon-check",
                             title: 'Sukses',
-                            message: 'Essay berhasil disimpan!'
+                            message: 'Urutan berhasil diperbarui!'
                         }, {
                             type: 'success',
                             delay: 2000
                         });
 
-                        // Menutup modal yang sesuai
-                        $(`#modalImportEssay${modalId}`).modal('hide'); // Bootstrap modal
+                        // Delay reload for a few seconds to let the user see the notification
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000); // 2 seconds delay
 
-                        // Reset form setelah sukses
-                        form.reset();
-                        const essayContainer = document.getElementById(`essay-container${modalId}`);
-                        essayContainer.innerHTML = ''; // Hapus semua textarea tambahan
-
-                        // Reload halaman setelah delay untuk memberi waktu notifikasi tampil
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1000);
                     } else {
                         $.notify({
                             icon: "icon-exclamation",
                             title: 'Gagal',
-                            message: data.message || 'Terjadi kesalahan saat menyimpan data.'
+                            message: 'Terjadi kesalahan saat memperbarui urutan.'
                         }, {
                             type: 'danger',
                             delay: 2000
@@ -1202,44 +981,302 @@
                         delay: 2000
                     });
                 });
+        });
+
+
+        // Pastikan tombol "Hapus Essay" muncul jika data ada di textarea (diambil dari database)
+        // document.querySelectorAll('.modal').forEach(modal => {
+        //     modal.addEventListener('show.bs.modal', function () {
+        //         const modalId = this.id.replace('modalImportEssay', '');
+        //         const essayContainer = document.getElementById(`essay-container${modalId}`);
+        //         const deleteButton = document.querySelector(`.deleteEssay[data-modal-id="${modalId}"]`);
+
+        //         // Periksa apakah ada data di dalam essay container
+        //         const allEssayDivs = essayContainer.querySelectorAll('.d-flex.mb-3');
+        //         if (allEssayDivs.length > 0) {
+        //             deleteButton.style.display = 'inline-block'; // Munculkan tombol "Hapus Essay"
+        //         } else {
+        //             deleteButton.style.display = 'none'; // Sembunyikan tombol jika tidak ada data
+        //         }
+        //     });
+        // });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Tambah Essay
+            document.querySelectorAll(".addEssay").forEach(button => {
+                button.addEventListener("click", function() {
+                    const modalId = this.getAttribute("data-modal-id");
+                    const container = document.getElementById(`essay-container${modalId}`);
+                    const count = container.querySelectorAll(".d-flex").length + 1;
+
+                    // Buat elemen baru
+                    const newEssay = document.createElement("div");
+                    newEssay.classList.add("d-flex", "mb-3");
+                    newEssay.innerHTML = `
+                    <div class="me-2" style="width: 30px; text-align: center; line-height: 2;">
+                        <span class="number">${count}</span>
+                    </div>
+                    <textarea class="form-control post-data" name="essay[]" rows="3" required></textarea>
+                    <button type="button" class="btn btn-outline-danger btn-sm deleteEssay">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+
+                    // Tambahkan elemen ke container
+                    container.appendChild(newEssay);
+
+                    // Tambahkan event listener untuk tombol hapus
+                    newEssay.querySelector(".deleteEssay").addEventListener("click", function() {
+                        newEssay.remove();
+                        renumberEssay(container); // Update nomor setelah penghapusan
+                    });
+                });
+            });
+
+            // Hapus Essay
+            document.querySelectorAll(".deleteEssay").forEach(button => {
+                button.addEventListener("click", function() {
+                    const modalId = this.getAttribute("data-modal-id"); // Ambil ID modal
+                    const container = document.getElementById(
+                    `essay-container${modalId}`); // Cari container spesifik
+
+                    if (!container) {
+                        console.warn(
+                            `Container dengan ID essay-container${modalId} tidak ditemukan!`);
+                        return;
+                    }
+
+                    // Elemen essay yang akan dihapus
+                    const essayDiv = this.closest(".d-flex");
+                    if (!essayDiv) {
+                        console.error("Elemen essay untuk dihapus tidak ditemukan!");
+                        return;
+                    }
+
+
+
+                    // Kirim permintaan hapus ke server
+                    const essayId = this.getAttribute("data-id");
+                    if (!essayId) {
+                        console.warn("ID Essay tidak ditemukan!");
+                        return;
+                    }
+
+                    // Logging informasi elemen yang akan dihapus
+                    console.log("Elemen yang akan dihapus:", {
+                        essayId: essayId,
+                        content: essayDiv.querySelector(".form-control").value.trim()
+                    });
+
+                    if (essayId) {
+                        fetch(`/admin/course/course/{course_id}/modul/{modul_id}/delete-essay/${essayId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').getAttribute('content'),
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    essayDiv.remove(); // Hapus elemen essay dari DOM
+                                    renumberEssay(container); // Perbarui nomor
+                                    $.notify({
+                                        icon: "icon-check",
+                                        title: 'Sukses',
+                                        message: 'Essay berhasil dihapus!'
+                                    }, {
+                                        type: 'success',
+                                        delay: 2000
+                                    });
+                                    // Reload halaman setelah delay untuk memberi waktu notifikasi tampil
+                                    // setTimeout(() => {
+                                    //     location.reload();
+                                    // }, 1000);
+                                } else {
+                                    // Tampilkan pesan error jika server mengembalikan kesalahan
+                                    $.notify({
+                                        icon: "icon-exclamation",
+                                        title: 'Gagal',
+                                        message: data.message ||
+                                            'Terjadi kesalahan saat menghapus data.'
+                                    }, {
+                                        type: 'danger',
+                                        delay: 2000
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                // Tampilkan pesan error jika terjadi kesalahan jaringan
+                                console.error('Error:', error);
+                                $.notify({
+                                    icon: "icon-exclamation",
+                                    title: 'Gagal',
+                                    message: 'Terjadi kesalahan jaringan.'
+                                }, {
+                                    type: 'danger',
+                                    delay: 2000
+                                });
+                            });
+                    } else {
+                        console.log("Elemen belum tersimpan di server, menghapus langsung:", {
+                            content: essayDiv.innerHTML.trim()
+                        });
+                        // Jika ID essay tidak tersedia, hapus langsung dari DOM
+                        essayDiv.remove();
+                        renumberEssay(container); // Perbarui nomor
+                        $.notify({
+                            icon: "icon-check",
+                            title: 'Sukses',
+                            message: 'Essay berhasil dihapus!'
+                        }, {
+                            type: 'success',
+                            delay: 2000
+                        });
+                    }
+                });
+            });
+
+
+
+            // Fungsi untuk memperbarui nomor urut
+            function renumberEssay(container) {
+                const numbers = container.querySelectorAll(".number");
+                numbers.forEach((number, index) => {
+                    number.textContent = index + 1;
+                });
+            }
+
+            // Submit Form
+            document.querySelectorAll(".essay-form").forEach(form => {
+                form.addEventListener("submit", function(e) {
+                    e.preventDefault();
+
+                    const modalId = this.getAttribute("id").replace("essayForm", "");
+                    const container = document.getElementById(`essay-container${modalId}`);
+                    const textareas = container.querySelectorAll("textarea");
+
+                    const formData = new FormData(this);
+
+                    // Tambahkan data essay dari textarea
+                    textareas.forEach(textarea => {
+                        const essayId = textarea.getAttribute(
+                        'data-id'); // Mendapatkan ID jika ada
+                        const essayValue = textarea.value;
+
+                        if (essayId) {
+                            // Jika ada ID, kirimkan ID dan value untuk update
+                            formData.append("essay_id[]",
+                            essayId); // Mengirim ID untuk update
+                        }
+                        formData.append("essay[]", essayValue); // Kirim value dari textarea
+                    });
+
+                    // Debugging untuk melihat data yang dikirim
+                    formData.forEach((value, key) => {
+                        console.log(`Key: ${key}, Value: ${value}`);
+                    });
+
+                    // Kirim data menggunakan fetch
+                    fetch(this.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            // Handle response dari server
+                            if (data.success) {
+                                $.notify({
+                                    icon: "icon-check",
+                                    title: 'Sukses',
+                                    message: 'Essay berhasil disimpan!'
+                                }, {
+                                    type: 'success',
+                                    delay: 2000
+                                });
+
+                                // Menutup modal yang sesuai
+                                $(`#modalImportEssay${modalId}`).modal(
+                                'hide'); // Bootstrap modal
+
+                                // Reset form setelah sukses
+                                form.reset();
+                                const essayContainer = document.getElementById(
+                                    `essay-container${modalId}`);
+                                essayContainer.innerHTML = ''; // Hapus semua textarea tambahan
+
+                                // Reload halaman setelah delay untuk memberi waktu notifikasi tampil
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1000);
+                            } else {
+                                $.notify({
+                                    icon: "icon-exclamation",
+                                    title: 'Gagal',
+                                    message: data.message ||
+                                        'Terjadi kesalahan saat menyimpan data.'
+                                }, {
+                                    type: 'danger',
+                                    delay: 2000
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            $.notify({
+                                icon: "icon-exclamation",
+                                title: 'Gagal',
+                                message: 'Terjadi kesalahan jaringan.'
+                            }, {
+                                type: 'danger',
+                                delay: 2000
+                            });
+                        });
+                });
             });
         });
-    });
-</script>
+    </script>
 
-<script>
-    // Hapus peserta dari enroll
-    $('.alertHapus').click(function(e) {
-        e.preventDefault(); // Cegah aksi default agar tidak terjadi redirect langsung
+    <script>
+        // Hapus peserta dari enroll
+        $('.alertHapus').click(function(e) {
+            e.preventDefault(); // Cegah aksi default agar tidak terjadi redirect langsung
 
-        var deleteUrl = $(this).closest('form').attr('action'); // Ambil URL untuk penghapusan dari data-url
-        console.log(deleteUrl);
+            var deleteUrl = $(this).closest('form').attr('action'); // Ambil URL untuk penghapusan dari data-url
+            console.log(deleteUrl);
 
-        swal({
-            title: 'Apakah anda yakin?',
-            text: "Anda akan menghapus user ini dari course!",
-            icon: 'warning',
-            buttons: {
-                confirm: {
-                    text: 'Ya, hapus!',
-                    className: 'btn btn-success'
-                },
-                cancel: {
-                    visible: true,
-                    className: 'btn btn-danger'
+            swal({
+                title: 'Apakah anda yakin?',
+                text: "Anda akan menghapus user ini dari course!",
+                icon: 'warning',
+                buttons: {
+                    confirm: {
+                        text: 'Ya, hapus!',
+                        className: 'btn btn-success'
+                    },
+                    cancel: {
+                        visible: true,
+                        className: 'btn btn-danger'
+                    }
                 }
-            }
-        }).then((Delete) => {
-            if (Delete) {
-                // Jika dihapus, kirim formulir untuk menghapus user
-                $(this).closest('form').submit();
-            } else {
-                // Jika dibatalkan, tutup swal
-                swal.close();
-            }
+            }).then((Delete) => {
+                if (Delete) {
+                    // Jika dihapus, kirim formulir untuk menghapus user
+                    $(this).closest('form').submit();
+                } else {
+                    // Jika dibatalkan, tutup swal
+                    swal.close();
+                }
+            });
         });
-    });
-</script>
+    </script>
 
 
 

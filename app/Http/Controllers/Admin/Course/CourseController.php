@@ -8,6 +8,8 @@ use App\Models\Course\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+
 
 class CourseController extends Controller
 {
@@ -44,7 +46,44 @@ class CourseController extends Controller
         try {
             DB::beginTransaction();
             $course = new Course();
-            $course->sub_category_id = $request->sub_category_id;
+
+            // Check and process the selected value
+            if ($request->filled('form_dropdown')) {
+                $selectedValue = $request->input('form_dropdown');
+
+                // Log the selected value to verify
+                Log::info('Selected Value: ' . $selectedValue); // Log the selected value
+
+                // Explode value to get prefix and ID
+                $parts = explode('_', $selectedValue);
+
+                // Log the exploded parts
+                Log::info('Exploded Parts: ', $parts); // Log the exploded parts
+
+                // Process based on the number of parts in the exploded array
+                if (count($parts) == 8) {
+                    // If there are 7 parts, process as usual
+                    $course->sub_category_id = $parts[1];   // subCategory ID
+                    $course->category_id = $parts[3];       // category ID
+                    $course->divisi_category_id = $parts[5]; // divisiCategory ID
+                    $course->learning_cat_id = $parts[7];   // learningCategory ID
+                } elseif (count($parts) == 6) {
+                    // If there are 5 parts, handle accordingly
+                    $course->category_id = $parts[1];       // category ID
+                    $course->divisi_category_id = $parts[3]; // divisiCategory ID
+                    $course->learning_cat_id = $parts[5];   // learningCategory ID
+                } elseif (count($parts) == 4) {
+                    // If there are 3 parts, process as needed
+                    $course->divisi_category_id = $parts[1]; // divisiCategory ID
+                    $course->learning_cat_id = $parts[3];       // category ID
+                } elseif (count($parts) == 2) {
+                    // If there is only 1 part, process accordingly
+                    $course->learning_cat_id = $parts[1];   // learningCategory ID
+                } else {
+                    Log::warning('Invalid number of parts in dropdown value. Expected 1, 3, 5, or 7 parts, got ' . count($parts));
+                }
+            }
+
             $course->nama_kelas = $request->nama_kelas;
 
             $image_parts = explode(";base64,", $request->image);
@@ -101,7 +140,41 @@ class CourseController extends Controller
         try {
             DB::beginTransaction();
             $course = Course::findOrFail($id);
-            $course->sub_category_id = $request->sub_category_id;
+
+            // Proses dropdown jika diisi
+            if ($request->filled('form_dropdown')) {
+                $selectedValue = $request->input('form_dropdown');
+
+                // Log untuk debugging
+                Log::info('Selected Value: ' . $selectedValue);
+
+                $parts = explode('_', $selectedValue);
+
+                // Reset nilai sebelumnya terlebih dahulu
+                $course->sub_category_id = null;
+                $course->category_id = null;
+                $course->divisi_category_id = null;
+                $course->learning_cat_id = null;
+
+                if (count($parts) == 8) {
+                    $course->sub_category_id = $parts[1];
+                    $course->category_id = $parts[3];
+                    $course->divisi_category_id = $parts[5];
+                    $course->learning_cat_id = $parts[7];
+                } elseif (count($parts) == 6) {
+                    $course->category_id = $parts[1];
+                    $course->divisi_category_id = $parts[3];
+                    $course->learning_cat_id = $parts[5];
+                } elseif (count($parts) == 4) {
+                    $course->divisi_category_id = $parts[1];
+                    $course->learning_cat_id = $parts[3];
+                } elseif (count($parts) == 2) {
+                    $course->learning_cat_id = $parts[1];
+                } else {
+                    Log::warning('Invalid number of parts in dropdown value.');
+                }
+            }
+
             $course->nama_kelas = $request->nama_kelas;
 
             $oldValueImageName = $course->thumbnail;

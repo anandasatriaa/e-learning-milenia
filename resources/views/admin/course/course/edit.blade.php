@@ -36,16 +36,40 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="fw-bold" for="sub_category_id">Sub Kategori<span
+                                <label class="fw-bold" for="form_dropdown">Sub Kategori<span
                                         class="text-danger">*</span></label>
-                                <select name="sub_category_id" id="sub_category_id" required>
+                                <select name="form_dropdown" id="form_dropdown" required>
                                     <option value="">Pilih Sub Kategori</option>
                                     @foreach ($subCategory as $item)
-                                        <option value="{{ $item->id }}"
-                                            {{ $data->sub_category_id == $item->id ? 'selected' : '' }}>
+                                        <!-- Learning Category Only -->
+                                        <option
+                                            value="learningCategory_{{ $item->category->divisiCategory->learningCategory->id }}">
+                                            [{{ $item->category->divisiCategory->learningCategory->nama }}]
+                                        </option>
+
+                                        <!-- Learning Category & Divisi Category -->
+                                        <option
+                                            value="divisiCategory_{{ $item->category->divisiCategory->id }}_learningCategory_{{ $item->category->divisiCategory->learningCategory->id }}">
                                             [{{ $item->category->divisiCategory->learningCategory->nama }}] -
-                                            [{{ $item->category->divisiCategory->nama }}] - [{{ $item->category->nama }}] -
-                                            {{ $item->nama }}</option>
+                                            [{{ $item->category->divisiCategory->nama }}]
+                                        </option>
+
+                                        <!-- Learning Category, Divisi Category & Category -->
+                                        <option
+                                            value="category_{{ $item->category->id }}_divisiCategory_{{ $item->category->divisiCategory->id }}_learningCategory_{{ $item->category->divisiCategory->learningCategory->id }}">
+                                            [{{ $item->category->divisiCategory->learningCategory->nama }}] -
+                                            [{{ $item->category->divisiCategory->nama }}] -
+                                            [{{ $item->category->nama }}]
+                                        </option>
+
+                                        <!-- Learning Category, Divisi Category, Category & Sub Category -->
+                                        <option
+                                            value="subCategory_{{ $item->id }}_category_{{ $item->category->id }}_divisiCategory_{{ $item->category->divisiCategory->id }}_learningCategory_{{ $item->category->divisiCategory->learningCategory->id }}">
+                                            [{{ $item->category->divisiCategory->learningCategory->nama }}] -
+                                            [{{ $item->category->divisiCategory->nama }}] -
+                                            [{{ $item->category->nama }}] -
+                                            {{ $item->nama }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -97,7 +121,7 @@
     <script src="{{ asset('vendor/ckeditor/ckeditor.js') }}"></script>
     @include('components.upload_image.js')
     <script>
-        var selectCategory = $("#sub_category_id").selectize({
+        var selectCategory = $("#form_dropdown").selectize({
             respect_word_boundaries: false,
             closeAfterSelect: true,
             plugins: ["clear_button"],

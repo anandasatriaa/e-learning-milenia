@@ -184,19 +184,24 @@
                         <div class="row">
                             <div class="col-12 col-lg-6">
                                 <div class="mb-1">
+                                    <span class="text-muted">Learning</span>
+                                    <h6 class="text-uppercase fw-bold">
+                                        {{ $course->learningCategory->nama ?? '-' }}</h6>
+                                </div>
+                                <div class="mb-1">
                                     <span class="text-muted">Divisi</span>
                                     <h6 class="text-uppercase fw-bold">
-                                        {{ $course->subCategory->category->divisiCategory->nama }}</h6>
+                                        {{ $course->divisiCategory->nama ?? '-' }}</h6>
                                 </div>
                                 <div class="mb-1">
                                     <span class="text-muted">Kategori</span>
                                     <h6 class="text-uppercase fw-bold">
-                                        {{ $course->subCategory->category->nama }}</h6>
+                                        {{ $course->category->nama ?? '-' }}</h6>
                                 </div>
                                 <div class="mb-3">
                                     <span class="text-muted">Sub Kategori</span>
                                     <h6 class="text-uppercase fw-bold">
-                                        {{ $course->subCategory->nama }}</h6>
+                                        {{ $course->subCategory->nama ?? '-' }}</h6>
                                 </div>
                             </div>
                         </div>

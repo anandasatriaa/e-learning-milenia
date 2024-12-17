@@ -3,6 +3,9 @@
 namespace App\Models\Course;
 
 use App\Models\Category\SubCategory;
+use App\Models\Category\Category;
+use App\Models\Category\DivisiCategory;
+use App\Models\Category\LearningCategory;
 use App\Models\User;
 use App\Models\Nilai\Nilai;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,6 +33,21 @@ class Course extends Model
         return $this->belongsTo(SubCategory::class);
     }
 
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function divisiCategory()
+    {
+        return $this->belongsTo(DivisiCategory::class);
+    }
+
+    public function learningCategory()
+    {
+        return $this->belongsTo(LearningCategory::class, 'learning_cat_id');
+    }
+
     public function user()
     {
         return $this->belongsToMany(User::class, 'user_course_enrolls', 'course_id', 'user_id');
@@ -38,8 +56,8 @@ class Course extends Model
     public function modul()
     {
         return $this->hasMany(CourseModul::class, 'course_id', 'id')
-        ->where('active', 1)
-        ->orderBy('no_urut', 'asc');  
+            ->where('active', 1)
+            ->orderBy('no_urut', 'asc');
     }
 
     public function nilai()
