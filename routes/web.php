@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 use App\Http\Controllers\Admin\User\UserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\Nilai\NilaiController;
+use App\Http\Controllers\Admin\Calendar\CalendarController;
 use App\Http\Controllers\Pages\Course\CourseController;
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\HomeCourseController;
@@ -64,6 +65,10 @@ Route::group(['middleware' => 'auth'], function () {
 
             Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai.index');
             Route::get('/nilai/course_id', [NilaiController::class, 'detail'])->name('nilai.detail');
+        });
+
+        Route::group(['prefix' => 'calendar', 'as' => 'calendar.'], function () {
+            Route::get('/course-schedule', [CalendarController::class, 'index'])->name('calendar.index');
         });
 
         Route::group(['prefix' => 'user', 'as' => 'user.'], function () {

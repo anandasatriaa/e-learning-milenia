@@ -124,6 +124,19 @@
                         </ul>
                     </div>
                 </li>
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </span>
+                    <h4 class="text-section">Calendar</h4>
+                </li>
+                <li class="nav-item">
+                    <a class="{{ request()->routeIs('admin.calendar.calendar.*') ? 'text-white fw-bold active border-start border-2' : '' }}" 
+                        href="{{ route('admin.calendar.calendar.index') }}">
+                        <i class="fas fa-calendar-alt"></i>
+                        <p>Course Schedule</p>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a href="widgets.html">
                         <i class="fas fa-desktop"></i>
