@@ -8,7 +8,7 @@
         }
 
         .shadow:hover {
-            transform: scale(1.05);
+            transform: scale(1.03);
             /* Membesarkan card sedikit saat hover */
         }
 
@@ -22,7 +22,7 @@
         }
 
         .shadow:hover .card-img-top {
-            transform: scale(1.1);
+            transform: scale(1.03);
             /* Membesarkan gambar sedikit saat hover */
         }
     </style>
@@ -76,7 +76,7 @@
             </div>
 
             <!-- Kontainer Kategori Utama -->
-            <div id="collapse{{ $loop->index }}" class="collapse" aria-labelledby="heading{{ $loop->index }}">
+            <div id="collapse{{ $loop->index }}" class="collapse show" aria-labelledby="heading{{ $loop->index }}">
                 <div class="px-3 row">
                     @if (isset($group['courses']) && count($group['courses']) > 0)
                         @foreach ($group['courses'] as $course)
@@ -90,11 +90,11 @@
                                     <div class="progress-card mx-2">
                                         <div class="progress-status">
                                             <span class="text-muted">Tasks Complete</span>
-                                            <span class="text-muted fw-bold">70%</span>
+                                            <span class="text-muted fw-bold">{{ $course['progress'] }}%</span>
                                         </div>
                                         <div class="progress" style="height: 6px;">
                                             <div class="progress-bar bg-primary" role="progressbar"
-                                                style="width: 70%;" aria-valuenow="70" aria-valuemin="0"
+                                                style="width: {{ $course['progress'] }}%;" aria-valuenow="{{ $course['progress'] }}" aria-valuemin="0"
                                                 aria-valuemax="100"></div>
                                         </div>
                                     </div>
@@ -117,7 +117,7 @@
                                     </div>
                                 </div>
 
-                                <div id="subCollapse{{ $loop->parent->index }}-{{ $loop->index }}" class="collapse"
+                                <div id="subCollapse{{ $loop->parent->index }}-{{ $loop->index }}" class="collapse show"
                                     aria-labelledby="subHeading{{ $loop->parent->index }}-{{ $loop->index }}">
                                     <div class="px-3 row">
                                         @if (isset($division['courses']) && count($division['courses']) > 0)
@@ -132,11 +132,11 @@
                                                     <div class="progress-card mx-2">
                                                         <div class="progress-status">
                                                             <span class="text-muted">Tasks Complete</span>
-                                                            <span class="text-muted fw-bold">70%</span>
+                                                            <span class="text-muted fw-bold">{{ $course['progress'] }}%</span>
                                                         </div>
                                                         <div class="progress" style="height: 6px;">
                                                             <div class="progress-bar bg-primary" role="progressbar"
-                                                                style="width: 70%;" aria-valuenow="70" aria-valuemin="0"
+                                                                style="width: {{ $course['progress'] }}%;" aria-valuenow="{{ $course['progress'] }}" aria-valuemin="0"
                                                                 aria-valuemax="100"></div>
                                                         </div>
                                                     </div>
@@ -159,7 +159,7 @@
                                                         </div>
                                                     </div>
 
-                                                    <div id="categoryCollapse{{ $loop->parent->index }}-{{ $loop->index }}" class="collapse"
+                                                    <div id="categoryCollapse{{ $loop->parent->index }}-{{ $loop->index }}" class="collapse show"
                                                         aria-labelledby="categoryHeading{{ $loop->parent->index }}-{{ $loop->index }}">
                                                         <div class="px-3 row">
                                                             @if (isset($category['courses']) && count($category['courses']) > 0)
@@ -174,11 +174,11 @@
                                                                         <div class="progress-card mx-2">
                                                                             <div class="progress-status">
                                                                                 <span class="text-muted">Tasks Complete</span>
-                                                                                <span class="text-muted fw-bold">70%</span>
+                                                                                <span class="text-muted fw-bold">{{ $course['progress'] }}%</span>
                                                                             </div>
                                                                             <div class="progress" style="height: 6px;">
                                                                                 <div class="progress-bar bg-primary" role="progressbar"
-                                                                                    style="width: 70%;" aria-valuenow="70" aria-valuemin="0"
+                                                                                    style="width: {{ $course['progress'] }}%;" aria-valuenow="{{ $course['progress'] }}" aria-valuemin="0"
                                                                                     aria-valuemax="100"></div>
                                                                             </div>
                                                                         </div>
@@ -200,7 +200,7 @@
                                                                         </div>
                                                                     </div>
 
-                                                                    <div id="subCategoryCollapse{{ $loop->parent->parent->index }}-{{ $loop->parent->index }}-{{ $loop->index }}" class="collapse"
+                                                                    <div id="subCategoryCollapse{{ $loop->parent->parent->index }}-{{ $loop->parent->index }}-{{ $loop->index }}" class="collapse show"
                                                                         aria-labelledby="subCategoryHeading{{ $loop->parent->parent->index }}-{{ $loop->parent->index }}-{{ $loop->index }}">
                                                                         <div class="px-3 row">
                                                                             @if (isset($subCategory['courses']) && count($subCategory['courses']) > 0)
@@ -215,11 +215,11 @@
                                                                                         <div class="progress-card mx-2">
                                                                                             <div class="progress-status">
                                                                                                 <span class="text-muted">Tasks Complete</span>
-                                                                                                <span class="text-muted fw-bold">70%</span>
+                                                                                                <span class="text-muted fw-bold">{{ $course['progress'] }}%</span>
                                                                                             </div>
                                                                                             <div class="progress" style="height: 6px;">
                                                                                                 <div class="progress-bar bg-primary" role="progressbar"
-                                                                                                    style="width: 70%;" aria-valuenow="70" aria-valuemin="0"
+                                                                                                    style="width: {{ $course['progress'] }}%;" aria-valuenow="{{ $course['progress'] }}" aria-valuemin="0"
                                                                                                     aria-valuemax="100"></div>
                                                                                             </div>
                                                                                         </div>

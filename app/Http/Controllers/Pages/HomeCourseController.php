@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Pages;
 use App\Http\Controllers\Controller;
 use App\Models\Category\LearningCategory;
 use App\Models\Course\Course;
+use App\Models\UserCourseEnroll;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeCourseController extends Controller
 {
@@ -25,6 +27,19 @@ class HomeCourseController extends Controller
             abort(404, 'Learning Category not found');
         }
 
+        // Ambil progress dari tabel UserCourseEnroll untuk user yang sedang login
+        $userId = Auth::id();
+        $userProgress = UserCourseEnroll::where('user_id',
+            $userId
+        )
+        ->pluck('progress_bar', 'course_id') // Mengambil progress untuk menggabungkan nanti
+            ->toArray();
+
+        // Ambil courses yang sudah di-enroll oleh user untuk learning category tertentu
+        $enrolledCourseIds = UserCourseEnroll::where('user_id', $userId)
+        ->pluck('course_id')
+        ->toArray();
+
         // Ambil semua courses dengan relasi yang diperlukan
         $courses = Course::with([
             'learningCategory',
@@ -32,7 +47,8 @@ class HomeCourseController extends Controller
             'category.divisiCategory.learningCategory',
             'subCategory.category.divisiCategory.learningCategory'
         ])
-            ->where('learning_cat_id', $learning_id) // Filter berdasarkan learning_id
+            ->where('learning_cat_id', $learning_id)
+            ->whereIn('id', $enrolledCourseIds)
             ->get();
 
         // Bangun struktur hierarki dinamis
@@ -40,6 +56,8 @@ class HomeCourseController extends Controller
         $addedCourses = []; // Array untuk melacak ID course yang sudah ditambahkan
 
         foreach ($courses as $course) {
+            $progress = $userProgress[$course->id] ?? 0;
+            $course->setAttribute('progress', $progress);
             // Level 1: LearningCategory
             // Kursus hanya memiliki LearningCategory
             if ($course->learningCategory) {
@@ -163,39 +181,5 @@ class HomeCourseController extends Controller
         // dd($group);
 
         return view('pages.course.sub_course', compact('learning', 'groupedCourses'));
-    }
-
-
-
-
-
-    /**
-     * Fungsi untuk menambahkan course ke dalam grup jika belum pernah ditambahkan sebelumnya
-     */
-    private function addCourseToGroup(&$group, $title, $course, &$addedCourses)
-    {
-        // Cek apakah course sudah ditambahkan sebelumnya berdasarkan ID
-        if (isset($addedCourses[$course->id])) {
-            return; // Jika sudah, langsung return
-        }
-
-        // Jika grup belum ada, buat baru
-        if (!isset($group[$title])) {
-            $group[$title] = [
-                'title' => $title,
-                'courses' => []
-            ];
-        }
-
-        // Tambahkan course ke grup
-        $group[$title]['courses'][] = [
-            'id' => $course->id,
-            'name' => $course->nama_kelas,
-            'thumbnail' => $course->thumbnail,
-            'progress' => $course->progress,
-        ];
-
-        // Tandai course sudah ditambahkan
-        $addedCourses[$course->id] = true;
     }
 }
