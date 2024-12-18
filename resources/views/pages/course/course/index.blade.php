@@ -557,19 +557,19 @@
                             ${data.kunci_jawaban.map((answer, index) => {
                                 const isChecked = userAnswers[courseModulId] && userAnswers[courseModulId].answer === answer ? 'checked' : '';
                                 return `
-                                                                                    <div class="form-check">
-                                                                                        <input 
-                                                                                            class="form-check-input" 
-                                                                                            type="radio" 
-                                                                                            name="answer" 
-                                                                                            id="answer${index + 1}" 
-                                                                                            value="${answer}" 
-                                                                                            ${isChecked}
-                                                                                            onclick="saveAnswer(${courseModulId}, '${answer}')"
-                                                                                        >
-                                                                                        <label class="form-check-label" for="answer${index + 1}">${answer}</label>
-                                                                                    </div>
-                                                                                `;
+                                                                                            <div class="form-check">
+                                                                                                <input 
+                                                                                                    class="form-check-input" 
+                                                                                                    type="radio" 
+                                                                                                    name="answer" 
+                                                                                                    id="answer${index + 1}" 
+                                                                                                    value="${answer}" 
+                                                                                                    ${isChecked}
+                                                                                                    onclick="saveAnswer(${courseModulId}, '${answer}')"
+                                                                                                >
+                                                                                                <label class="form-check-label" for="answer${index + 1}">${answer}</label>
+                                                                                            </div>
+                                                                                        `;
                             }).join('')}
                         </form>
                     </div>
@@ -690,9 +690,11 @@
             const courseId = @json($course->id);
             const currentDate = new Date().toISOString().split('T')[0];
 
-            // Mengambil Time Spend dari localStorage
-            const timeSpend = parseInt(localStorage.getItem('time_spend')) || 0;
-            console.log("Time Spend (dalam detik):", timeSpend);
+            // Mengambil Time Spend dari localStorage berdasarkan courseId
+            const storageKey = `timeElapsed_course_${courseId}`;
+            const timeSpend = parseInt(localStorage.getItem(storageKey)) || 0;
+
+            console.log("Time Spend untuk course ini (dalam detik):", timeSpend);
 
             // Mengambil Progress Bar dari localStorage
             const progressBar = parseInt(localStorage.getItem('progress_bar')) || 0;
@@ -828,7 +830,7 @@
                 timer = setInterval(() => {
                     timeElapsed++;
                     document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
-                    localStorage.setItem('time_spend', timeElapsed);
+                    localStorage.setItem(storageKey, timeElapsed);
                 }, 1000);
             }
         }
@@ -836,7 +838,7 @@
         // Fungsi untuk berhenti timer
         function stopTimer() {
             clearInterval(timer);
-            localStorage.setItem('time_spend', timeElapsed);
+            localStorage.setItem(storageKey, timeElapsed);
         }
 
         // Event listener untuk mendeteksi perubahan visibility halaman
@@ -864,8 +866,8 @@
             let progressPercent = Math.floor((currentModule / totalModules) * 100);
 
             // Pastikan tidak lebih dari 99% (submit membuatnya menjadi 100%)
-            if (progressPercent >= 99) {
-                progressPercent = 99;
+            if (progressPercent >= 100) {
+                progressPercent = 100;
             }
 
             // Simpan progress ke localStorage
