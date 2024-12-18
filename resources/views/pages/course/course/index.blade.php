@@ -67,11 +67,11 @@
                     <div class="card bg-light-subtle rounded-end-4 rounded-start-0 h-100 shadow-none ">
                         <div class="card-header">
                             <div class="text-center border rounded">
-    <div class="card-title">
-        <i class="fas fa-clock align-middle me-1"></i>
-        <span class="align-middle" id="time">Time Spend: 00:00:00</span>
-    </div>
-</div>
+                                <div class="card-title">
+                                    <i class="fas fa-clock align-middle me-1"></i>
+                                    <span class="align-middle" id="time">Time Spend: 00:00:00</span>
+                                </div>
+                            </div>
                             <div class="card-head-row">
                                 <div class="card-title"><i class="icon-grid align-middle me-1"></i><span
                                         class="align-middle">
@@ -536,19 +536,19 @@
                             ${data.kunci_jawaban.map((answer, index) => {
                                 const isChecked = userAnswers[courseModulId] && userAnswers[courseModulId].answer === answer ? 'checked' : '';
                                 return `
-                                            <div class="form-check">
-                                                <input 
-                                                    class="form-check-input" 
-                                                    type="radio" 
-                                                    name="answer" 
-                                                    id="answer${index + 1}" 
-                                                    value="${answer}" 
-                                                    ${isChecked}
-                                                    onclick="saveAnswer(${courseModulId}, '${answer}')"
-                                                >
-                                                <label class="form-check-label" for="answer${index + 1}">${answer}</label>
-                                            </div>
-                                        `;
+                                                    <div class="form-check">
+                                                        <input 
+                                                            class="form-check-input" 
+                                                            type="radio" 
+                                                            name="answer" 
+                                                            id="answer${index + 1}" 
+                                                            value="${answer}" 
+                                                            ${isChecked}
+                                                            onclick="saveAnswer(${courseModulId}, '${answer}')"
+                                                        >
+                                                        <label class="form-check-label" for="answer${index + 1}">${answer}</label>
+                                                    </div>
+                                                `;
                             }).join('')}
                         </form>
                     </div>
@@ -746,55 +746,64 @@
         });
     </script>
 
-<script>
-    // Fungsi untuk format waktu
-    function formatTime(seconds) {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    let timeElapsed = 0; // Waktu berjalan dalam detik
-    let timer = null; // Timer ID untuk setInterval
-
-    // Cek localStorage untuk waktu sebelumnya
-    const storedTime = localStorage.getItem('timeElapsed');
-    if (storedTime) {
-        timeElapsed = parseInt(storedTime, 10);
-    }
-
-    // Fungsi untuk mulai timer
-    function startTimer() {
-        if (!timer) {
-            timer = setInterval(() => {
-                timeElapsed++;
-                document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
-                localStorage.setItem('timeElapsed', timeElapsed); // Simpan waktu ke localStorage
-            }, 1000);
+    <script>
+        // Fungsi untuk format waktu
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
-    }
 
-    // Fungsi untuk berhenti timer
-    function stopTimer() {
-        if (timer) {
-            clearInterval(timer);
-            timer = null;
+        let timeElapsed = 0; // Waktu berjalan dalam detik
+        let timer = null; // Timer ID untuk setInterval
+
+        // Ambil course_id dari URL
+        const urlPath = window.location.pathname; // Contoh: /course/25/
+        const courseIdMatch = urlPath.match(/\/course\/(\d+)/); // Ekstrak angka setelah "/course/"
+        const courseId = courseIdMatch ? courseIdMatch[1] : 'default';
+
+        // Gunakan course_id untuk kunci localStorage
+        const storageKey = `timeElapsed_course_${courseId}`;
+
+        // Cek localStorage untuk waktu sebelumnya
+        const storedTime = localStorage.getItem(storageKey);
+        if (storedTime) {
+            timeElapsed = parseInt(storedTime, 10);
         }
-    }
 
-    // Event listener untuk mendeteksi perubahan visibility halaman
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            startTimer(); // Halaman aktif
-        } else {
-            stopTimer(); // Halaman tidak aktif
+        // Fungsi untuk mulai timer
+        function startTimer() {
+            if (!timer) {
+                timer = setInterval(() => {
+                    timeElapsed++;
+                    document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
+                    localStorage.setItem(storageKey,
+                    timeElapsed); // Simpan waktu ke localStorage dengan kunci course-specific
+                }, 1000);
+            }
         }
-    });
 
-    // Memulai timer saat halaman dimuat
-    document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
-    startTimer();
-</script>
+        // Fungsi untuk berhenti timer
+        function stopTimer() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+        }
+
+        // Event listener untuk mendeteksi perubahan visibility halaman
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                startTimer(); // Halaman aktif
+            } else {
+                stopTimer(); // Halaman tidak aktif
+            }
+        });
+
+        // Memulai timer saat halaman dimuat
+        document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
+        startTimer();
+    </script>
 
 @endsection
