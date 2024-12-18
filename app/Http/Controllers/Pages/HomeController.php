@@ -32,11 +32,16 @@ class HomeController extends Controller
         $coursesFollowed = UserCourseEnroll::where('user_id', $userId)->count();
         $coursesInProgress = UserCourseEnroll::where('user_id', $userId)->whereNull('status')->count();
         $coursesCompleted = UserCourseEnroll::where('user_id', $userId)->where('status', 'complete')->count();
+        $averageProgress = UserCourseEnroll::where('user_id', $userId)->avg('progress_bar');
+
+        $totalTimeSpendInSeconds = UserCourseEnroll::where('user_id', $userId)->sum('time_spend');
+        $totalTimeSpendInHours = $totalTimeSpendInSeconds / 3600;
 
         // Tambahkan data jumlah modul untuk setiap kursus
         foreach ($courseEnrolled as $courseEnrolleds) {
             $modulCount = $courseEnrolleds->course->modul->count(); // Menggunakan relasi modul
             $courseEnrolleds->modul_count = $modulCount; // Tambahkan atribut jumlah modul
+            $courseEnrolleds->progress = $courseEnrolleds->progress_bar ?? 0;
         }
 
         // Kirimkan data ke view
@@ -45,7 +50,9 @@ class HomeController extends Controller
             'totalCourses',
             'coursesFollowed',
             'coursesInProgress',
-            'coursesCompleted'
+            'coursesCompleted',
+            'averageProgress',
+            'totalTimeSpendInHours'
         ));
     }
 

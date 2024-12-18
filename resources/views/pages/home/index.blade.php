@@ -39,7 +39,7 @@
                                     <div class="col col-stats ms-3 ms-sm-0">
                                         <div class="numbers">
                                             <p class="card-category">Progress</p>
-                                            <h4 class="card-title">{{ $totalCourses }} %</h4>
+                                            <h4 class="card-title">{{ number_format($averageProgress, 2) }}%</h4>
                                         </div>
                                     </div>
                                 </div>
@@ -60,7 +60,7 @@
                                     <div class="col col-stats ms-3 ms-sm-0">
                                         <div class="numbers">
                                             <p class="card-category">Time Spend</p>
-                                            <h4 class="card-title">{{ $coursesFollowed }} hrs</h4>
+                                            <h4 class="card-title">{{ number_format($totalTimeSpendInHours, 2) }} hrs</h4>
                                         </div>
                                     </div>
                                 </div>
@@ -141,17 +141,29 @@
                                                         <div class="progress-card">
                                                             <div class="progress-status">
                                                                 <span class="text-muted">
-                                                                    @if ($courseEnrolleds->course->subCategory && $courseEnrolleds->course->category && $courseEnrolleds->course->divisiCategory && $courseEnrolleds->course->learningCategory)
-                                                                        {{ $courseEnrolleds->course->learningCategory->nama }} >
-                                                                        {{ $courseEnrolleds->course->divisiCategory->nama }} >
+                                                                    @if (
+                                                                        $courseEnrolleds->course->subCategory &&
+                                                                            $courseEnrolleds->course->category &&
+                                                                            $courseEnrolleds->course->divisiCategory &&
+                                                                            $courseEnrolleds->course->learningCategory)
+                                                                        {{ $courseEnrolleds->course->learningCategory->nama }}
+                                                                        >
+                                                                        {{ $courseEnrolleds->course->divisiCategory->nama }}
+                                                                        >
                                                                         {{ $courseEnrolleds->course->category->nama }} >
                                                                         {{ $courseEnrolleds->course->subCategory->nama }}
-                                                                    @elseif ($courseEnrolleds->course->category && $courseEnrolleds->course->divisiCategory && $courseEnrolleds->course->learningCategory)
-                                                                        {{ $courseEnrolleds->course->learningCategory->nama }} >
-                                                                        {{ $courseEnrolleds->course->divisiCategory->nama }} >
+                                                                    @elseif (
+                                                                        $courseEnrolleds->course->category &&
+                                                                            $courseEnrolleds->course->divisiCategory &&
+                                                                            $courseEnrolleds->course->learningCategory)
+                                                                        {{ $courseEnrolleds->course->learningCategory->nama }}
+                                                                        >
+                                                                        {{ $courseEnrolleds->course->divisiCategory->nama }}
+                                                                        >
                                                                         {{ $courseEnrolleds->course->category->nama }}
                                                                     @elseif ($courseEnrolleds->course->divisiCategory && $courseEnrolleds->course->learningCategory)
-                                                                        {{ $courseEnrolleds->course->learningCategory->nama }} >
+                                                                        {{ $courseEnrolleds->course->learningCategory->nama }}
+                                                                        >
                                                                         {{ $courseEnrolleds->course->divisiCategory->nama }}
                                                                     @elseif ($courseEnrolleds->course->learningCategory)
                                                                         {{ $courseEnrolleds->course->learningCategory->nama }}
@@ -159,29 +171,31 @@
                                                                         No Category
                                                                     @endif
                                                                 </span>
-                                                                <span class="text-muted fw-bold"> 70%</span>
+                                                                <span class="text-muted fw-bold">{{ $courseEnrolleds->progress }}%</span>
                                                             </div>
                                                             <div class="progress" style="height: 6px;">
                                                                 <div class="progress-bar bg-primary" role="progressbar"
-                                                                    style="width: 70%" aria-valuenow="70" aria-valuemin="0"
-                                                                    aria-valuemax="100" data-toggle="tooltip"
-                                                                    data-placement="top" title=""
-                                                                    data-original-title="70%"></div>
+                                                                    style="width: {{ $courseEnrolleds->progress }}%"
+                                                                    aria-valuenow="{{ $courseEnrolleds->progress }}"
+                                                                    aria-valuemin="0" aria-valuemax="100"
+                                                                    data-toggle="tooltip" data-placement="top"
+                                                                    title="{{ $courseEnrolleds->progress }}%">
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="text-end">
-                                                @if ($courseEnrolleds->status != 'complete')
+                                                @if ($courseEnrolleds->status != 'completed')
                                                     <a href="{{ route('pages.course.course.detail', $courseEnrolleds->course_id) }}"
                                                         class="btn btn-label-warning btn-round btn-sm me-2 stretched-link">
                                                         Lanjutkan <i class="fas fa-arrow-right"></i>
                                                     </a>
                                                 @else
                                                     <a href="{{ route('pages.course.course.detail', $courseEnrolleds->course_id) }}"
-                                                        class="btn btn-label-info btn-round btn-sm me-2 stretched-link">
-                                                        Detail <i class="fas fa-search"></i>
+                                                        class="btn btn-label-success btn-round btn-sm me-2 stretched-link">
+                                                        Selesai <i class="fas fa-search"></i>
                                                     </a>
                                                 @endif
                                             </div>
