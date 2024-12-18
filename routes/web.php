@@ -90,8 +90,9 @@ Route::group(['middleware' => 'auth'], function () {
             // Route::post('/{course_id}/kirim-jawaban-essay-quiz', [CourseController::class, 'kirimJawaban'])->name('course.kirimJawaban');
             // Route::post('/quiz/{modul_quiz_id}/submit', [CourseController::class, 'submitQuiz'])->name('course.submitQuiz');
 
-            Route::post('/quiz/{course_modul_id}/submit/{user_id}',[CourseController::class, 'quiz'])->name('course.quiz');
-            Route::post('/essay/{course_modul_id}/submit/{user_id}',[CourseController::class, 'essay'])->name('course.essay');
+            Route::post('/quiz/{course_modul_id}/submit/{user_id}',[CourseController::class, 'submitQuiz'])->name('course.submitQuiz');
+            Route::post('/essay/{course_modul_id}/submit/{user_id}',[CourseController::class, 'submitEssay'])->name('course.submitEssay');
+            Route::post('/update-course-enrolls',[CourseController::class, 'updateCourseEnrollSummary'])->name('course.updateCourseEnrollSummary');
             Route::get('/getQuiz/{quiz_id}', [CourseController::class, 'getQuiz'])->name('course.getQuiz');
 
         });

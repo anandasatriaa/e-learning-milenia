@@ -10,7 +10,6 @@ class ModulQuizUserAnswer extends Model
     use HasFactory;
 
     protected $fillable = [
-        'course_modul_id',
         'user_id',
         'modul_quizzes_id',
         'jawaban',

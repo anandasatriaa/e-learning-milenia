@@ -425,37 +425,55 @@
         };
 
         function saveAnswer(courseModulId, answer) {
-            const radioButtons = document.getElementsByName('answer'); // Mendapatkan semua radio button dalam form
+            const radioButtons = document.getElementsByName('answer');
 
-            // Jika jawaban sudah dipilih, batalkan jika diklik lagi
-            if (userAnswers[courseModulId] && userAnswers[courseModulId].answer === answer) {
-                delete userAnswers[courseModulId]; // Batalkan jawaban
-                // Menghapus status checked dari semua radio button
-                radioButtons.forEach(button => {
-                    button.checked = false;
-                });
-            } else {
-                userAnswers[courseModulId] = {
-                    answer,
-                    course_modul_id: courseModulId
-                }; // Simpan jawaban
+            let selectedIndex = -1;
+            // Cari indeks radio button yang dipilih
+            for (let i = 0; i < radioButtons.length; i++) {
+                if (radioButtons[i].value === answer && radioButtons[i].checked) {
+                    selectedIndex = i + 1;
+                    break;
+                }
             }
 
-            // Simpan jawaban di localStorage
+            console.log(`Jawaban terpilih untuk modul ${courseModulId}: ${answer}, Indeks radio button: ${selectedIndex}`);
+
+            if (!userAnswers) userAnswers = {};
+            if (userAnswers[courseModulId]) {
+                delete userAnswers[courseModulId];
+            }
+
+            // Simpan jawaban dengan kode_jawaban
+            userAnswers[courseModulId] = {
+                answer,
+                course_modul_id: courseModulId,
+                kode_jawaban: selectedIndex.toString() // Menyimpan indeks sebagai kode jawaban
+            };
+
+            console.log('Jawaban yang disimpan ke userAnswers:', userAnswers);
+
+            // Simpan jawaban di LocalStorage
             localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
 
-            updateQuestionNavState(Object.keys(userAnswers),
-                courseModulId); // Update tombol navigasi setelah jawaban dipilih
+            console.log('Data LocalStorage setelah saveAnswer:', localStorage.getItem('userAnswers'));
         }
+
 
         // Function to load the saved answers from localStorage and set the radio buttons
         function loadAnswers() {
             const savedAnswers = JSON.parse(localStorage.getItem('userAnswers')) || {};
             Object.keys(savedAnswers).forEach(courseModulId => {
                 const savedAnswer = savedAnswers[courseModulId].answer;
+                const savedKodeJawaban = savedAnswers[courseModulId].kode_jawaban;
                 const radioButton = document.querySelector(`input[name="answer"][value="${savedAnswer}"]`);
-                if (radioButton) {
-                    radioButton.checked = true; // Set the radio button as checked
+                for (let i = 0; i < radioButtons.length; i++) {
+                    if (radioButtons[i].value === savedAnswer) {
+                        radioButtons[i].checked = true;
+
+                        console.log(
+                            `Mengatur jawaban untuk modul ${courseModulId}, kode jawaban: ${savedKodeJawaban}`);
+                        break;
+                    }
                 }
             });
         }
@@ -539,19 +557,19 @@
                             ${data.kunci_jawaban.map((answer, index) => {
                                 const isChecked = userAnswers[courseModulId] && userAnswers[courseModulId].answer === answer ? 'checked' : '';
                                 return `
-                                                        <div class="form-check">
-                                                            <input 
-                                                                class="form-check-input" 
-                                                                type="radio" 
-                                                                name="answer" 
-                                                                id="answer${index + 1}" 
-                                                                value="${answer}" 
-                                                                ${isChecked}
-                                                                onclick="saveAnswer(${courseModulId}, '${answer}')"
-                                                            >
-                                                            <label class="form-check-label" for="answer${index + 1}">${answer}</label>
-                                                        </div>
-                                                    `;
+                                                                                    <div class="form-check">
+                                                                                        <input 
+                                                                                            class="form-check-input" 
+                                                                                            type="radio" 
+                                                                                            name="answer" 
+                                                                                            id="answer${index + 1}" 
+                                                                                            value="${answer}" 
+                                                                                            ${isChecked}
+                                                                                            onclick="saveAnswer(${courseModulId}, '${answer}')"
+                                                                                        >
+                                                                                        <label class="form-check-label" for="answer${index + 1}">${answer}</label>
+                                                                                    </div>
+                                                                                `;
                             }).join('')}
                         </form>
                     </div>
@@ -664,88 +682,116 @@
 
     {{-- POST jawaban ke database --}}
     <script>
+        // Event listener untuk tombol Submit & End Course
         document.getElementById('selesaiKelas').addEventListener('click', function(e) {
             e.preventDefault();
 
-            // Ambil jawaban dari localStorage
-            const userId = @json(auth()->user()->ID); // Mendapatkan userId dari Blade
+            const userId = @json(auth()->user()->ID);
+            const courseId = @json($course->id);
+            const currentDate = new Date().toISOString().split('T')[0];
+
+            // Mengambil Time Spend dari localStorage
+            const timeSpend = parseInt(localStorage.getItem('time_spend')) || 0;
+            console.log("Time Spend (dalam detik):", timeSpend);
+
+            // Mengambil Progress Bar dari localStorage
+            const progressBar = parseInt(localStorage.getItem('progress_bar')) || 0;
+            console.log("Progress Bar:", progressBar + "%");
+
             const userAnswers = JSON.parse(localStorage.getItem('userAnswers')) || {};
-            console.log("User Answer:", userAnswers);
             const essayAnswers = Object.keys(localStorage).filter(key => key.startsWith('essayAnswer-'));
 
-            // Kirim jawaban quiz
+            console.log("User Answers:", userAnswers);
+
+            // Pastikan progress menjadi 100% ketika selesai kelas ditekan
+            currentModule = totalModules;
+            updateProgress();
+
+            // Mengirim jawaban quiz tanpa course_modul_id
             Object.keys(userAnswers).forEach((modulquizzesId) => {
                 const {
                     answer,
-                    course_modul_id
-                } = userAnswers[modulquizzesId]; // Ambil course_modul_id
-                console.log(
-                    `Quiz ID: ${modulquizzesId}, Course Module ID: ${course_modul_id}, Answer: ${answer}`
-                );
+                    kode_jawaban
+                } = userAnswers[modulquizzesId];
+
+                console.log(`Mengirim jawaban quiz untuk modul ${modulquizzesId}`);
+                console.log(`Jawaban: ${answer}, Kode Jawaban: ${kode_jawaban}`);
 
                 const quizData = {
                     user_id: userId,
-                    modul_quizzes_id: modulquizzesId, // Menggunakan modulquizzesId yang sesuai
-                    course_modul_id: course_modul_id,
+                    modul_quizzes_id: modulquizzesId,
                     jawaban: answer,
-                    kode_jawaban: answer,
+                    kode_jawaban: kode_jawaban
                 };
 
-                // Log data yang akan dikirim
-                console.log(`Mengirim jawaban quiz:`, quizData);
-
-                // Kirim jawaban quiz ke backend
-                fetch(`/quiz/${quizData.course_modul_id}/submit/${quizData.user_id}`, {
+                fetch(`/course/quiz/${quizData.modul_quizzes_id}/submit/${quizData.user_id}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content')
                         },
-                        body: JSON.stringify(quizData),
+                        body: JSON.stringify(quizData)
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            console.log(`Jawaban quiz ${quizData.course_modul_id} berhasil dikirim`);
-                        } else {
-                            console.error(`Error mengirim jawaban quiz ${quizData.course_modul_id}`);
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok: ' + response.status);
                         }
+                        return response.json();
                     })
-                    .catch(err => console.error('Error:', err));
+                    .then(data => console.log('Quiz Response:', data))
+                    .catch(err => console.error('Quiz Error:', err));
             });
 
             console.log(`Jawaban essay: ${essayAnswers}`);
 
-            // Kirim jawaban essay
+            // Mengirim jawaban essay ke backend
             essayAnswers.forEach((key) => {
-                const courseModulId = key.replace('essayAnswer-', ''); // Ambil course_modul_id dari key
+                const courseModulId = key.replace('essayAnswer-', '');
                 const essayContent = localStorage.getItem(key);
+
                 const essayData = {
                     user_id: userId,
                     course_modul_id: courseModulId,
-                    jawaban: essayContent,
+                    jawaban: essayContent
                 };
 
-                // Log data yang akan dikirim
                 console.log(`Mengirim jawaban essay untuk modul ${courseModulId}:`, essayData);
 
-                // Kirim jawaban essay ke backend
-                fetch(`/essay/${essayData.course_modul_id}/submit/${essayData.user_id}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(essayData),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            console.log(`Jawaban essay untuk modul ${courseModulId} berhasil dikirim`);
-                        } else {
-                            console.error(`Error mengirim jawaban essay untuk modul ${courseModulId}`);
-                        }
-                    })
-                    .catch(err => console.error('Error:', err));
+                fetch(`/course/essay/${essayData.course_modul_id}/submit/${essayData.user_id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content')
+                    },
+                    body: JSON.stringify(essayData)
+                });
             });
+
+            // Mengirim summary course ke backend
+            const summaryData = {
+                course_id: courseId,
+                finish_date: currentDate,
+                status: 'completed',
+                time_spend: timeSpend,
+                progress_bar: 100 // Pastikan progress menjadi 100%
+            };
+
+            console.log('Mengirim data summary:', summaryData);
+
+            fetch('/course/update-course-enrolls', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
+                    },
+                    body: JSON.stringify(summaryData)
+                })
+                .then(response => response.json())
+                .then(data => console.log('Summary Response:', data))
+                .catch(err => console.error('Summary Error:', err));
         });
     </script>
 
@@ -782,18 +828,15 @@
                 timer = setInterval(() => {
                     timeElapsed++;
                     document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
-                    localStorage.setItem(storageKey,
-                        timeElapsed); // Simpan waktu ke localStorage dengan kunci course-specific
+                    localStorage.setItem('time_spend', timeElapsed);
                 }, 1000);
             }
         }
 
         // Fungsi untuk berhenti timer
         function stopTimer() {
-            if (timer) {
-                clearInterval(timer);
-                timer = null;
-            }
+            clearInterval(timer);
+            localStorage.setItem('time_spend', timeElapsed);
         }
 
         // Event listener untuk mendeteksi perubahan visibility halaman
@@ -818,13 +861,15 @@
 
         // Fungsi untuk memperbarui progress
         function updateProgress() {
-            // Hitung progress berdasarkan modul yang sedang aktif
             let progressPercent = Math.floor((currentModule / totalModules) * 100);
 
             // Pastikan tidak lebih dari 99% (submit membuatnya menjadi 100%)
             if (progressPercent >= 99) {
                 progressPercent = 99;
             }
+
+            // Simpan progress ke localStorage
+            localStorage.setItem('progress_bar', progressPercent);
 
             // Update tampilan progress
             document.querySelector('.progress-bar').style.width = `${progressPercent}%`;
@@ -837,14 +882,12 @@
             updateProgress();
         }
 
-        // Fungsi untuk menangani klik tombol Submit & End Course
-        // document.getElementById('selesaiKelas').addEventListener('click', () => {
-        //     currentModule = totalModules; // Progress mencapai 100%
-        //     updateProgress();
-        // });
-
-        // Inisialisasi progress di awal
-        updateProgress();
+        // Ambil progress dari localStorage saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedProgress = parseInt(localStorage.getItem('progress_bar')) || 0;
+            currentModule = Math.floor((savedProgress / 100) * totalModules);
+            updateProgress();
+        });
     </script>
 
 

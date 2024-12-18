@@ -7,18 +7,21 @@ use Illuminate\Http\Request;
 use App\Models\Course\Course;
 use App\Models\Course\ModulQuiz;
 use App\Models\Course\ModulEssay;
+use App\Models\Course\ModulQuizUserAnswer;
+use App\Models\Course\ModulEssayAnswer;
 use App\Models\Course\CourseModul;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\UserCourseEnroll;
 use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {
     public function detailcourse(Request $request, $course_id)
     {
-        
-        $course = Course::with(['modul','modul.quizzes', 'modul.essays'])->where('id', $course_id)->first();
+
+        $course = Course::with(['modul', 'modul.quizzes', 'modul.essays'])->where('id', $course_id)->first();
         Log::info("Course Return: " . print_r($course, true));
         $test = $course->toArray();
         Log::info("Variabel test: " . print_r($test, true));
@@ -134,7 +137,7 @@ class CourseController extends Controller
                 'totalQuizzes' => count($quizzesInModule), // Count quizzes in the module
                 'quizIds' => $quizzesInModule, // Send only IDs from the same module
                 'quizIndex' => $quizIndex,
-                'course_modul_id' => $courseModulId, // Include the module ID
+                // 'course_modul_id' => $courseModulId, // Include the module ID
             ]);
         }
 
@@ -160,19 +163,71 @@ class CourseController extends Controller
         return response()->json(['message' => 'No essays found for this module'], 404);
     }
 
+    public function submitQuiz(Request $request, $modulId, $userId)
+    {
+        Log::info('Quiz submitted', [
+            'modulId' => $modulId,
+            'userId' => $userId,
+            'data' => $request->all()
+        ]);
 
-    // public function submitQuiz(Request $request, $modul_quiz_id)
-    // {
-    //     $quiz = ModulQuiz::findOrFail($modul_quiz_id);
-    //     $correctAnswer = $quiz->kunci_jawaban;
+        try {
+            ModulQuizUserAnswer::create([
+                'modul_quizzes_id' => $modulId,
+                'user_id' => $userId,
+                'jawaban' => $request->input('jawaban'),
+                'kode_jawaban' => $request->input('kode_jawaban')
+            ]);
 
-    //     if ($request->input('answer') == $correctAnswer) {
-    //         // Logika untuk jawaban benar
-    //         return back()->with('success', 'Jawaban benar!');
-    //     } else {
-    //         // Logika untuk jawaban salah
-    //         return back()->with('error', 'Jawaban salah. Coba lagi!');
-    //     }
-    // }
+            return response()->json(['message' => 'Data quiz berhasil disimpan']);
+        } catch (\Exception $e) {
+            Log::error('Failed to submit quiz', ['error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 
+    public function submitEssay(Request $request, $modulId, $userId)
+    {
+        $data = $request->only(['jawaban']);
+
+        try {
+            ModulEssayAnswer::create([
+                'course_modul_id' => $modulId,
+                'user_id' => $userId,
+                'jawaban' => $data['jawaban']
+            ]);
+
+            return response()->json(['message' => 'Jawaban essay berhasil disimpan']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function updateCourseEnrollSummary(Request $request)
+    {
+        $request->validate([
+            'course_id'   => 'required|exists:user_course_enrolls,course_id',
+            'finish_date' => 'required|date',
+            'status'     => 'required|string',
+            'time_spend'  => 'required|integer',
+            'progress_bar' => 'required|integer'
+        ]);
+
+        $courseId = $request->input('course_id');
+
+        try {
+            $summaryData = [
+                'finish_date'   => $request->input('finish_date'),
+                'status'       => $request->input('status'),
+                'time_spend'    => $request->input('time_spend'),
+                'progress_bar'  => $request->input('progress_bar')
+            ];
+
+            UserCourseEnroll::where('course_id', $courseId)->update($summaryData);
+
+            return response()->json(['message' => 'Data summary berhasil diperbarui']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

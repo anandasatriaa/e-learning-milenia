@@ -14,7 +14,7 @@ class AddTimeSpendToCoursesTable extends Migration
     public function up()
     {
         Schema::table('courses', function (Blueprint $table) {
-            $table->integer('time_spend')->default(0)->after('active');
+            $table->dropColumn('time_spend');
         });
     }
 
@@ -26,7 +26,7 @@ class AddTimeSpendToCoursesTable extends Migration
     public function down()
     {
         Schema::table('courses', function (Blueprint $table) {
-            $table->dropColumn('time_spend');
+            $table->integer('time_spend')->default(0)->after('active');
         });
     }
 }
