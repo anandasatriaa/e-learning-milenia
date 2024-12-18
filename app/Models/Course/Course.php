@@ -8,6 +8,7 @@ use App\Models\Category\DivisiCategory;
 use App\Models\Category\LearningCategory;
 use App\Models\User;
 use App\Models\Nilai\Nilai;
+use App\Models\UserCourseEnroll;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -58,6 +59,11 @@ class Course extends Model
         return $this->hasMany(CourseModul::class, 'course_id', 'id')
             ->where('active', 1)
             ->orderBy('no_urut', 'asc');
+    }
+
+    public function userCourseEnroll()
+    {
+        return $this->hasMany(UserCourseEnroll::class);
     }
 
     public function nilai()

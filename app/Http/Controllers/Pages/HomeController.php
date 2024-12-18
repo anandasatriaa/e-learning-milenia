@@ -15,43 +15,28 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        // Ambil ID pengguna yang sedang login
-        $userId = Auth::id(); // atau Auth::user()->id
+        $userId = Auth::id(); // ID pengguna yang login
 
-        // Ambil daftar kursus yang diikuti user (dengan relasi)
-        $courseEnrolled = UserCourseEnroll::with('course')->where('user_id', $userId)->get();
+        // Ambil daftar kursus yang diikuti user dengan semua relasi terkait
+        $courseEnrolled = UserCourseEnroll::with([
+            'course.subCategory',
+            'course.category',
+            'course.divisiCategory',
+            'course.learningCategory',
+        ])
+            ->where('user_id', $userId)
+            ->get();
 
-        // 1. Kursus Tersedia
+        // Hitung statistik kursus
         $totalCourses = DB::table('courses')->count();
+        $coursesFollowed = UserCourseEnroll::where('user_id', $userId)->count();
+        $coursesInProgress = UserCourseEnroll::where('user_id', $userId)->whereNull('status')->count();
+        $coursesCompleted = UserCourseEnroll::where('user_id', $userId)->where('status', 'complete')->count();
 
-        // 2. Kursus Diikuti
-        $coursesFollowed = DB::table('user_course_enrolls')
-        ->where('user_id', $userId)
-            ->count();
-
-        // 3. Kursus Sedang Dipelajari
-        $coursesInProgress = DB::table('user_course_enrolls')
-        ->where('user_id', $userId)
-        ->whereNull('status')
-            ->count();
-
-        // 4. Kursus Telah Diselesaikan
-        $coursesCompleted = DB::table('user_course_enrolls')
-        ->where('user_id', $userId)
-            ->where('status', 'complete')
-            ->count();
-
-        // Untuk setiap course enrolled, ambil kategori dan jumlah modul
+        // Tambahkan data jumlah modul untuk setiap kursus
         foreach ($courseEnrolled as $courseEnrolleds) {
-            // Ambil kategori berdasarkan sub_category_id
-            $category = Category::find($courseEnrolleds->course->sub_category_id);
-
-            // Hitung jumlah modul berdasarkan course_id
-            $modulCount = CourseModul::where('course_id', $courseEnrolleds->course_id)->count();
-
-            // Menambahkan data kategori dan jumlah modul ke dalam collection
-            $courseEnrolleds->category_name = $category ? $category->nama : 'No Category';
-            $courseEnrolleds->modul_count = $modulCount;
+            $modulCount = $courseEnrolleds->course->modul->count(); // Menggunakan relasi modul
+            $courseEnrolleds->modul_count = $modulCount; // Tambahkan atribut jumlah modul
         }
 
         // Kirimkan data ke view
@@ -62,8 +47,6 @@ class HomeController extends Controller
             'coursesInProgress',
             'coursesCompleted'
         ));
-
-        return view('pages.home.index', compact('courseEnrolled'));
     }
 
 }

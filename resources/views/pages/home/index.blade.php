@@ -39,7 +39,7 @@
                                     <div class="col col-stats ms-3 ms-sm-0">
                                         <div class="numbers">
                                             <p class="card-category">Progress</p>
-                                            <h4 class="card-title">{{ $totalCourses }}</h4>
+                                            <h4 class="card-title">{{ $totalCourses }} %</h4>
                                         </div>
                                     </div>
                                 </div>
@@ -60,7 +60,7 @@
                                     <div class="col col-stats ms-3 ms-sm-0">
                                         <div class="numbers">
                                             <p class="card-category">Time Spend</p>
-                                            <h4 class="card-title">{{ $coursesFollowed }}</h4>
+                                            <h4 class="card-title">{{ $coursesFollowed }} hrs</h4>
                                         </div>
                                     </div>
                                 </div>
@@ -140,7 +140,25 @@
                                                         </h6>
                                                         <div class="progress-card">
                                                             <div class="progress-status">
-                                                                <span class="text-muted">{{ $courseEnrolleds->category_name }}</span>
+                                                                <span class="text-muted">
+                                                                    @if ($courseEnrolleds->course->subCategory && $courseEnrolleds->course->category && $courseEnrolleds->course->divisiCategory && $courseEnrolleds->course->learningCategory)
+                                                                        {{ $courseEnrolleds->course->learningCategory->nama }} >
+                                                                        {{ $courseEnrolleds->course->divisiCategory->nama }} >
+                                                                        {{ $courseEnrolleds->course->category->nama }} >
+                                                                        {{ $courseEnrolleds->course->subCategory->nama }}
+                                                                    @elseif ($courseEnrolleds->course->category && $courseEnrolleds->course->divisiCategory && $courseEnrolleds->course->learningCategory)
+                                                                        {{ $courseEnrolleds->course->learningCategory->nama }} >
+                                                                        {{ $courseEnrolleds->course->divisiCategory->nama }} >
+                                                                        {{ $courseEnrolleds->course->category->nama }}
+                                                                    @elseif ($courseEnrolleds->course->divisiCategory && $courseEnrolleds->course->learningCategory)
+                                                                        {{ $courseEnrolleds->course->learningCategory->nama }} >
+                                                                        {{ $courseEnrolleds->course->divisiCategory->nama }}
+                                                                    @elseif ($courseEnrolleds->course->learningCategory)
+                                                                        {{ $courseEnrolleds->course->learningCategory->nama }}
+                                                                    @else
+                                                                        No Category
+                                                                    @endif
+                                                                </span>
                                                                 <span class="text-muted fw-bold"> 70%</span>
                                                             </div>
                                                             <div class="progress" style="height: 6px;">
