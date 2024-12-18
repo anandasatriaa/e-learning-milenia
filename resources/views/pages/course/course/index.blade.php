@@ -81,12 +81,11 @@
                             <div class="progress-card mb-0 mt-2">
                                 <div class="progress-status">
                                     <span class="text-muted">Progress</span>
-                                    <span class="text-muted fw-bold"> 30%</span>
+                                    <span class="text-muted fw-bold"> 0%</span> <!-- Progress text -->
                                 </div>
                                 <div class="progress">
                                     <div class="progress-bar progress-bar-striped bg-primary" role="progressbar"
-                                        style="width: 30%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"
-                                        data-toggle="tooltip" data-placement="top" title="" data-original-title="60%">
+                                        style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                                     </div>
                                 </div>
                             </div>
@@ -107,7 +106,7 @@
                             @foreach ($course->modul as $index => $modul)
                                 <div class="card mb-2 border rounded m-2">
                                     <div class="card-header"
-                                        onclick="updateIframeSource('{{ $modul->tipe_media }}', '{{ $modul->url_media_link }}')"
+                                        onclick="updateIframeSource('{{ $modul->tipe_media }}', '{{ $modul->url_media_link }}', {{ $index }})"
                                         id="heading{{ $index }}" data-bs-toggle="collapse"
                                         data-bs-target="#collapse{{ $index }}" aria-expanded="false"
                                         aria-controls="collapse{{ $index }}">
@@ -127,8 +126,6 @@
                                                     <span class="me-2 bg-primary px-2 py-1 my-auto rounded text-white">
                                                         <i class="icon-share-alt"></i></span>
                                                 @break
-
-                                                @default
                                             @endswitch
                                             {{ $modul->nama_modul }}
                                         </div>
@@ -259,6 +256,9 @@
                     otherCard.classList.remove('border-primary');
                 }
             });
+
+            // Update progress
+            setActiveModule(0); // Set progress to the Introduction module (index 0)
         }
 
         $(document).ready(function() {
@@ -358,6 +358,9 @@
                     otherCard.classList.remove('border-primary');
                 }
             });
+
+            // Update progress
+            setActiveModule(index + 1); // Update progress based on the clicked module's index
         }
     </script>
 
@@ -536,19 +539,19 @@
                             ${data.kunci_jawaban.map((answer, index) => {
                                 const isChecked = userAnswers[courseModulId] && userAnswers[courseModulId].answer === answer ? 'checked' : '';
                                 return `
-                                                    <div class="form-check">
-                                                        <input 
-                                                            class="form-check-input" 
-                                                            type="radio" 
-                                                            name="answer" 
-                                                            id="answer${index + 1}" 
-                                                            value="${answer}" 
-                                                            ${isChecked}
-                                                            onclick="saveAnswer(${courseModulId}, '${answer}')"
-                                                        >
-                                                        <label class="form-check-label" for="answer${index + 1}">${answer}</label>
-                                                    </div>
-                                                `;
+                                                        <div class="form-check">
+                                                            <input 
+                                                                class="form-check-input" 
+                                                                type="radio" 
+                                                                name="answer" 
+                                                                id="answer${index + 1}" 
+                                                                value="${answer}" 
+                                                                ${isChecked}
+                                                                onclick="saveAnswer(${courseModulId}, '${answer}')"
+                                                            >
+                                                            <label class="form-check-label" for="answer${index + 1}">${answer}</label>
+                                                        </div>
+                                                    `;
                             }).join('')}
                         </form>
                     </div>
@@ -746,6 +749,7 @@
         });
     </script>
 
+    {{-- Time Spend --}}
     <script>
         // Fungsi untuk format waktu
         function formatTime(seconds) {
@@ -779,7 +783,7 @@
                     timeElapsed++;
                     document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
                     localStorage.setItem(storageKey,
-                    timeElapsed); // Simpan waktu ke localStorage dengan kunci course-specific
+                        timeElapsed); // Simpan waktu ke localStorage dengan kunci course-specific
                 }, 1000);
             }
         }
@@ -805,5 +809,43 @@
         document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
         startTimer();
     </script>
+
+    {{-- Progress Bar --}}
+    <script>
+        // Total jumlah modul, termasuk Introduction
+        const totalModules = {{ $course->modul->count() + 1 }}; // +1 untuk Introduction
+        let currentModule = 0; // Modul saat ini (dimulai dari 0 untuk Introduction)
+
+        // Fungsi untuk memperbarui progress
+        function updateProgress() {
+            // Hitung progress berdasarkan modul yang sedang aktif
+            let progressPercent = Math.floor((currentModule / totalModules) * 100);
+
+            // Pastikan tidak lebih dari 99% (submit membuatnya menjadi 100%)
+            if (progressPercent >= 99) {
+                progressPercent = 99;
+            }
+
+            // Update tampilan progress
+            document.querySelector('.progress-bar').style.width = `${progressPercent}%`;
+            document.querySelector('.progress-status span.fw-bold').innerText = `${progressPercent}%`;
+        }
+
+        // Fungsi untuk set modul aktif
+        function setActiveModule(index) {
+            currentModule = index;
+            updateProgress();
+        }
+
+        // Fungsi untuk menangani klik tombol Submit & End Course
+        // document.getElementById('selesaiKelas').addEventListener('click', () => {
+        //     currentModule = totalModules; // Progress mencapai 100%
+        //     updateProgress();
+        // });
+
+        // Inisialisasi progress di awal
+        updateProgress();
+    </script>
+
 
 @endsection
