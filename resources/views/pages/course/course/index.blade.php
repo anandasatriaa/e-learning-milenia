@@ -67,11 +67,11 @@
                     <div class="card bg-light-subtle rounded-end-4 rounded-start-0 h-100 shadow-none ">
                         <div class="card-header">
                             <div class="text-center border rounded">
-                                <div class="card-title">
-                                    <i class="fas fa-clock align-middle me-1"></i>
-                                    <span class="align-middle" id="time"></span>
-                                </div>
-                            </div>
+    <div class="card-title">
+        <i class="fas fa-clock align-middle me-1"></i>
+        <span class="align-middle" id="time">Time Spend: 00:00:00</span>
+    </div>
+</div>
                             <div class="card-head-row">
                                 <div class="card-title"><i class="icon-grid align-middle me-1"></i><span
                                         class="align-middle">
@@ -747,24 +747,54 @@
     </script>
 
 <script>
-// Fungsi untuk format waktu
-function formatTime(seconds) {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-}
+    // Fungsi untuk format waktu
+    function formatTime(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
 
-// Menghitung waktu berjalan
-let timeElapsed = 0; // Waktu berjalan dalam detik
+    let timeElapsed = 0; // Waktu berjalan dalam detik
+    let timer = null; // Timer ID untuk setInterval
 
-function updateTime() {
-    timeElapsed++;
+    // Cek localStorage untuk waktu sebelumnya
+    const storedTime = localStorage.getItem('timeElapsed');
+    if (storedTime) {
+        timeElapsed = parseInt(storedTime, 10);
+    }
+
+    // Fungsi untuk mulai timer
+    function startTimer() {
+        if (!timer) {
+            timer = setInterval(() => {
+                timeElapsed++;
+                document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
+                localStorage.setItem('timeElapsed', timeElapsed); // Simpan waktu ke localStorage
+            }, 1000);
+        }
+    }
+
+    // Fungsi untuk berhenti timer
+    function stopTimer() {
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+    }
+
+    // Event listener untuk mendeteksi perubahan visibility halaman
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            startTimer(); // Halaman aktif
+        } else {
+            stopTimer(); // Halaman tidak aktif
+        }
+    });
+
+    // Memulai timer saat halaman dimuat
     document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
-}
-
-// Memperbarui waktu setiap detik
-setInterval(updateTime, 1000);
+    startTimer();
 </script>
+
 @endsection
