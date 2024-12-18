@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Admin\Calendar;
 
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class CalendarController extends Controller
 {
     public function index()
     {
-        return view('admin.calendar.index');
+        $users = User::select('Nama', 'Divisi')->get();
+        return view('admin.calendar.index', compact('users'));
     }
 }
