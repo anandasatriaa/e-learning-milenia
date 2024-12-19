@@ -1,7 +1,18 @@
 @extends('pages.layouts.app')
 @section('title', 'Dashboard')
 @section('css')
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/index.global.min.css' rel="stylesheet">
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.15/index.global.min.css' rel="stylesheet">
+    <style>
+        .fc .fc-button-primary:disabled {
+            background-color: #0d6efd !important;
+        }
 
+        .fc-toolbar .fc-button {
+            background-color: #0d6efd !important;
+        }
+    </style>
 @endsection
 @section('content')
     <div class="page-inner">
@@ -171,7 +182,8 @@
                                                                         No Category
                                                                     @endif
                                                                 </span>
-                                                                <span class="text-muted fw-bold">{{ $courseEnrolleds->progress }}%</span>
+                                                                <span
+                                                                    class="text-muted fw-bold">{{ $courseEnrolleds->progress }}%</span>
                                                             </div>
                                                             <div class="progress" style="height: 6px;">
                                                                 <div class="progress-bar bg-primary" role="progressbar"
@@ -210,19 +222,93 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Calendar -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Detail Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><b>Ini adalah rentang tanggal Anda harus selesai mengerjakan course.</b></p>
+                    <p><b>Pelatihan:</b> <span id="modalPelatihan"></span></p>
+                    <p><b>Nama:</b> <span id="modalNama"></span></p>
+                    <p><b>Divisi:</b> <span id="modalDivisi"></span></p>
+                    <p><b>Rentang Tanggal:</b> <span id="modalTanggal"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('js')
     <!-- FullCalendar JS -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.15/index.global.min.js'></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
+
+            // Data events yang dikirim dari backend (Laravel)
+            var events = @json($events); // Pastikan data events sudah tersedia di controller
+
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth'
+                initialView: 'dayGridMonth', // Tampilan kalender bulanan
+                events: events, // Menambahkan event yang diambil dari database
+
+                // Menambahkan divisi dan nama ke dalam tampilan event
+                eventContent: function(arg) {
+                    let content = document.createElement('div');
+                    let title = arg.event.title;
+                    let nama = arg.event.extendedProps.nama || ''; // Default jika nama tidak ada
+                    let divisi = arg.event.extendedProps.divisi || ''; // Default jika divisi tidak ada
+
+                    // Format "title - nama (divisi)"
+                    content.innerHTML = `<b>"${title}"</b> - ${nama} (${divisi})`;
+
+                    return {
+                        domNodes: [content]
+                    };
+                },
+
+                eventClick: function(info) {
+                    // Konversi tanggal end (exclusive) menjadi inclusive dengan mengurangi 1 hari
+                    let endDate = info.event.end ?
+                        new Date(info.event.end.getTime() -
+                            86400000) // Kurangi 1 hari (86400000 ms = 1 hari)
+                        :
+                        null;
+
+                    // Isi data ke dalam modal
+                    document.getElementById('modalPelatihan').innerText = info.event.title;
+                    document.getElementById('modalNama').innerText = info.event.extendedProps.nama ||
+                        '-';
+                    document.getElementById('modalDivisi').innerText = info.event.extendedProps
+                        .divisi || '-';
+                    document.getElementById('modalTanggal').innerText =
+                        info.event.start.toLocaleDateString() +
+                        ' - ' +
+                        (endDate ? endDate.toLocaleDateString() : 'Tidak ditentukan');
+
+                    // Tampilkan modal
+                    var eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+                    eventModal.show();
+                },
+
+
+                // Menambahkan pengaturan lainnya, jika diperlukan
+                eventColor: '#378006', // Menentukan warna event default
             });
+
+            // Render kalender
             calendar.render();
         });
     </script>
+
 
 @endsection
