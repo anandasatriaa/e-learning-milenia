@@ -49,7 +49,6 @@
                             <div class="mb-3">
                                 <label for="division" class="form-label">Divisi</label>
                                 <select id="division" name="division" class="form-select form-dropdown" required>
-                                    <option value="">Pilih Divisi</option>
                                     @foreach ($usersWithFoto->pluck('Divisi')->unique() as $division)
                                         <option value="{{ $division }}">{{ $division }}</option>
                                     @endforeach
@@ -160,6 +159,7 @@
         integrity="sha512-IOebNkvA/HZjMM7MxL0NYeLYEalloZ8ckak+NDtOViP7oiYzG5vn6WVXyrJDiJPhl4yRdmNAG49iuLmhkUdVsQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+    {{-- Calendar --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Inisialisasi FullCalendar
@@ -261,6 +261,7 @@
         }
     </script>
 
+    {{-- Selectize --}}
     <script>
         // Inisialisasi Selectize
         $('#personName').selectize({
@@ -299,12 +300,23 @@
         });
     </script>
 
+<script>
+    $(document).ready(function() {
+        $('.form-dropdown').selectize({
+            placeholder: 'Pilih Divisi', // Menambahkan placeholder
+            allowEmptyOption: true // Mengizinkan opsi kosong
+        });
+    });
+</script>
+
+    {{-- Data Table --}}
     <script>
         $(document).ready(function() {
             $('#table-hapus').DataTable({});
         });
     </script>
 
+    {{-- Button Hapus --}}
     <script>
         $(document).on('click', '[id^="btnHapus_"]', function(e) {
             e.preventDefault(); // Mencegah aksi default tombol jika sudah terhubung ke form
@@ -330,7 +342,8 @@
                 if (willDelete) {
                     // Mengirim permintaan DELETE menggunakan Ajax
                     $.ajax({
-                        url: '/admin/calendar/course-schedule/calendar/destroy/' + eventId, // URL untuk menghapus event berdasarkan ID
+                        url: '/admin/calendar/course-schedule/calendar/destroy/' +
+                            eventId, // URL untuk menghapus event berdasarkan ID
                         method: 'DELETE',
                         data: {
                             _token: '{{ csrf_token() }}' // Token CSRF untuk keamanan
@@ -346,7 +359,7 @@
                             });
                             // Menghapus baris data di tabel setelah dihapus
                             $('#btnHapus_' + eventId).closest('tr')
-                        .remove(); // Menghapus baris yang sesuai
+                                .remove(); // Menghapus baris yang sesuai
                         },
                         error: function() {
                             swal("Error!", "Something went wrong.", "error");
