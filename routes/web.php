@@ -69,6 +69,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::group(['prefix' => 'calendar', 'as' => 'calendar.'], function () {
             Route::get('/course-schedule', [CalendarController::class, 'index'])->name('calendar.index');
+            Route::post('/course-schedule/calendar', [CalendarController::class, 'store'])->name('calendar.store');
         });
 
         Route::group(['prefix' => 'user', 'as' => 'user.'], function () {

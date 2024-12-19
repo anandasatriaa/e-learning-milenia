@@ -1,3 +1,17 @@
+<script>
+    @php
+        $event = $event ?? null;
+    @endphp
+
+    // Pastikan $event tidak null sebelum menggunakan
+    @if ($event)
+        console.log("Event yang baru disimpan:", @json($event));
+    @else
+        console.log("Tidak ada event untuk ditampilkan.");
+    @endif
+</script>
+
+
  <script src="{{ asset('js/plugin/webfont/webfont.min.js') }}"></script>
  <script>
      WebFont.load({

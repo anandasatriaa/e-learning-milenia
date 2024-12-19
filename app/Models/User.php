@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Course\Course;
 use App\Models\Nilai\Nilai;
+use App\Models\Calendar\Calendar;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -112,5 +113,10 @@ class User extends Authenticatable
     public function nilai()
     {
         return $this->hasMany(Nilai::class);
+    }
+
+    public function calendar()
+    {
+        return $this->belongsToMany(Calendar::class,'user_id');
     }
 }
