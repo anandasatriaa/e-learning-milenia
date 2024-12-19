@@ -24,9 +24,21 @@ class CalendarController extends Controller
             return $user;
         });
 
+        // Menyiapkan data untuk FullCalendar
+        $eventsForFullCalendar = $events->map(function ($event) {
+            return [
+                'id' => $event->id,
+                'title' => $event->acara . ' - ' . $event->nama . ' (' . $event->divisi . ')',
+                'start' => $event->start_date . 'T00:00:00', // Format tanggal ke format FullCalendar
+                'end' => $event->end_date . 'T23:59:59', // Format tanggal ke format FullCalendar
+                'backgroundColor' => $event->bg_color,
+            ];
+        });
+
         // Mengirimkan data ke view
-        return view('admin.calendar.index', compact('usersWithFoto', 'events'));
+        return view('admin.calendar.index', compact('usersWithFoto', 'eventsForFullCalendar'));
     }
+
 
     public function store(Request $request)
     {

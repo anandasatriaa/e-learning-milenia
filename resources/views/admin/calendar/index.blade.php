@@ -113,19 +113,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Inisialisasi Selectize (jika digunakan)
-            var selectCategory = $(".form-dropdown").selectize({
-                respect_word_boundaries: false,
-                closeAfterSelect: true,
-                plugins: ["clear_button"],
-            });
-
             // Inisialisasi FullCalendar
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 selectable: true,
-                events: @json($events),
+                events: @json($eventsForFullCalendar), // Menggunakan data events yang sudah diproses
             });
 
             calendar.render();
@@ -177,15 +170,15 @@
                             endDate: endDate,
                             backgroundColor: backgroundColor,
                             userId: getUserIdByPersonName(
-                                personName) // Menambahkan user_id (null jika personName tidak ada)
+                                    personName
+                                    ) // Menambahkan user_id (null jika personName tidak ada)
                         },
                         success: function(response) {
                             console.log('Data berhasil disimpan:', response);
 
                             // Menambahkan event ke calendar setelah berhasil
                             calendar.addEvent({
-                                id: response
-                                .id, // Menggunakan ID yang dikirimkan dari server
+                                id: response.id, // Menggunakan ID yang dikirimkan dari server
                                 title: response.title, // Judul event
                                 start: response.start, // Tanggal mulai
                                 end: response.end, // Tanggal selesai
@@ -204,6 +197,7 @@
                 }
             });
         });
+
 
         // Fungsi untuk mendapatkan user_id berdasarkan personName
         function getUserIdByPersonName(personName) {
