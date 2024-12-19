@@ -98,6 +98,55 @@
                 </div>
             </div>
         </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Hapus Jadwal Pelatihan</h4>
+            </div>
+            <div class="card-body">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="table-hapus" class="display table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Pelatihan</th>
+                                    <th>Nama/Divisi</th>
+                                    <th>Tanggal Mulai</th>
+                                    <th>Tanggal Selesai</th>
+                                    <th>Color</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($events as $event)
+                                    <tr>
+                                        <td>{{ $event->acara }}</td>
+                                        <td>
+                                            @if ($event->nama)
+                                                {{ $event->nama }} - {{ $event->divisi }}
+                                            @else
+                                                {{ $event->divisi }}
+                                            @endif
+                                        </td>
+                                        <td>{{ \Carbon\Carbon::parse($event->start_date)->format('d M Y') }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($event->end_date)->format('d M Y') }}</td>
+                                        <td><span class="badge"
+                                                style="background-color: {{ $event->bg_color }}">{{ $event->bg_color }}</span>
+                                        </td>
+                                        <td>
+                                            <button type="button" id="btnHapus_{{ $event->id }}"
+                                                class="btn btn-icon btn-round btn-danger" data-id="{{ $event->id }}">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 @endsection
@@ -170,15 +219,16 @@
                             endDate: endDate,
                             backgroundColor: backgroundColor,
                             userId: getUserIdByPersonName(
-                                    personName
-                                    ) // Menambahkan user_id (null jika personName tidak ada)
+                                personName
+                            ) // Menambahkan user_id (null jika personName tidak ada)
                         },
                         success: function(response) {
                             console.log('Data berhasil disimpan:', response);
 
                             // Menambahkan event ke calendar setelah berhasil
                             calendar.addEvent({
-                                id: response.id, // Menggunakan ID yang dikirimkan dari server
+                                id: response
+                                    .id, // Menggunakan ID yang dikirimkan dari server
                                 title: response.title, // Judul event
                                 start: response.start, // Tanggal mulai
                                 end: response.end, // Tanggal selesai
@@ -249,6 +299,70 @@
         });
     </script>
 
+    <script>
+        $(document).ready(function() {
+            $('#table-hapus').DataTable({});
+        });
+    </script>
 
+    <script>
+        $(document).on('click', '[id^="btnHapus_"]', function(e) {
+            e.preventDefault(); // Mencegah aksi default tombol jika sudah terhubung ke form
+
+            let eventId = $(this).data('id'); // Mengambil ID dari tombol yang diklik
+
+            swal({
+                title: 'Yakin menghapus ini?',
+                text: "Anda tidak dapat mengembalikannya!",
+                type: 'warning',
+                buttons: {
+                    cancel: {
+                        visible: true,
+                        text: 'Tidak!',
+                        className: 'btn btn-danger'
+                    },
+                    confirm: {
+                        text: 'Ya, hapus!',
+                        className: 'btn btn-success'
+                    }
+                }
+            }).then((willDelete) => {
+                if (willDelete) {
+                    // Mengirim permintaan DELETE menggunakan Ajax
+                    $.ajax({
+                        url: '/admin/calendar/course-schedule/calendar/destroy/' + eventId, // URL untuk menghapus event berdasarkan ID
+                        method: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}' // Token CSRF untuk keamanan
+                        },
+                        success: function(response) {
+                            swal("Data berhasil dihapus!", {
+                                icon: "success",
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-success'
+                                    }
+                                }
+                            });
+                            // Menghapus baris data di tabel setelah dihapus
+                            $('#btnHapus_' + eventId).closest('tr')
+                        .remove(); // Menghapus baris yang sesuai
+                        },
+                        error: function() {
+                            swal("Error!", "Something went wrong.", "error");
+                        }
+                    });
+                } else {
+                    swal("Data tidak jadi dihapus!", {
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 
 @endsection

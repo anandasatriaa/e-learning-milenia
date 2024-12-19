@@ -36,7 +36,7 @@ class CalendarController extends Controller
         });
 
         // Mengirimkan data ke view
-        return view('admin.calendar.index', compact('usersWithFoto', 'eventsForFullCalendar'));
+        return view('admin.calendar.index', compact('usersWithFoto', 'eventsForFullCalendar', 'events'));
     }
 
 
@@ -97,4 +97,12 @@ class CalendarController extends Controller
             'backgroundColor' => $event->bg_color,
         ]);
     }
+
+    public function destroy($id)
+    {
+        $event = Calendar::findOrFail($id); // Mencari data berdasarkan ID
+        $event->delete(); // Menghapus data
+        return response()->json(['success' => true]);
+    }
+
 }
