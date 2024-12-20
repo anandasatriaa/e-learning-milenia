@@ -80,27 +80,60 @@ class NilaiController extends Controller
         foreach ($moduls as $modul) {
             // Ambil jawaban quiz untuk pengguna
             foreach ($modul->modulQuiz as $quiz) {
+                // Ambil jawaban pengguna berdasarkan quiz ID dan user ID
                 $quiz->userAnswer = ModulQuizUserAnswer::where('modul_quizzes_id', $quiz->id)
-                ->where('user_id', $user_id)
+                    ->where('user_id', $user_id)
                     ->first(); // Jawaban pengguna pada quiz ini
+
+                // Log kode jawaban yang didapatkan
+                Log::info('Jawaban pengguna untuk quiz', [
+                    'quiz_id' => $quiz->id,
+                    'user_id' => $user_id,
+                    'jawaban_pengguna' => $quiz->userAnswer ? $quiz->userAnswer->jawaban : 'Tidak ada jawaban',
+                    'kode_jawaban_pengguna' => $quiz->userAnswer ? $quiz->userAnswer->kode_jawaban : 'Tidak ada kode jawaban',
+                ]);
 
                 // Ambil opsi pilihan jawaban untuk quiz
                 $quiz->options = ModulQuizAnswer::where('modul_quiz_id', $quiz->id)->get();
+
+                // Perbandingan kode jawaban pengguna dengan kunci jawaban
+                if ($quiz->userAnswer) {
+                    $quiz->is_correct = ($quiz->userAnswer->kode_jawaban === $quiz->kunci_jawaban);
+                    $quiz->correct_answer = $quiz->kunci_jawaban;
+
+                    // Log perbandingan kode jawaban
+                    Log::info('Perbandingan kode jawaban pengguna dengan kunci jawaban', [
+                        'quiz_id' => $quiz->id,
+                        'kode_jawaban_pengguna' => $quiz->userAnswer->kode_jawaban,
+                        'kunci_jawaban' => $quiz->kunci_jawaban,
+                        'is_correct' => $quiz->is_correct,
+                    ]);
+                } else {
+                    $quiz->is_correct = false;
+                    $quiz->correct_answer = null;
+
+                    // Log jika tidak ada jawaban pengguna
+                    Log::info('Tidak ada jawaban pengguna untuk quiz', [
+                        'quiz_id' => $quiz->id,
+                        'user_id' => $user_id,
+                    ]);
+                }
             }
 
             // Ambil jawaban essay untuk pengguna
             foreach ($modul->modulEssay as $essay) {
                 $essay->userAnswer = ModulEssayAnswer::where('course_modul_id', $modul->id)
-                ->where('user_id', $user_id)
+                    ->where('user_id', $user_id)
                     ->first(); // Jawaban pengguna pada essay ini
+
+                // Log kode jawaban essay
+                Log::info('Jawaban pengguna untuk essay', [
+                    'essay_id' => $essay->id,
+                    'user_id' => $user_id,
+                    'jawaban_pengguna' => $essay->userAnswer ? $essay->userAnswer->jawaban : 'Tidak ada jawaban',
+                ]);
             }
         }
-
-        Log::info('Moduls data:', ['moduls' => $moduls]);
-        Log::info('Modul Quiz Data:', ['quiz_data' => $moduls->pluck('modulQuiz')]);
-        Log::info('Modul Essay Data:', ['essay_data' => $moduls->pluck('modulEssay')]);
-
-
 
         // Return data dalam format JSON untuk frontend
         return response()->json([
@@ -113,8 +146,8 @@ class NilaiController extends Controller
                 'name' => $user->Nama,
             ],
         ]);
-
-        
-
     }
+
+
+
 }

@@ -168,132 +168,153 @@
 @endsection
 @section('js')
 
-    <script>
-        $('#reviewModal').on('show.bs.modal', function(event) {
-            var button = $(event.relatedTarget);
-            var courseId = button.data('course-id');
-            var userId = button.data('user-id');
-            var modal = $(this);
+<script>
+    $('#reviewModal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget);
+        var courseId = button.data('course-id');
+        var userId = button.data('user-id');
+        var modal = $(this);
 
-            $.ajax({
-                url: '/admin/course/get-review-data/' + courseId + '/' + userId,
-                method: 'GET',
-                // Success function
-                success: function(response) {
-                    // Update modal title
-                    modal.find('.modal-title').text('Review & Penilaian ' + response.user.name);
+        $.ajax({
+            url: '/admin/course/get-review-data/' + courseId + '/' + userId, 
+            method: 'GET',
+            success: function(response) {
+                modal.find('.modal-title').text('Review & Penilaian ' + response.user.name);
 
-                    // Build the accordion content
-                    if (response.course.moduls && response.course.moduls.length > 0) {
-                        var accordionContent = '';
-                        response.course.moduls.forEach(function(modul) {
-                            var quizContent = '';
-                            if (modul.modul_quiz && modul.modul_quiz.length > 0) {
-                                quizContent = modul.modul_quiz.map(function(quiz) {
+                if (response.course.moduls && response.course.moduls.length > 0) {
+                    var accordionContent = '';
+                    response.course.moduls.forEach(function(modul) {
+                        var quizContent = '';
+                        if (modul.modul_quiz && modul.modul_quiz.length > 0) {
+                            quizContent = modul.modul_quiz.map(function(quiz, index) {
+                                // Tampilkan jawaban quiz hanya untuk user yang sesuai
+                                if (quiz.userAnswer && quiz.userAnswer.user_id == userId) {
+    var userAnswer = quiz.userAnswer.jawaban;
+    var correctAnswer = quiz.correct_answer;
+
+    // Menambahkan console log untuk melihat nilai kunci jawaban, jawaban pengguna, dan kode jawaban
+    console.log('Kunci Jawaban:', correctAnswer);
+    console.log('Jawaban Pengguna:', userAnswer);
+    console.log('Kode Jawaban Pengguna:', quiz.userAnswer.kode_jawaban_pengguna);
+
+    return `
+        <div class="mb-4 p-3 border rounded shadow-sm bg-light">
+            <h5><strong>${index + 1}. </strong> ${quiz.pertanyaan || 'Tidak ada pertanyaan'}</h5>
+            <p><strong>Jawaban Pengguna:</strong> ${quiz.userAnswer.jawaban}</p>
+            <p><strong>Kunci Jawaban:</strong> ${quiz.correct_answer || 'Tidak ada kunci jawaban'}</p>
+            ${quiz.options.length > 0 ? `
+                <p><strong>Opsi Jawaban:</strong></p>
+                <ul class="list-group">
+                    ${quiz.options.map(function(option) {
+                        let optionClass = '';
+                        // Cek apakah pilihan adalah kunci jawaban dan jika jawaban pengguna sesuai
+                        if (option.pilihan === correctAnswer) {
+                            optionClass = 'bg-success text-white'; // Kunci jawaban benar
+                            // Jika jawaban pengguna sesuai dengan kunci jawaban, beri bg-primary
+                            if (option.pilihan === userAnswer) {
+                                optionClass = 'bg-primary text-white'; // Jawaban benar oleh pengguna
+                            }
+                        }
+                        // Jika jawaban pengguna salah, beri bg-danger
+                        if (option.pilihan === userAnswer && option.pilihan !== correctAnswer) {
+                            optionClass = 'bg-danger text-white'; // Jawaban salah
+                        }
+                        return `<li class="list-group-item ${optionClass}">${option.pilihan}</li>`;
+                    }).join('')}
+                </ul>
+            ` : ''}
+        </div>
+    `;
+}
+
+
+
+                            }).join('');
+                        } else {
+                            quizContent = '<p class="text-muted ms-3">Tidak ada soal quiz di modul.</p>';
+                        }
+
+                        var essayContent = '';
+                        if (modul.modul_essay && modul.modul_essay.length > 0) {
+                            essayContent = modul.modul_essay.map(function(essay, index) {
+                                if (essay.userAnswer && essay.userAnswer.user_id == userId) {
                                     return `
                                         <div class="mb-4 p-3 border rounded shadow-sm bg-light">
-                                            <h5><strong>Pertanyaan:</strong> ${quiz.pertanyaan || 'Tidak ada pertanyaan'}</h5>
-                                            <p><strong>Jawaban Pengguna:</strong> ${quiz.userAnswer ? quiz.userAnswer.jawaban : 'Tidak ada jawaban'}</p>
-                                            <p><strong>Kunci Jawaban:</strong> ${quiz.kunci_jawaban}</p>
-                                            ${quiz.options.length > 0 ? `
-                                                        <p><strong>Opsi Jawaban:</strong></p>
-                                                        <ul class="list-group">
-                                                            ${quiz.options.map(option => `<li class="list-group-item">${option.pilihan}</li>`).join('')}
-                                                        </ul>
-                                                    ` : ''}
+                                            <h5><strong>${index + 1}. </strong> ${essay.pertanyaan || 'Tidak ada pertanyaan'}</h5>
+                                            <p><strong>Jawaban Pengguna:</strong> ${essay.userAnswer.jawaban}</p>
                                         </div>
                                     `;
-                                }).join('');
-                            } else {
-                                quizContent =
-                                    '<p class="text-muted ms-3">Tidak ada data quiz.</p>';
-                            }
+                                }
+                            }).join(''); 
+                        } else {
+                            essayContent = '<p class="text-muted ms-3">Tidak ada soal essay di modul.</p>';
+                        }
 
-                            var essayContent = '';
-                            if (modul.modul_essay && modul.modul_essay.length > 0) {
-                                essayContent = modul.modul_essay.map(function(essay) {
-                                    return `
-                                        <div class="mb-4 p-3 border rounded shadow-sm bg-light">
-                                            <h5><strong>Pertanyaan:</strong> ${essay.pertanyaan || 'Tidak ada pertanyaan'}</h5>
-                                            <p><strong>Jawaban Pengguna:</strong> ${essay.userAnswer ? essay.userAnswer.jawaban : 'Tidak ada jawaban'}</p>
-                                        </div>
-                                    `;
-                                }).join('');
-                            } else {
-                                essayContent =
-                                    '<p class="text-muted ms-3">Tidak ada data essay.</p>';
-                            }
-
-
-                            console.log('Quiz Content:', quizContent);
-                            console.log('Essay Content:', essayContent);
-
-
-                            accordionContent += `
-                                <div class="card border rounded">
-                                    <div class="card-header collapsed" data-bs-toggle="collapse" data-bs-target="#modul${modul.id}">
-                                        <div class="span-title d-flex align-items-center">
-                                            <span class="me-2 bg-secondary p-2 my-auto rounded text-white d-flex align-items-center justify-content-center">
-                                                <i class="far fa-file-alt"></i>
-                                            </span>
-                                            ${modul.nama_modul}
-                                        </div>
-
-                                        <div class="span-mode"></div>
+                        accordionContent += `
+                            <div class="card border rounded">
+                                <div class="card-header collapsed" data-bs-toggle="collapse" data-bs-target="#modul${modul.id}">
+                                    <div class="span-title d-flex align-items-center">
+                                        <span class="me-2 bg-secondary p-2 my-auto rounded text-white d-flex align-items-center justify-content-center">
+                                            <i class="far fa-file-alt"></i>
+                                        </span>
+                                        ${modul.nama_modul}
                                     </div>
-                                    <div id="modul${modul.id}" class="collapse" data-parent="#accordionReview">
-                                        <div class="card-body">
-                                            <div class="accordion accordion-black">
-                                                <div class="card border rounded">
-                                                    <div class="card-header collapsed" data-bs-toggle="collapse" data-bs-target="#quiz${modul.id}">
-                                                        <div class="span-title d-flex align-items-center">
-                                                            <span class="me-2 bg-primary p-2 my-auto rounded text-white d-flex align-items-center justify-content-center">
-                                                                <i class="far fa-comment-dots"></i>
-                                                            </span> Quiz    
-                                                        </div>
-                                                        <div class="span-mode"></div>
+                                    <div class="span-mode"></div>
+                                </div>
+                                <div id="modul${modul.id}" class="collapse" data-parent="#accordionReview">
+                                    <div class="card-body">
+                                        <div class="accordion accordion-black">
+                                            <div class="card border rounded">
+                                                <div class="card-header collapsed" data-bs-toggle="collapse" data-bs-target="#quiz${modul.id}">
+                                                    <div class="span-title d-flex align-items-center">
+                                                        <span class="me-2 bg-primary p-2 my-auto rounded text-white d-flex align-items-center justify-content-center">
+                                                            <i class="far fa-comment-dots"></i>
+                                                        </span> Quiz    
                                                     </div>
-                                                    <div id="quiz${modul.id}" class="collapse">
-                                                        <div class="card-body">
-                                                            ${quizContent}
-                                                        </div>
+                                                    <div class="span-mode"></div>
+                                                </div>
+                                                <div id="quiz${modul.id}" class="collapse">
+                                                    <div class="card-body">
+                                                        ${quizContent}
                                                     </div>
                                                 </div>
-                                                <div class="card border rounded">
-                                                    <div class="card-header collapsed" data-bs-toggle="collapse" data-bs-target="#essay${modul.id}">
-                                                        <div class="span-title d-flex align-items-center">
-                                                            <span class="me-2 bg-warning p-2 my-auto rounded text-white d-flex align-items-center justify-content-center">
-                                                                <i class="far fa-file-alt"></i>
-                                                            </span> Essay
-                                                        </div>
-                                                        <div class="span-mode"></div>
+                                            </div>
+                                            <div class="card border rounded">
+                                                <div class="card-header collapsed" data-bs-toggle="collapse" data-bs-target="#essay${modul.id}">
+                                                    <div class="span-title d-flex align-items-center">
+                                                        <span class="me-2 bg-warning p-2 my-auto rounded text-white d-flex align-items-center justify-content-center">
+                                                            <i class="far fa-file-alt"></i>
+                                                        </span> Essay
                                                     </div>
-                                                    <div id="essay${modul.id}" class="collapse">
-                                                        <div class="card-body">
-                                                            ${essayContent}
-                                                        </div>
+                                                    <div class="span-mode"></div>
+                                                </div>
+                                                <div id="essay${modul.id}" class="collapse">
+                                                    <div class="card-body">
+                                                        ${essayContent}
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            `;
-                        });
+                            </div>
+                        `;
+                    });
 
-                        modal.find('#accordionReview').html(accordionContent);
-                    } else {
-                        modal.find('#accordionReview').html('<p>Tidak ada modul yang tersedia.</p>');
-                    }
-                },
-
-                error: function(err) {
-                    console.error('Error fetching review data:', err);
-                    modal.find('#accordionReview').html(
-                        '<p>Gagal memuat data. Silakan coba lagi nanti.</p>');
+                    modal.find('#accordionReview').html(accordionContent);
+                } else {
+                    modal.find('#accordionReview').html('<p>Tidak ada modul yang tersedia.</p>');
                 }
-            });
+            },
+            error: function(err) {
+                console.error('Error fetching review data:', err);
+                modal.find('#accordionReview').html('<p>Gagal memuat data. Silakan coba lagi nanti.</p>');
+            }
         });
-    </script>
+    });
+</script>
+
+
+
 
 @endsection
