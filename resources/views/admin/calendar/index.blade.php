@@ -35,14 +35,14 @@
 
                     <!-- Form Input Acara -->
                     <div class="mt-4 col-6 col-md-6">
-                        <h5>Input Acara</h5>
+                        <h5>Input Pelatihan</h5>
                         <form action="{{ route('admin.calendar.calendar.store') }}" method="POST" id="eventForm">
                             @csrf
                             <!-- Input Nama Acara -->
                             <div class="mb-3">
-                                <label for="eventName" class="form-label">Nama Acara</label>
+                                <label for="eventName" class="form-label">Nama Pelatihan</label>
                                 <input type="text" id="eventName" name="eventName" class="form-control"
-                                    placeholder="Masukkan nama acara" required>
+                                    placeholder="Masukkan nama pelatihan" required>
                             </div>
 
                             <!-- Dropdown Divisi -->
