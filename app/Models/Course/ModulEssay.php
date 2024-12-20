@@ -17,4 +17,10 @@ class ModulEssay extends Model
         return $this->belongsTo(CourseModul::class);
     }
 
+    public function modulEssayAnswer()
+    {
+        return $this->hasMany(ModulEssayAnswer::class, 'course_modul_id', 'course_modul_id');
+    }
+
+
 }

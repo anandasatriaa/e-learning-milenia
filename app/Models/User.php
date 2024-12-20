@@ -112,7 +112,7 @@ class User extends Authenticatable
 
     public function nilai()
     {
-        return $this->hasMany(Nilai::class);
+        return $this->hasMany(Nilai::class, 'user_id', 'ID');
     }
 
     public function calendar()

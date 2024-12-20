@@ -80,6 +80,6 @@ class Course extends Model
 
     public function nilai()
     {
-        return $this->hasMany(Nilai::class);
+        return $this->hasManyThrough(Nilai::class, UserCourseEnroll::class);
     }
 }

@@ -86,7 +86,7 @@
                                                 </div>
                                             </div>
                                             <div class="text-end">
-                                                <a href="{{ route('admin.course.nilai.detail', ['id' => $course->id]) }}"
+                                                <a href="{{ route('admin.course.nilai.detail', ['course_id' => $course->id]) }}"
                                                     class="btn btn-label-info btn-round btn-sm me-2 stretched-link">
                                                     Detail <i class="fas fa-search"></i>
                                                 </a>

@@ -65,6 +65,7 @@ Route::group(['middleware' => 'auth'], function () {
 
             Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai.index');
             Route::get('/nilai/{course_id}', [NilaiController::class, 'detail'])->name('nilai.detail');
+            Route::get('/get-review-data/{course_id}/{user_id}', [NilaiController::class, 'showReviewModal'])->name('nilai.showReviewModal');
         });
 
         Route::group(['prefix' => 'calendar', 'as' => 'calendar.'], function () {

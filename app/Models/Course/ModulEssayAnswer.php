@@ -9,9 +9,11 @@ class ModulEssayAnswer extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'course_modul_id',
-        'user_id',
-        'jawaban'
-    ];
+    protected $table = 'modul_essay_answers';
+    protected $fillable = ['course_modul_id', 'user_id', 'jawaban'];
+
+    public function courseModul()
+    {
+        return $this->belongsTo(CourseModul::class);
+    }
 }

@@ -50,12 +50,12 @@ class CourseModul extends Model
 
     public function modulQuiz()
     {
-        return $this->hasMany(ModulQuiz::class);
+        return $this->hasMany(ModulQuiz::class,'course_modul_id', 'id');
     }
 
     public function modulEssay()
     {
-        return $this->hasMany(ModulEssay::class);
+        return $this->hasMany(ModulEssay::class,'course_modul_id', 'id');
     }
 
     // Relasi ke tabel modul_quizzes

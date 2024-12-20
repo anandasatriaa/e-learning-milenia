@@ -3,326 +3,297 @@
 @section('css')
     <style>
         .accordion .card {
-            margin-bottom: 0.5rem; /* Sesuaikan sesuai keinginan */
+            margin-bottom: 0.5rem;
+            /* Sesuaikan sesuai keinginan */
+        }
+
+        .accordion .card .card-body {
+            padding: 5px !important;
         }
     </style>
 @endsection
 @section('content')
-<div class="page-inner">
-    <div class="row">
-        <div class="col-md-12 col-lg-12">
-            <div class="card card-round">
-                <div class="card-header">
-                    <div class="card-head-row">
-                        <div class="card-title">
-                            <div class="col-icon d-flex align-items-center">
-                                <!-- Image -->
-                                <img class="rounded me-3" src="{{ asset('img/no_image.jpg') }}" width="15%" alt="Course Image">
+    <div class="page-inner">
+        <div class="row">
+            <div class="col-md-12 col-lg-12">
+                <div class="card card-round">
+                    <div class="card-header">
+                        <div class="card-head-row">
+                            <div class="card-title">
+                                <div class="col-icon d-flex align-items-center">
+                                    <!-- Image -->
+                                    <img class="rounded me-3" src="{{ $course->thumbnail_url }}" width="200px"
+                                        alt="Course Image">
 
-                                <!-- Text content: Peserta Kursus, Modul, and Peserta -->
-                                <div>
-                                    <!-- Peserta Kursus -->
-                                    <span class="d-block fw-bold">Course 1</span>
-
-                                    <!-- Modul and Peserta -->
-                                    <div class="mt-1 fs-6">
-                                        <div class="d-flex align-items-center mb-1">
-                                            <i class="fas fa-book me-2"></i>
-                                            <span class="fw-semibold">5 Modul</span>
-                                        </div>
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-user-friends me-2"></i>
-                                            <span class="fw-semibold">20 Peserta</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="container-fluid mt-4">
-                    <div class="row">
-                        <!-- Card 1 -->
-                        <div class="col-lg-6">
-                            <div class="card card-stats card-round shadow-sm">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-icon">
-                                            <img class="w-100 rounded" src="{{ asset('img/no_image.jpg') }}" alt="Course Image">
-                                        </div>
-                                        <div class="col col-stats ms-3 ms-sm-0">
-                                            <div class="number">
-                                                <p class="card-category fw-bold text-dark align-middle">
-                                                    <span class="d-flex align-items-center">
-                                                        <i class="fas fa-user-friends me-2 fs-4"></i>
-                                                        <span class="ms-2 fw-semibold fs-4">Peserta 1</span>
-                                                    </span>
-                                                </p>
-                                                <div class="d-flex align-items-center text-muted">
-                                                    <span class="fw-semibold">Nilai Quiz: -</span>
-                                                </div>
-                                                <div class="d-flex align-items-center text-muted">
-                                                    <span class="fw-semibold">Nilai Essay: 100</span>
-                                                </div>
+                                    <!-- Text content: Peserta Kursus, Modul, and Peserta -->
+                                    <div>
+                                        <!-- Peserta Kursus -->
+                                        <span class="d-block fw-bold">{{ $course->nama_kelas }}</span>
+                                        <p class="my-0">
+                                            @if ($course->subCategory && $course->category && $course->divisiCategory && $course->learningCategory)
+                                                {{ $course->learningCategory->nama }} >
+                                                {{ $course->divisiCategory->nama }} >
+                                                {{ $course->category->nama }} >
+                                                {{ $course->subCategory->nama }}
+                                            @elseif ($course->category && $course->divisiCategory && $course->learningCategory)
+                                                {{ $course->learningCategory->nama }} >
+                                                {{ $course->divisiCategory->nama }} >
+                                                {{ $course->category->nama }}
+                                            @elseif ($course->divisiCategory && $course->learningCategory)
+                                                {{ $course->learningCategory->nama }} >
+                                                {{ $course->divisiCategory->nama }}
+                                            @elseif ($course->learningCategory)
+                                                {{ $course->learningCategory->nama }}
+                                            @else
+                                                Data tidak lengkap
+                                            @endif
+                                        </p>
+                                        <!-- Modul and Peserta -->
+                                        <div class="mt-1 fs-6">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <i class="fas fa-book me-2"></i>
+                                                <span class="fw-semibold">{{ $course->modul_count }} Modul</span>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-user-friends me-2"></i>
+                                                <span class="fw-semibold">{{ $course->user_count }} Peserta</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="text-end">
-                                        <a href="#" class="btn btn-label-info btn-round btn-sm me-2 stretched-link" data-bs-toggle="modal" data-bs-target="#reviewModal">
-                                            Review & Nilai <i class="fas fa-search"></i>
-                                        </a>
-                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="container-fluid mt-4">
+                        <div class="row">
+                            @foreach ($course->user as $enrollUser)
+                                @php
+                                    // Menyiapkan URL foto peserta
+                                    $formattedFoto = str_pad($enrollUser->id, 5, '0', STR_PAD_LEFT);
+                                    $fotoUrl = "http://192.168.0.8/hrd-milenia/foto/{$formattedFoto}.JPG";
+                                @endphp
 
-                        <!-- Modal -->
-<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="reviewModalLabel">Review & Penilaian { $peserta_satu}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Form atau konten review -->
-                <div class="accordion accordion-black">
-                    <div class="card">
-                        <div class="card-header" id="headingOne" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                        <div class="span-title">
-                            Modul 1
-                        </div>
-                        <div class="span-mode"></div>
-                        </div>
-
-                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
-                        <div class="card-body">
-                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-                        </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header collapsed" id="headingTwo" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                        <div class="span-title">
-                            Modul 2
-                        </div>
-                        <div class="span-mode"></div>
-                        </div>
-                        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
-                        <div class="card-body">
-                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-                        </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header collapsed" id="headingThree" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                        <div class="span-title">
-                            Modul 3
-                        </div>
-                        <div class="span-mode"></div>
-                        </div>
-                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
-                        <div class="card-body">
-                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-                        </div>
-                        </div>
-                    </div>
-                </div>
-                <form>
-                    <div class="mb-3">
-                        <label for="nilaiQuiz" class="form-label">Nilai Quiz</label>
-                        <input type="number" class="form-control" id="nilaiQuiz" placeholder="Masukkan nilai quiz">
-                    </div>
-                    <div class="mb-3">
-                        <label for="nilaiEssay" class="form-label">Nilai Essay</label>
-                        <input type="number" class="form-control" id="nilaiEssay" placeholder="Masukkan nilai essay">
-                    </div>
-                    <div class="mb-3">
-                        <label for="komentar" class="form-label">Komentar</label>
-                        <textarea class="form-control" id="komentar" rows="3" placeholder="Tulis komentar"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <button type="button" class="btn btn-primary">Simpan Penilaian</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-                        <!-- Card 2 -->
-                        <div class="col-lg-6">
-                            <div class="card card-stats card-round shadow-sm">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-icon">
-                                            <img class="w-100 rounded" src="{{ asset('img/no_image.jpg') }}" alt="Course Image">
-                                        </div>
-                                        <div class="col col-stats ms-3 ms-sm-0">
-                                            <div class="number">
-                                                <p class="card-category fw-bold text-dark align-middle">
-                                                    <span class="d-flex align-items-center">
-                                                        <i class="fas fa-user-friends me-2 fs-4"></i>
-                                                        <span class="ms-2 fw-semibold fs-4">Peserta 1</span>
-                                                    </span>
-                                                </p>
-                                                <div class="d-flex align-items-center text-muted">
-                                                    <span class="fw-semibold">Nilai Quiz: -</span>
+                                <div class="col-lg-6">
+                                    <div class="card card-stats card-round shadow-sm">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-icon">
+                                                    <!-- Foto Peserta -->
+                                                    <img class="w-100 rounded" src="{{ $fotoUrl }}"
+                                                        alt="Course Image">
                                                 </div>
-                                                <div class="d-flex align-items-center text-muted">
-                                                    <span class="fw-semibold">Nilai Essay: 100</span>
+                                                <div class="col col-stats ms-3 ms-sm-0">
+                                                    <div class="number">
+                                                        <p class="card-category fw-bold text-dark align-middle">
+                                                            <span class="d-flex align-items-center">
+                                                                <i class="fas fa-user-friends me-2 fs-4"></i>
+                                                                <span
+                                                                    class="ms-2 fw-semibold fs-4">{{ $enrollUser->Nama }}</span>
+                                                            </span>
+                                                        </p>
+                                                        <div class="d-flex align-items-center text-muted">
+                                                            <span class="fw-semibold">Nilai Quiz:
+                                                                {{ $enrollUser->nilai->first()->nilai_quiz ?? '-' }}</span>
+                                                        </div>
+                                                        <div class="d-flex align-items-center text-muted">
+                                                            <span class="fw-semibold">Nilai Essay:
+                                                                {{ $enrollUser->nilai->first()->nilai_essay ?? '-' }}</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <a href="#"
+                                                    class="btn btn-label-info btn-round btn-sm me-2 stretched-link"
+                                                    data-bs-toggle="modal" data-bs-target="#reviewModal"
+                                                    data-course-id="{{ $course->id }}"
+                                                    data-user-id="{{ $enrollUser->id }}">
+                                                    Review & Nilai <i class="fas fa-search"></i>
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="text-end">
-                                        <a href="#" class="btn btn-label-info btn-round btn-sm me-2 stretched-link">
-                                            Review & Nilai <i class="fas fa-search"></i>
-                                        </a>
-                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            @endforeach
 
-                        <!-- Card 2 -->
-                        <div class="col-lg-6">
-                            <div class="card card-stats card-round shadow-sm">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-icon">
-                                            <img class="w-100 rounded" src="{{ asset('img/no_image.jpg') }}" alt="Course Image">
-                                        </div>
-                                        <div class="col col-stats ms-3 ms-sm-0">
-                                            <div class="number">
-                                                <p class="card-category fw-bold text-dark align-middle">
-                                                    <span class="d-flex align-items-center">
-                                                        <i class="fas fa-user-friends me-2 fs-4"></i>
-                                                        <span class="ms-2 fw-semibold fs-4">Peserta 1</span>
-                                                    </span>
-                                                </p>
-                                                <div class="d-flex align-items-center text-muted">
-                                                    <span class="fw-semibold">Nilai Quiz: -</span>
-                                                </div>
-                                                <div class="d-flex align-items-center text-muted">
-                                                    <span class="fw-semibold">Nilai Essay: 100</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="text-end">
-                                        <a href="#" class="btn btn-label-info btn-round btn-sm me-2 stretched-link">
-                                            Review & Nilai <i class="fas fa-search"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Card 2 -->
-                        <div class="col-lg-6">
-                            <div class="card card-stats card-round shadow-sm">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-icon">
-                                            <img class="w-100 rounded" src="{{ asset('img/no_image.jpg') }}" alt="Course Image">
+                            <!-- Modal -->
+                            <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="reviewModalLabel">Review & Penilaian</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
                                         </div>
-                                        <div class="col col-stats ms-3 ms-sm-0">
-                                            <div class="number">
-                                                <p class="card-category fw-bold text-dark align-middle">
-                                                    <span class="d-flex align-items-center">
-                                                        <i class="fas fa-user-friends me-2 fs-4"></i>
-                                                        <span class="ms-2 fw-semibold fs-4">Peserta 1</span>
-                                                    </span>
-                                                </p>
-                                                <div class="d-flex align-items-center text-muted">
-                                                    <span class="fw-semibold">Nilai Quiz: -</span>
-                                                </div>
-                                                <div class="d-flex align-items-center text-muted">
-                                                    <span class="fw-semibold">Nilai Essay: 100</span>
-                                                </div>
+                                        <div class="modal-body">
+                                            <div class="accordion accordion-black" id="accordionReview">
+                                                <!-- Data Modul, Quiz, Essay akan dimuat di sini -->
                                             </div>
+                                            <form>
+                                                <div class="mb-3">
+                                                    <label for="nilaiQuiz" class="form-label">Nilai Quiz</label>
+                                                    <input type="number" class="form-control" id="nilaiQuiz"
+                                                        placeholder="Masukkan nilai quiz">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="nilaiEssay" class="form-label">Nilai Essay</label>
+                                                    <input type="number" class="form-control" id="nilaiEssay"
+                                                        placeholder="Masukkan nilai essay">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="komentar" class="form-label">Komentar</label>
+                                                    <textarea class="form-control" id="komentar" rows="3" placeholder="Tulis komentar"></textarea>
+                                                </div>
+                                            </form>
                                         </div>
-                                    </div>
-                                    <div class="text-end">
-                                        <a href="#" class="btn btn-label-info btn-round btn-sm me-2 stretched-link">
-                                            Review & Nilai <i class="fas fa-search"></i>
-                                        </a>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Tutup</button>
+                                            <button type="button" class="btn btn-primary" id="saveReviewButton">Simpan
+                                                Penilaian</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 @endsection
 @section('js')
-	<!--   Core JS Files   -->
-	<script src="assets/js/core/jquery-3.7.1.min.js"></script>
-	<script src="assets/js/core/popper.min.js"></script>
-	<script src="assets/js/core/bootstrap.min.js"></script>
 
-	<!-- jQuery Scrollbar -->
-	<script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script>
+        $('#reviewModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var courseId = button.data('course-id');
+            var userId = button.data('user-id');
+            var modal = $(this);
 
-	<!-- Chart JS -->
-	<script src="assets/js/plugin/chart.js/chart.min.js"></script>
+            $.ajax({
+                url: '/admin/course/get-review-data/' + courseId + '/' + userId,
+                method: 'GET',
+                // Success function
+                success: function(response) {
+                    // Update modal title
+                    modal.find('.modal-title').text('Review & Penilaian ' + response.user.name);
 
-	<!-- jQuery Sparkline -->
-	<script src="assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
+                    // Build the accordion content
+                    if (response.course.moduls && response.course.moduls.length > 0) {
+                        var accordionContent = '';
+                        response.course.moduls.forEach(function(modul) {
+                            var quizContent = '';
+                            if (modul.modul_quiz && modul.modul_quiz.length > 0) {
+                                quizContent = modul.modul_quiz.map(function(quiz) {
+                                    return `
+                                        <div class="mb-4 p-3 border rounded shadow-sm bg-light">
+                                            <h5><strong>Pertanyaan:</strong> ${quiz.pertanyaan || 'Tidak ada pertanyaan'}</h5>
+                                            <p><strong>Jawaban Pengguna:</strong> ${quiz.userAnswer ? quiz.userAnswer.jawaban : 'Tidak ada jawaban'}</p>
+                                            <p><strong>Kunci Jawaban:</strong> ${quiz.kunci_jawaban}</p>
+                                            ${quiz.options.length > 0 ? `
+                                                        <p><strong>Opsi Jawaban:</strong></p>
+                                                        <ul class="list-group">
+                                                            ${quiz.options.map(option => `<li class="list-group-item">${option.pilihan}</li>`).join('')}
+                                                        </ul>
+                                                    ` : ''}
+                                        </div>
+                                    `;
+                                }).join('');
+                            } else {
+                                quizContent =
+                                    '<p class="text-muted ms-3">Tidak ada data quiz.</p>';
+                            }
 
-	<!-- Chart Circle -->
-	<script src="assets/js/plugin/chart-circle/circles.min.js"></script>
+                            var essayContent = '';
+                            if (modul.modul_essay && modul.modul_essay.length > 0) {
+                                essayContent = modul.modul_essay.map(function(essay) {
+                                    return `
+                                        <div class="mb-4 p-3 border rounded shadow-sm bg-light">
+                                            <h5><strong>Pertanyaan:</strong> ${essay.pertanyaan || 'Tidak ada pertanyaan'}</h5>
+                                            <p><strong>Jawaban Pengguna:</strong> ${essay.userAnswer ? essay.userAnswer.jawaban : 'Tidak ada jawaban'}</p>
+                                        </div>
+                                    `;
+                                }).join('');
+                            } else {
+                                essayContent =
+                                    '<p class="text-muted ms-3">Tidak ada data essay.</p>';
+                            }
 
-	<!-- Datatables -->
-	<script src="assets/js/plugin/datatables/datatables.min.js"></script>
 
-	<!-- Bootstrap Notify -->
-	<script src="assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
+                            console.log('Quiz Content:', quizContent);
+                            console.log('Essay Content:', essayContent);
 
-	<!-- jQuery Vector Maps -->
-	<script src="assets/js/plugin/jsvectormap/jsvectormap.min.js"></script>
-	<script src="assets/js/plugin/jsvectormap/world.js"></script>
 
-	<!-- Sweet Alert -->
-	<script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+                            accordionContent += `
+                                <div class="card border rounded">
+                                    <div class="card-header collapsed" data-bs-toggle="collapse" data-bs-target="#modul${modul.id}">
+                                        <div class="span-title d-flex align-items-center">
+                                            <span class="me-2 bg-secondary p-2 my-auto rounded text-white d-flex align-items-center justify-content-center">
+                                                <i class="far fa-file-alt"></i>
+                                            </span>
+                                            ${modul.nama_modul}
+                                        </div>
 
-	<!-- Kaiadmin JS -->
-	<script src="assets/js/kaiadmin.min.js"></script>
+                                        <div class="span-mode"></div>
+                                    </div>
+                                    <div id="modul${modul.id}" class="collapse" data-parent="#accordionReview">
+                                        <div class="card-body">
+                                            <div class="accordion accordion-black">
+                                                <div class="card border rounded">
+                                                    <div class="card-header collapsed" data-bs-toggle="collapse" data-bs-target="#quiz${modul.id}">
+                                                        <div class="span-title d-flex align-items-center">
+                                                            <span class="me-2 bg-primary p-2 my-auto rounded text-white d-flex align-items-center justify-content-center">
+                                                                <i class="far fa-comment-dots"></i>
+                                                            </span> Quiz    
+                                                        </div>
+                                                        <div class="span-mode"></div>
+                                                    </div>
+                                                    <div id="quiz${modul.id}" class="collapse">
+                                                        <div class="card-body">
+                                                            ${quizContent}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card border rounded">
+                                                    <div class="card-header collapsed" data-bs-toggle="collapse" data-bs-target="#essay${modul.id}">
+                                                        <div class="span-title d-flex align-items-center">
+                                                            <span class="me-2 bg-warning p-2 my-auto rounded text-white d-flex align-items-center justify-content-center">
+                                                                <i class="far fa-file-alt"></i>
+                                                            </span> Essay
+                                                        </div>
+                                                        <div class="span-mode"></div>
+                                                    </div>
+                                                    <div id="essay${modul.id}" class="collapse">
+                                                        <div class="card-body">
+                                                            ${essayContent}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
 
-	<!-- Kaiadmin DEMO methods, don't include it in your project! -->
-	<script src="assets/js/setting-demo.js"></script>
-	<script src="assets/js/demo.js"></script>
-	<script>
-		$('#lineChart').sparkline([102,109,120,99,110,105,115], {
-			type: 'line',
-			height: '70',
-			width: '100%',
-			lineWidth: '2',
-			lineColor: '#177dff',
-			fillColor: 'rgba(23, 125, 255, 0.14)'
-		});
+                        modal.find('#accordionReview').html(accordionContent);
+                    } else {
+                        modal.find('#accordionReview').html('<p>Tidak ada modul yang tersedia.</p>');
+                    }
+                },
 
-		$('#lineChart2').sparkline([99,125,122,105,110,124,115], {
-			type: 'line',
-			height: '70',
-			width: '100%',
-			lineWidth: '2',
-			lineColor: '#f3545d',
-			fillColor: 'rgba(243, 84, 93, .14)'
-		});
+                error: function(err) {
+                    console.error('Error fetching review data:', err);
+                    modal.find('#accordionReview').html(
+                        '<p>Gagal memuat data. Silakan coba lagi nanti.</p>');
+                }
+            });
+        });
+    </script>
 
-		$('#lineChart3').sparkline([105,103,123,100,95,105,115], {
-			type: 'line',
-			height: '70',
-			width: '100%',
-			lineWidth: '2',
-			lineColor: '#ffa534',
-			fillColor: 'rgba(255, 165, 52, .14)'
-		});
-	</script>
 @endsection
