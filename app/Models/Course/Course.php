@@ -17,7 +17,19 @@ class Course extends Model
     use HasFactory;
 
     protected $appends = ['thumbnail_url', 'thumbnail_video_url'];
-    protected $fillable = ['nama_kelas'];
+    protected $table = 'courses';
+    protected $fillable = [
+        'category_id',
+        'divisi_category_id',
+        'learning_cat_id',
+        'sub_category_id',
+        'nama_kelas',
+        'thumbnail',
+        'thumbnail_video',
+        'deskripsi',
+        'active',
+        'time_spend'
+    ];
 
     public function getThumbnailUrlAttribute()
     {
@@ -63,7 +75,7 @@ class Course extends Model
 
     public function userCourseEnroll()
     {
-        return $this->hasMany(UserCourseEnroll::class);
+        return $this->hasMany(UserCourseEnroll::class, 'course_id');
     }
 
     public function nilai()

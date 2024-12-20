@@ -64,7 +64,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::delete('/course/{course_id}/enroll-user/destroy/{user_id}', [UserCourseEnrollController::class, 'destroyUser'])->name('course.destroy-user');
 
             Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai.index');
-            Route::get('/nilai/course_id', [NilaiController::class, 'detail'])->name('nilai.detail');
+            Route::get('/nilai/{course_id}', [NilaiController::class, 'detail'])->name('nilai.detail');
         });
 
         Route::group(['prefix' => 'calendar', 'as' => 'calendar.'], function () {

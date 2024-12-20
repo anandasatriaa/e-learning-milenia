@@ -4,15 +4,19 @@ namespace App\Http\Controllers\Admin\Nilai;
 
 use App\Http\Controllers\Controller;
 use App\Models\Nilai\Nilai;
+use App\Models\Course\Course;
 use Illuminate\Http\Request;
 
 class NilaiController extends Controller
 {
     public function index()
     {
-        // Ambil semua peserta yang sudah selesai mengikuti kuis
-        $nilai = Nilai::all();
-        return view('admin.course.nilai.index', compact('nilai'));
+        // Ambil data courses dengan jumlah modul dan peserta
+        $courses = Course::withCount(['modul', 'user']) // Menghitung jumlah modul dan peserta
+            ->with('modul') // Memuat data modul untuk akses lebih lanjut
+            ->get();
+
+        return view('admin.course.nilai.index', compact('courses'));
     }
 
     public function store(Request $request)
