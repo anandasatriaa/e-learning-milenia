@@ -239,6 +239,18 @@
                             // Reset form input
                             document.getElementById('eventForm').reset();
                             backgroundColorInput.style.backgroundColor = '#ffffff';
+
+                            swal("Jadwal berhasil ditambahkan!", {
+                                icon: "success",
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-success'
+                                    }
+                                }
+                                }).then(() => {
+                                    // Setelah swal ditutup, lakukan refresh halaman
+                                    location.reload();
+                                });
                         },
                         error: function(xhr, status, error) {
                             console.error('Terjadi kesalahan saat mengirim data:', error);
@@ -360,6 +372,18 @@
                             // Menghapus baris data di tabel setelah dihapus
                             $('#btnHapus_' + eventId).closest('tr')
                                 .remove(); // Menghapus baris yang sesuai
+
+                            swal("Jadwal berhasil dihapus!", {
+                                icon: "success",
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-success'
+                                    }
+                                }
+                                }).then(() => {
+                                    // Setelah swal ditutup, lakukan refresh halaman
+                                    location.reload();
+                                });
                         },
                         error: function() {
                             swal("Error!", "Something went wrong.", "error");
