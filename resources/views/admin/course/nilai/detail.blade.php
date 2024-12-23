@@ -168,12 +168,23 @@
 @endsection
 @section('js')
 
+{{-- hasil jawaban quiz dan essay user --}}
     <script>
         $('#reviewModal').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget);
             var courseId = button.data('course-id');
             var userId = button.data('user-id');
             var modal = $(this);
+
+            // Reset input field sebelum modal ditampilkan
+            // $('#nilaiQuiz').val('');
+            // $('#nilaiEssay').val('');
+            // $('#komentar').val('');
+
+            // Set data ke tombol "Simpan Penilaian"
+            var saveButton = document.getElementById('saveReviewButton');
+            saveButton.setAttribute('data-course-id', courseId);
+            saveButton.setAttribute('data-user-id', userId);
 
             $.ajax({
                 url: '/admin/course/get-review-data/' + courseId + '/' + userId,
@@ -354,12 +365,104 @@
                 } else {
                     modal.find('#accordionReview').html('<p>Tidak ada modul yang tersedia.</p>');
                 }
+                    // Set nilai quiz, nilai essay, dan komentar ke input form jika sudah ada di database
+                    if (response.review) {
+                        $('#nilaiQuiz').val(response.review.nilai_quiz || '');
+                        $('#nilaiEssay').val(response.review.nilai_essay || '');
+                        $('#komentar').val(response.review.komentar || '');
+                    }
                 },
                 error: function(err) {
                     console.error('Error fetching review data:', err);
                     modal.find('#accordionReview').html('<p>Gagal memuat data. Silakan coba lagi nanti.</p>');
                 }
             });
+        });
+    </script>
+
+{{-- kirim nilai ke database --}}
+    <script>
+        document.getElementById('saveReviewButton').addEventListener('click', function() {
+            // Ambil nilai dari input form
+            var nilaiQuiz = document.getElementById('nilaiQuiz').value;
+            var nilaiEssay = document.getElementById('nilaiEssay').value;
+            var komentar = document.getElementById('komentar').value;
+
+            // Ambil nilai dari data atribut yang ada di tombol
+            var courseId = this.getAttribute('data-course-id');
+            var userId = this.getAttribute('data-user-id');
+
+            // Tampilkan data di console untuk memeriksa
+            console.log('User ID:', userId);
+            console.log('Course ID:', courseId);
+            console.log('Nilai Quiz:', nilaiQuiz);
+            console.log('Nilai Essay:', nilaiEssay);
+            console.log('Komentar:', komentar);
+
+            // Ambil CSRF token untuk keamanan
+            var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            console.log('Request URL:', `/admin/course/get-review-data/${courseId}/${userId}`);
+
+            // Pertama, cek apakah review sudah ada di database
+            fetch(`/admin/course/get-review-data/${courseId}/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    var url = '/admin/course/nilai/store'; // Default untuk POST (insert)
+                    var method = 'POST'; // Default untuk POST (insert)
+
+                    // Jika review sudah ada, kita gunakan PUT untuk update
+                    if (data.review) {
+                        url = `/admin/course/nilai/update/${courseId}/${userId}`; // Gunakan route update
+                        method = 'PUT'; // Menggunakan PUT, jadi method 'POST' dengan pengubahan URL
+                    }
+
+                    // Kirim data ke backend menggunakan fetch
+                    fetch(url, {
+                        method: method, // Menggunakan POST atau PUT sesuai kondisi
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken, // CSRF token untuk keamanan
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            course_id: courseId,
+                            nilai_quiz: nilaiQuiz,
+                            nilai_essay: nilaiEssay,
+                            komentar: komentar
+                        })
+                    })
+                    .then(response => {
+                        console.log(response.status);  // Cek status kode
+                        if (response.ok) { // Jika status code adalah 200-299
+                            return response.json();
+                        } else {
+                            throw new Error('Request failed');
+                        }
+                    })
+                    .then(data => {
+                        // Tampilkan swal setelah data berhasil disimpan
+                        swal("Nilai berhasil disimpan!", { 
+                            icon: "success",
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            }
+                        }).then(() => {
+                            // Setelah swal ditutup, lakukan refresh halaman
+                            location.reload();
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        swal("Terjadi kesalahan!", "Nilai gagal disimpan.", "error");
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    swal("Terjadi kesalahan saat memeriksa data review!", "Silakan coba lagi.", "error");
+                });
         });
     </script>
 @endsection

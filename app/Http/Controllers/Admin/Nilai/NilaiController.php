@@ -17,6 +17,11 @@ use Illuminate\Support\Facades\Log;
 
 class NilaiController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         // Ambil data courses dengan jumlah modul dan peserta
@@ -29,19 +34,29 @@ class NilaiController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi dan simpan penilaian
+        // Validasi input data
         $request->validate([
-            'skor' => 'required|integer|min:0|max:100',
-            'komentar' => 'nullable|string',
+            'user_id' => 'required|integer',
+            'course_id' => 'required|integer',
+            'nilai_quiz' => 'nullable|numeric|between:0,100',
+            'nilai_essay' => 'nullable|numeric|between:0,100',
+            'komentar' => 'nullable|string|max:255',
         ]);
 
-        $peserta = Nilai::find($request->id);
-        $peserta->update([
-            'skor' => $request->skor,
-            'komentar' => $request->komentar,
-        ]);
+        // Simpan data penilaian ke database
+        $nilai = new Nilai();
+        $nilai->user_id = $request->user_id;
+        $nilai->course_id = $request->course_id;
+        $nilai->nilai_quiz = $request->nilai_quiz;
+        $nilai->nilai_essay = $request->nilai_essay;
+        $nilai->komentar = $request->komentar;
+        $nilai->save();
 
-        return redirect()->route('penilaian.index')->with('success', 'Penilaian berhasil disimpan!');
+        // Response sukses
+        return response()->json([
+            'message' => 'Nilai berhasil disimpan',
+            'status' => 'success'
+        ]);
     }
 
     public function detail($course_id)
@@ -75,6 +90,11 @@ class NilaiController extends Controller
 
         // Ambil data modul
         $moduls = CourseModul::with(['modulQuiz', 'modulEssay'])->where('course_id', $course_id)->get();
+
+        // Ambil data review (nilai quiz, nilai essay, komentar) dari tabel review
+        $review = Nilai::where('course_id', $course_id)
+        ->where('user_id', $user_id)
+            ->first();
 
         // Tambahkan quiz dan essay data pengguna
         foreach ($moduls as $modul) {
@@ -145,9 +165,56 @@ class NilaiController extends Controller
                 'id' => $user->ID,
                 'name' => $user->Nama,
             ],
+            'review' => $review ? [
+                'nilai_quiz' => $review->nilai_quiz,
+                'nilai_essay' => $review->nilai_essay,
+                'komentar' => $review->komentar,
+            ] : null,
         ]);
     }
 
+    public function updateReview(Request $request, $course_id, $user_id)
+    {
+        // Validasi input
+        $validatedData = $request->validate([
+            'nilai_quiz' => 'nullable|numeric',
+            'nilai_essay' => 'nullable|numeric',
+            'komentar' => 'nullable|string|max:255',
+        ]);
 
+        // Cek apakah review sudah ada di database
+        $review = Nilai::where('course_id', $course_id)
+            ->where('user_id', $user_id)
+            ->first();
 
+        if ($review) {
+            // Update data review jika sudah ada
+            $review->nilai_quiz = $validatedData['nilai_quiz'] ?? $review->nilai_quiz;
+            $review->nilai_essay = $validatedData['nilai_essay'] ?? $review->nilai_essay;
+            $review->komentar = $validatedData['komentar'] ?? $review->komentar;
+
+            // Simpan perubahan
+            $review->save();
+
+            // Log perubahan
+            Log::info('Review updated', ['course_id' => $course_id, 'user_id' => $user_id]);
+        } else {
+            // Jika review belum ada, buat baru
+            $review = new Nilai();
+            $review->course_id = $course_id;
+            $review->user_id = $user_id;
+            $review->nilai_quiz = $validatedData['nilai_quiz'];
+            $review->nilai_essay = $validatedData['nilai_essay'];
+            $review->komentar = $validatedData['komentar'];
+
+            // Simpan data baru
+            $review->save();
+
+            // Log pembuatan data baru
+            Log::info('New review created', ['course_id' => $course_id, 'user_id' => $user_id]);
+        }
+
+        // Return response sukses
+        return response()->json(['message' => 'Review saved successfully']);
+    }
 }
