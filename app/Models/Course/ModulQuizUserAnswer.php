@@ -15,4 +15,9 @@ class ModulQuizUserAnswer extends Model
         'jawaban',
         'kode_jawaban'
     ];
+
+    public function modulQuiz()
+    {
+        return $this->belongsTo(ModulQuiz::class, 'modul_quizzes_id');
+    }
 }

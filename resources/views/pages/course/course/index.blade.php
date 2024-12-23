@@ -791,9 +791,34 @@
                     },
                     body: JSON.stringify(summaryData)
                 })
-                .then(response => response.json())
-                .then(data => console.log('Summary Response:', data))
-                .catch(err => console.error('Summary Error:', err));
+                .then(response => {
+                    if (!response.ok) {
+                        // Jika respons tidak ok, tampilkan alert error
+                        swal("Terjadi kesalahan!", "Jawaban gagal disimpan.", "error");
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Summary Response:', data);
+                    // Tampilkan swal setelah data berhasil disimpan
+                    swal("Jawaban berhasil dikumpulkan!", {
+                        icon: "success",
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(() => {
+                        // Setelah swal ditutup, lakukan refresh halaman
+                        location.reload();
+                    });
+                })
+                .catch(error => {
+                    console.error('Summary Error:', error);
+                    // Tampilkan swal jika terjadi error
+                    swal("Terjadi kesalahan!", "Jawaban gagal disimpan.", "error");
+                });
         });
     </script>
 

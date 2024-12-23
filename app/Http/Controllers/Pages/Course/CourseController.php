@@ -20,11 +20,7 @@ class CourseController extends Controller
 {
     public function detailcourse(Request $request, $course_id)
     {
-
         $course = Course::with(['modul', 'modul.quizzes', 'modul.essays'])->where('id', $course_id)->first();
-        Log::info("Course Return: " . print_r($course, true));
-        $test = $course->toArray();
-        Log::info("Variabel test: " . print_r($test, true));
         return view('pages.course.course.index', compact('course'));
     }
 

@@ -91,14 +91,13 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/course-learning/{learning_id}', [HomeCourseController::class, 'subCourse'])->name('subCourse');
 
         Route::group(['prefix' => 'course', 'as' => 'course.'], function () {
-            Route::get('/{course_id}/', [CourseController::class, 'detailcourse'])->name('course.detail');
+            Route::get('/{course_id}', [CourseController::class, 'detailcourse'])->name('course.detail');
             Route::get('/embed-video/{course_modul_id}/', [CourseController::class, 'embedVideo'])->name('course.video');
             Route::get('/{course_id}/first-modul', [CourseController::class, 'getFirstModul']);
+            // Route::get('/get-quiz-answers-from-database/{course_id}/{user_id}', [CourseController::class, 'getQuizAnswerFromDatabase'])->name('course.getQuizAnswerFromDatabase');
         
             Route::get('/quiz/{course_modul_id}', [CourseController::class, 'quiz'])->name('course.quiz');
             Route::get('/essay/{course_modul_id}', [CourseController::class, 'essay'])->name('course.essay');
-            // Route::post('/{course_id}/kirim-jawaban-essay-quiz', [CourseController::class, 'kirimJawaban'])->name('course.kirimJawaban');
-            // Route::post('/quiz/{modul_quiz_id}/submit', [CourseController::class, 'submitQuiz'])->name('course.submitQuiz');
 
             Route::post('/quiz/{course_modul_id}/submit/{user_id}',[CourseController::class, 'submitQuiz'])->name('course.submitQuiz');
             Route::post('/essay/{course_modul_id}/submit/{user_id}',[CourseController::class, 'submitEssay'])->name('course.submitEssay');
