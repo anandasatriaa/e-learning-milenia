@@ -20,8 +20,7 @@
                </ul>
            </nav>
            <div class="copyright ms-auto">
-               2024, made with <i class="fa fa-heart heart text-danger"></i> by Hary
-               Susilo P
+               2024, made with <i class="fa fa-heart heart text-danger"></i> by IT Milenia Group
            </div>
        </div>
    </footer>
