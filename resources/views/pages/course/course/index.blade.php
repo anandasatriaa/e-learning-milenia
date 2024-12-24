@@ -466,20 +466,21 @@
                 const savedAnswer = savedAnswers[courseModulId].answer;
                 const savedKodeJawaban = savedAnswers[courseModulId].kode_jawaban;
                 const radioButton = document.querySelector(`input[name="answer"][value="${savedAnswer}"]`);
-                for (let i = 0; i < radioButtons.length; i++) {
-                    if (radioButtons[i].value === savedAnswer) {
-                        radioButtons[i].checked = true;
+                // for (let i = 0; i < radioButtons.length; i++) {
+                //     if (radioButtons[i].value === savedAnswer) {
+                //         radioButtons[i].checked = true;
 
-                        console.log(
-                            `Mengatur jawaban untuk modul ${courseModulId}, kode jawaban: ${savedKodeJawaban}`);
-                        break;
-                    }
-                }
+                //         console.log(
+                //             `Mengatur jawaban untuk modul ${courseModulId}, kode jawaban: ${savedKodeJawaban}`);
+                //         break;
+                //     }
+                // }
             });
         }
 
         // Call the loadAnswers function when the page loads
-        window.onload = loadAnswers;
+        document.addEventListener('DOMContentLoaded', loadAnswers);
+
 
 
         function updateQuestionNavState(quizIds, currentQuizId) {
@@ -496,7 +497,7 @@
                         button.classList.add('btn-outline-primary');
                     }
 
-                    // Ubah warna tombol menjadi hijau jika sudah ada jawaban
+                    // Ubah warna tombol menjadi info jika sudah ada jawaban
                     if (userAnswers[quizId]) {
                         button.classList.add('btn-info');
                     } else {
@@ -516,15 +517,15 @@
             // Create buttons for each quiz ID
             let buttons = quizIds.map((id, index) => {
                 return `
-        <li class="list-group-item">
-            <button 
-                id="quizButton-${id}" 
-                class="btn btn-outline-primary mx-1" 
-                onclick="getQuiz(event, ${id})">
-                ${index + 1} <!-- Increment button number starting from 1 -->
-            </button>
-        </li>
-        `;
+                <li class="list-group-item">
+                    <button 
+                        id="quizButton-${id}" 
+                        class="btn btn-outline-primary mx-1" 
+                        onclick="getQuiz(event, ${id})">
+                        ${index + 1} <!-- Increment button number starting from 1 -->
+                    </button>
+                </li>
+                `;
             }).join('');
             return buttons;
         }
@@ -545,6 +546,12 @@
                         return;
                     }
 
+                    const userAnswerFromDb = data.userAnswer;
+            console.log('User Answer from DB:', userAnswerFromDb); // Untuk debugging
+            console.log('Answer Options:', data.kunci_jawaban); // Untuk debugging
+
+            let userAnswer = userAnswerFromDb || JSON.parse(localStorage.getItem('userAnswers'))?.[courseModulId]?.answer;
+
                     const iframeContent = `
                 <div class="">
                     <div class="card-header">
@@ -555,21 +562,21 @@
                         <p class="fw-bold">Jawaban:</p>
                         <form>
                             ${data.kunci_jawaban.map((answer, index) => {
-                                const isChecked = userAnswers[courseModulId] && userAnswers[courseModulId].answer === answer ? 'checked' : '';
+                                const isChecked = userAnswer === answer ? 'checked' : '';
                                 return `
-                                                                                            <div class="form-check">
-                                                                                                <input 
-                                                                                                    class="form-check-input" 
-                                                                                                    type="radio" 
-                                                                                                    name="answer" 
-                                                                                                    id="answer${index + 1}" 
-                                                                                                    value="${answer}" 
-                                                                                                    ${isChecked}
-                                                                                                    onclick="saveAnswer(${courseModulId}, '${answer}')"
-                                                                                                >
-                                                                                                <label class="form-check-label" for="answer${index + 1}">${answer}</label>
-                                                                                            </div>
-                                                                                        `;
+                                    <div class="form-check">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="radio" 
+                                            name="answer" 
+                                            id="answer${index + 1}" 
+                                            value="${answer}" 
+                                            ${isChecked}
+                                            onclick="saveAnswer(${courseModulId}, '${answer}')"
+                                        >
+                                        <label class="form-check-label" for="answer${index + 1}">${answer}</label>
+                                    </div>
+                                `;
                             }).join('')}
                         </form>
                     </div>
@@ -611,6 +618,7 @@
         };
     </script>
 
+    {{-- Essay --}}
     <script>
         function loadEssay(courseModulId) {
             // Clear iframe and hide ratio
@@ -652,14 +660,20 @@
                     // Initialize CKEditor for each textarea
                     CKEDITOR.replace(`essayFrame-${courseModulId}`);
 
-                    // Retrieve saved answer from localStorage if available
+                    // Determine the source of the answer
                     const savedAnswer = localStorage.getItem(`essayAnswer-${courseModulId}`);
-                    if (savedAnswer) {
-                        CKEDITOR.instances[`essayFrame-${courseModulId}`].setData(savedAnswer);
+                    const answerFromDb = data.answer;
+
+                    // Use database answer if available; otherwise, fallback to localStorage
+                    const finalAnswer = answerFromDb || savedAnswer;
+
+                    // Set the answer in CKEditor
+                    if (finalAnswer) {
+                        CKEDITOR.instances[`essayFrame-${courseModulId}`].setData(finalAnswer);
                     }
 
                     // Add event listener to save the content when the user types
-                    CKEDITOR.instances[`essayFrame-${courseModulId}`].on('change', function() {
+                    CKEDITOR.instances[`essayFrame-${courseModulId}`].on('change', function () {
                         const currentContent = CKEDITOR.instances[`essayFrame-${courseModulId}`].getData();
                         localStorage.setItem(`essayAnswer-${courseModulId}`, currentContent);
                     });
@@ -811,7 +825,7 @@
                         }
                     }).then(() => {
                         // Setelah swal ditutup, lakukan refresh halaman
-                        location.reload();
+                        window.location.href = "{{ route('pages.dashboard') }}";
                     });
                 })
                 .catch(error => {

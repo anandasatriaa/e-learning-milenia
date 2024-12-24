@@ -26,4 +26,10 @@ class ModulQuiz extends Model
     {
         return $this->hasMany(ModulQuizAnswer::class, 'modul_quiz_id');
     }
+
+    public function userAnswers()
+    {
+        return $this->hasMany(ModulQuizUserAnswer::class, 'modul_quizzes_id'); // Sesuaikan nama tabel dan kolom jika berbeda
+    }
+
 }

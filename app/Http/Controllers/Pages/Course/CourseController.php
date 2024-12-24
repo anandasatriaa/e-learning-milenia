@@ -79,8 +79,13 @@ class CourseController extends Controller
 
     public function getQuiz($quiz_id)
     {
+        // Ambil pengguna yang sedang login
+        $userId = auth()->id(); // Pastikan middleware auth diaktifkan
+
         // Fetch quiz question and its answers from the database
-        $quiz = ModulQuiz::with('answers')->find($quiz_id);
+        $quiz = ModulQuiz::with(['answers', 'userAnswers' => function ($query) use ($userId) {
+            $query->where('user_id', $userId); // Filter jawaban berdasarkan user_id
+        }])->find($quiz_id);
 
         if ($quiz) {
             // Pastikan course_modul_id benar-benar berasal dari tabel course_moduls
@@ -94,18 +99,24 @@ class CourseController extends Controller
             $quizzesInModule = ModulQuiz::where('course_modul_id', $courseModulId)->pluck('id')->toArray();
             $quizIndex = array_search($quiz_id, $quizzesInModule) + 1;
 
+            // Fetch user answers if they exist
+            $userAnswer = $quiz->userAnswers->first() ? $quiz->userAnswers->first()->jawaban : null;
+
             return response()->json([
                 'question' => $quiz->pertanyaan,
                 'kunci_jawaban' => $quiz->answers->pluck('pilihan')->toArray(),
-                'totalQuizzes' => count($quizzesInModule), // Count quizzes in the module
-                'quizIds' => $quizzesInModule, // Send only IDs from the same module
+                'userAnswer' => $userAnswer, // User answer jika tersedia
+                'totalQuizzes' => count($quizzesInModule),
+                'quizIds' => $quizzesInModule,
                 'quizIndex' => $quizIndex,
-                'course_modul_id' => $courseModulId, // Include the module ID
+                'course_modul_id' => $courseModulId,
             ]);
         }
 
         return response()->json(['message' => 'Quiz not found'], 404);
     }
+
+
 
     public function quiz($course_modul_id)
     {
@@ -143,7 +154,13 @@ class CourseController extends Controller
 
     public function essay($course_modul_id)
     {
+        $userId = auth()->id(); // Ambil user ID dari session
+
+        // Ambil pertanyaan dan jawaban terkait modul
         $essays = ModulEssay::where('course_modul_id', $course_modul_id)->get();
+        $answers = ModulEssayAnswer::where('course_modul_id', $course_modul_id)
+            ->where('user_id', $userId)
+            ->first(); // Hanya ambil jawaban user terkait modul ini
 
         if ($essays->isNotEmpty()) {
             return response()->json([
@@ -153,11 +170,13 @@ class CourseController extends Controller
                         'question' => $essay->pertanyaan,
                     ];
                 }),
+                'answer' => $answers ? $answers->jawaban : null, // Kirim jawaban jika ada
             ]);
         }
 
         return response()->json(['message' => 'No essays found for this module'], 404);
     }
+
 
     public function submitQuiz(Request $request, $modulId, $userId)
     {
@@ -210,6 +229,7 @@ class CourseController extends Controller
         ]);
 
         $courseId = $request->input('course_id');
+        $userId = auth()->user()->ID;
 
         try {
             $summaryData = [
@@ -219,7 +239,9 @@ class CourseController extends Controller
                 'progress_bar'  => $request->input('progress_bar')
             ];
 
-            UserCourseEnroll::where('course_id', $courseId)->update($summaryData);
+            UserCourseEnroll::where('course_id', $courseId)
+            ->where('user_id', $userId) // Menambahkan kondisi user_id
+            ->update($summaryData);
 
             return response()->json(['message' => 'Data summary berhasil diperbarui']);
         } catch (\Exception $e) {
