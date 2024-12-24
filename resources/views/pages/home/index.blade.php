@@ -182,18 +182,20 @@
                                                                         No Category
                                                                     @endif
                                                                 </span>
-                                                                <span
-                                                                    class="text-muted fw-bold">{{ $courseEnrolleds->progress }}%</span>
-                                                            </div>
-                                                            <div class="progress" style="height: 6px;">
-                                                                <div class="progress-bar bg-primary" role="progressbar"
-                                                                    style="width: {{ $courseEnrolleds->progress }}%"
-                                                                    aria-valuenow="{{ $courseEnrolleds->progress }}"
-                                                                    aria-valuemin="0" aria-valuemax="100"
-                                                                    data-toggle="tooltip" data-placement="top"
-                                                                    title="{{ $courseEnrolleds->progress }}%">
-                                                                </div>
-                                                            </div>
+                                                                <span class="text-muted fw-bold" data-course-id="{{ $courseEnrolleds->course_id }}">
+    {{ $courseEnrolleds->progress ?? '0' }}%
+</span>
+</div>
+<div class="progress" style="height: 6px;">
+    <div class="progress-bar bg-primary" role="progressbar"
+        style="width: {{ $courseEnrolleds->progress ?? '0' }}%"
+        aria-valuenow="{{ $courseEnrolleds->progress ?? '0' }}"
+        aria-valuemin="0" aria-valuemax="100"
+        data-course-id="{{ $courseEnrolleds->course_id }}"
+        data-toggle="tooltip" data-placement="top"
+        title="{{ $courseEnrolleds->progress ?? '0' }}%">
+    </div>
+</div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -310,5 +312,42 @@
         });
     </script>
 
+{{-- Progress Bar --}}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const courseIds = @json($courseIds); // Ambil array courseId dari controller
+
+        // Loop untuk setiap courseId dan proses progress untuk masing-masing kursus
+        courseIds.forEach(courseId => {
+            // Cari elemen dengan data-course-id yang sesuai
+            const progressElement = document.querySelector(`.progress-bar[data-course-id="${courseId}"]`);
+            const progressSpan = document.querySelector(`.text-muted.fw-bold[data-course-id="${courseId}"]`);
+
+            // Pastikan elemen progress ada
+            if (progressElement && progressSpan) {
+                // Cek progress dari database untuk setiap kursus
+                const progressFromDatabase = parseInt(progressElement.getAttribute('aria-valuenow')) || 0;
+
+                // Jika progress dari database adalah 0, ambil data dari localStorage
+                if (progressFromDatabase === 0) {
+                    const progressStorageKey = `progress_bar_course_${courseId}`;
+                    const progressFromLocalStorage = parseInt(localStorage.getItem(progressStorageKey)) || 0;
+
+                    // Update progress bar dengan nilai dari localStorage
+                    progressElement.style.width = `${progressFromLocalStorage}%`;
+                    progressElement.setAttribute('aria-valuenow', progressFromLocalStorage);
+                    progressSpan.innerText = `${progressFromLocalStorage}%`;
+                } else {
+                    // Jika progress dari database tidak 0, tampilkan nilai tersebut
+                    progressElement.style.width = `${progressFromDatabase}%`;
+                    progressElement.setAttribute('aria-valuenow', progressFromDatabase);
+                    progressSpan.innerText = `${progressFromDatabase}%`;
+                }
+            } else {
+                console.error(`Progress element atau span dengan courseId ${courseId} tidak ditemukan.`);
+            }
+        });
+    });
+</script>
 
 @endsection

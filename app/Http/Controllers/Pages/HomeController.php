@@ -93,6 +93,7 @@ class HomeController extends Controller
             'coursesCompleted' => $coursesCompleted,
             'averageProgress' => $averageProgress,
             'totalTimeSpendInHours' => $totalTimeSpendInHours,
+            'courseIds' => $courseEnrolled->pluck('course.id')->toArray(),
         ]);
     }
 }

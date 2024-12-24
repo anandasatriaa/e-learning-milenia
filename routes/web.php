@@ -94,7 +94,6 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/{course_id}', [CourseController::class, 'detailcourse'])->name('course.detail');
             Route::get('/embed-video/{course_modul_id}/', [CourseController::class, 'embedVideo'])->name('course.video');
             Route::get('/{course_id}/first-modul', [CourseController::class, 'getFirstModul']);
-            // Route::get('/get-quiz-answers-from-database/{course_id}/{user_id}', [CourseController::class, 'getQuizAnswerFromDatabase'])->name('course.getQuizAnswerFromDatabase');
         
             Route::get('/quiz/{course_modul_id}', [CourseController::class, 'quiz'])->name('course.quiz');
             Route::get('/essay/{course_modul_id}', [CourseController::class, 'essay'])->name('course.essay');
@@ -103,7 +102,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/essay/{course_modul_id}/submit/{user_id}',[CourseController::class, 'submitEssay'])->name('course.submitEssay');
             Route::post('/update-course-enrolls',[CourseController::class, 'updateCourseEnrollSummary'])->name('course.updateCourseEnrollSummary');
             Route::get('/getQuiz/{quiz_id}', [CourseController::class, 'getQuiz'])->name('course.getQuiz');
-
+            Route::get('/get-time-spend-and-progress-bar/{course_id}/{user_id}', [CourseController::class, 'getTimeandProgress'])->name('course.getTimeandProgress');
         });
     });
 });

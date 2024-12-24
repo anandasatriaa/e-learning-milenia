@@ -857,10 +857,19 @@
         // Gunakan course_id untuk kunci localStorage
         const storageKey = `timeElapsed_course_${courseId}`;
 
-        // Cek localStorage untuk waktu sebelumnya
-        const storedTime = localStorage.getItem(storageKey);
-        if (storedTime) {
-            timeElapsed = parseInt(storedTime, 10);
+        // Fungsi untuk ambil data dari server (API)
+        async function fetchTimeSpendFromDatabase() {
+            const userId = @json(auth()->user()->ID); // Ganti dengan ID pengguna yang sesuai
+            const response = await fetch(`/course/get-time-spend-and-progress-bar/${courseId}/${userId}`);
+            const data = await response.json();
+            if (data && data.time_spend) {
+                timeElapsed = data.time_spend;
+            } else {
+                const storedTime = localStorage.getItem(storageKey);
+                if (storedTime) {
+                    timeElapsed = parseInt(storedTime, 10);
+                }
+            }
         }
 
         // Fungsi untuk mulai timer
@@ -889,47 +898,67 @@
             }
         });
 
-        // Memulai timer saat halaman dimuat
-        document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
-        startTimer();
+        // Ambil data dari database atau localStorage saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchTimeSpendFromDatabase();
+            document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
+            startTimer();
+        });
     </script>
 
     {{-- Progress Bar --}}
-    <script>
-        // Total jumlah modul, termasuk Introduction
-        const totalModules = {{ $course->modul->count() + 1 }}; // +1 untuk Introduction
-        let currentModule = 0; // Modul saat ini (dimulai dari 0 untuk Introduction)
+<script>
+    // Total jumlah modul, termasuk Introduction
+    const totalModules = {{ $course->modul->count() + 1 }}; // +1 untuk Introduction
+    let currentModule = 0; // Modul saat ini (dimulai dari 0 untuk Introduction)
 
-        // Fungsi untuk memperbarui progress
-        function updateProgress() {
-            let progressPercent = Math.floor((currentModule / totalModules) * 100);
+    // Gunakan course_id untuk kunci localStorage yang unik
+    const progressStorageKey = `progress_bar_course_${courseId}`;
 
-            // Pastikan tidak lebih dari 99% (submit membuatnya menjadi 100%)
-            if (progressPercent >= 100) {
-                progressPercent = 100;
-            }
+    // Fungsi untuk memperbarui progress
+    function updateProgress() {
+        let progressPercent = Math.floor((currentModule / totalModules) * 100);
 
-            // Simpan progress ke localStorage
-            localStorage.setItem('progress_bar', progressPercent);
-
-            // Update tampilan progress
-            document.querySelector('.progress-bar').style.width = `${progressPercent}%`;
-            document.querySelector('.progress-status span.fw-bold').innerText = `${progressPercent}%`;
+        // Pastikan tidak lebih dari 99% (submit membuatnya menjadi 100%)
+        if (progressPercent >= 100) {
+            progressPercent = 100;
         }
 
-        // Fungsi untuk set modul aktif
-        function setActiveModule(index) {
-            currentModule = index;
-            updateProgress();
-        }
+        // Simpan progress ke localStorage dengan kunci berdasarkan course_id
+        localStorage.setItem(progressStorageKey, progressPercent);
 
-        // Ambil progress dari localStorage saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedProgress = parseInt(localStorage.getItem('progress_bar')) || 0;
+        // Update tampilan progress
+        document.querySelector('.progress-bar').style.width = `${progressPercent}%`;
+        document.querySelector('.progress-status span.fw-bold').innerText = `${progressPercent}%`;
+    }
+
+    // Fungsi untuk set modul aktif
+    function setActiveModule(index) {
+        currentModule = index;
+        updateProgress();
+    }
+
+    // Fungsi untuk ambil data dari server (API)
+    async function fetchProgressFromDatabase() {
+        const userId = @json(auth()->user()->ID); // Ganti dengan ID pengguna yang sesuai
+        const response = await fetch(`/course/get-time-spend-and-progress-bar/${courseId}/${userId}`);
+        const data = await response.json();
+        if (data && data.progress_bar) {
+            const savedProgress = data.progress_bar;
             currentModule = Math.floor((savedProgress / 100) * totalModules);
-            updateProgress();
-        });
-    </script>
+        } else {
+            const savedProgress = parseInt(localStorage.getItem(progressStorageKey)) || 0;
+            currentModule = Math.floor((savedProgress / 100) * totalModules);
+        }
+    }
+
+    // Ambil progress dari database atau localStorage saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', async () => {
+        await fetchProgressFromDatabase();
+        updateProgress();
+    });
+</script>
+
 
 
 @endsection

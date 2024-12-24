@@ -248,4 +248,23 @@ class CourseController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function getTimeandProgress($course_id, $user_id)
+    {
+        $enroll = UserCourseEnroll::where('course_id', $course_id)
+            ->where('user_id', $user_id)
+            ->first();
+
+        if ($enroll) {
+            return response()->json([
+                'time_spend' => $enroll->time_spend,
+                'progress_bar' => $enroll->progress_bar,
+            ]);
+        } else {
+            return response()->json([
+                'time_spend' => 0,
+                'progress_bar' => 0,
+            ]);
+        }
+    }
 }
