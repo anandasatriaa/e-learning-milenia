@@ -46,7 +46,7 @@
         <div class="row" id="categoryCards">
             @foreach ($learnings as $learning)
                 <div class="col-12 col-md-4 category-card">
-                    <a href="{{ route('pages.subCourse', ['learning_id' => $learning->id]) }}" class="card" style="width: 30rem;">
+                    <a href="{{ route('pages.subCourse', ['learning_id' => $learning->id]) }}" class="card">
                         <img class="card-img-top" src="{{ asset('storage/category/learning/' . $learning->image) }}"
                             alt="{{ $learning->nama }}">
                         <div class="card-body">

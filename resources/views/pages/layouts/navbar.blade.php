@@ -7,7 +7,7 @@
         <!-- Logo Header -->
         <div class="logo-header" data-background-color="white">
 
-            <a href="index.html" class="logo bg-white">
+            <a href="{{ route('pages.dashboard') }}" class="logo bg-white">
                 <img src="{{ asset('img/logo.png') }}" alt="navbar brand" class="navbar-brand bg-white rounded-3"
                     height="45">
             </a>
@@ -275,7 +275,7 @@
                                     <div class="u-text">
                                         <h4>{{ ucwords(strtolower(Auth::user()->Nama)) }}</h4>
                                         <p class="text-muted">{{ Auth::user()->email_karyawan }}</p><a
-                                            href="profile.html" class="btn btn-xs btn-secondary btn-sm">View
+                                            href="#" class="btn btn-xs btn-secondary btn-sm">View
                                             Profile</a>
                                     </div>
                                 </div>
