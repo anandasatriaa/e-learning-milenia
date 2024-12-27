@@ -51,6 +51,8 @@ class HomeCourseController extends Controller
             ->whereIn('id', $enrolledCourseIds)
             ->get();
 
+        $courseIds = $courses->pluck('id')->toArray();
+
         // Bangun struktur hierarki dinamis
         $groupedCourses = [];
         $addedCourses = []; // Array untuk melacak ID course yang sudah ditambahkan
@@ -180,6 +182,6 @@ class HomeCourseController extends Controller
         }
         // dd($group);
 
-        return view('pages.course.sub_course', compact('learning', 'groupedCourses'));
+        return view('pages.course.sub_course', compact('learning','groupedCourses', 'courseIds'));
     }
 }

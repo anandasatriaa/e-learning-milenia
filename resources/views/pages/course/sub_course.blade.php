@@ -20,11 +20,6 @@
         .shadow img {
             transition: transform 0.3s ease;
         }
-
-        .shadow:hover .card-img-top {
-            transform: scale(1.03);
-            /* Membesarkan gambar sedikit saat hover */
-        }
     </style>
 
     <style>
@@ -82,7 +77,7 @@
                         @foreach ($group['courses'] as $course)
                             <div class="col-12 col-md-4 category-card mt-2">
                                 <a href="{{ route('pages.course.course.detail', $course['id']) }}"
-                                    class="card bg-white shadow" style="width: 30rem;">
+                                    class="card bg-white shadow">
                                     <img class="card-img-top"
                                         src="{{ asset('storage/course/thumbnail/' . $course['thumbnail']) }}"
                                         alt="{{ $course['name'] }}">
@@ -90,11 +85,14 @@
                                     <div class="progress-card mx-2">
                                         <div class="progress-status">
                                             <span class="text-muted">Tasks Complete</span>
-                                            <span class="text-muted fw-bold">{{ $course['progress'] }}%</span>
+                                            <span class="text-muted fw-bold" data-course-id="{{ $course['id'] }}">{{ $course['progress'] }}%</span>
                                         </div>
                                         <div class="progress" style="height: 6px;">
-                                            <div class="progress-bar bg-primary" role="progressbar"
-                                                style="width: {{ $course['progress'] }}%;" aria-valuenow="{{ $course['progress'] }}" aria-valuemin="0"
+                                            <div class="progress-bar bg-primary" role="progressbar" 
+                                                data-course-id="{{ $course['id'] }}" 
+                                                style="width: {{ $course['progress'] }}%;" 
+                                                aria-valuenow="{{ $course['progress'] }}" 
+                                                aria-valuemin="0" 
                                                 aria-valuemax="100"></div>
                                         </div>
                                     </div>
@@ -132,11 +130,14 @@
                                                     <div class="progress-card mx-2">
                                                         <div class="progress-status">
                                                             <span class="text-muted">Tasks Complete</span>
-                                                            <span class="text-muted fw-bold">{{ $course['progress'] }}%</span>
+                                                            <span class="text-muted fw-bold" data-course-id="{{ $course['id'] }}">{{ $course['progress'] }}%</span>
                                                         </div>
                                                         <div class="progress" style="height: 6px;">
-                                                            <div class="progress-bar bg-primary" role="progressbar"
-                                                                style="width: {{ $course['progress'] }}%;" aria-valuenow="{{ $course['progress'] }}" aria-valuemin="0"
+                                                            <div class="progress-bar bg-primary" role="progressbar" 
+                                                                data-course-id="{{ $course['id'] }}" 
+                                                                style="width: {{ $course['progress'] }}%;" 
+                                                                aria-valuenow="{{ $course['progress'] }}" 
+                                                                aria-valuemin="0" 
                                                                 aria-valuemax="100"></div>
                                                         </div>
                                                     </div>
@@ -174,11 +175,14 @@
                                                                         <div class="progress-card mx-2">
                                                                             <div class="progress-status">
                                                                                 <span class="text-muted">Tasks Complete</span>
-                                                                                <span class="text-muted fw-bold">{{ $course['progress'] }}%</span>
+                                                                                <span class="text-muted fw-bold" data-course-id="{{ $course['id'] }}">{{ $course['progress'] }}%</span>
                                                                             </div>
                                                                             <div class="progress" style="height: 6px;">
-                                                                                <div class="progress-bar bg-primary" role="progressbar"
-                                                                                    style="width: {{ $course['progress'] }}%;" aria-valuenow="{{ $course['progress'] }}" aria-valuemin="0"
+                                                                                <div class="progress-bar bg-primary" role="progressbar" 
+                                                                                    data-course-id="{{ $course['id'] }}" 
+                                                                                    style="width: {{ $course['progress'] }}%;" 
+                                                                                    aria-valuenow="{{ $course['progress'] }}" 
+                                                                                    aria-valuemin="0" 
                                                                                     aria-valuemax="100"></div>
                                                                             </div>
                                                                         </div>
@@ -215,11 +219,14 @@
                                                                                         <div class="progress-card mx-2">
                                                                                             <div class="progress-status">
                                                                                                 <span class="text-muted">Tasks Complete</span>
-                                                                                                <span class="text-muted fw-bold">{{ $course['progress'] }}%</span>
+                                                                                                <span class="text-muted fw-bold" data-course-id="{{ $course['id'] }}">{{ $course['progress'] }}%</span>
                                                                                             </div>
                                                                                             <div class="progress" style="height: 6px;">
-                                                                                                <div class="progress-bar bg-primary" role="progressbar"
-                                                                                                    style="width: {{ $course['progress'] }}%;" aria-valuenow="{{ $course['progress'] }}" aria-valuemin="0"
+                                                                                                <div class="progress-bar bg-primary" role="progressbar" 
+                                                                                                    data-course-id="{{ $course['id'] }}" 
+                                                                                                    style="width: {{ $course['progress'] }}%;" 
+                                                                                                    aria-valuenow="{{ $course['progress'] }}" 
+                                                                                                    aria-valuemin="0" 
                                                                                                     aria-valuemax="100"></div>
                                                                                             </div>
                                                                                         </div>
@@ -267,5 +274,50 @@
                 }
             });
         });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const courseIds = @json($courseIds); // Ambil array courseId dari controller
+
+    // Loop untuk setiap courseId dan proses progress untuk masing-masing kursus
+    courseIds.forEach(courseId => {
+        // Cari elemen progress bar dan span dengan data-course-id yang sesuai
+        const progressElement = document.querySelector(`.progress-bar[data-course-id="${courseId}"]`);
+        const progressSpan = document.querySelector(`.text-muted.fw-bold[data-course-id="${courseId}"]`);
+
+        if (!progressElement || !progressSpan) {
+            console.error(`Progress element atau span dengan courseId ${courseId} tidak ditemukan.`);
+            return;
+        }
+
+        // Ambil progress dari database
+        const progressFromDatabase = parseInt(progressElement.getAttribute('aria-valuenow')) || 0;
+
+        if (progressFromDatabase === 0) {
+            // Jika progress dari database adalah 0, ambil data dari localStorage
+            const progressStorageKey = `progress_bar_course_${courseId}`;
+            const progressFromLocalStorage = parseInt(localStorage.getItem(progressStorageKey)) || 0;
+
+            // Update progress bar dengan nilai dari localStorage
+            progressElement.style.width = `${progressFromLocalStorage}%`;
+            progressElement.setAttribute('aria-valuenow', progressFromLocalStorage);
+            progressSpan.innerText = `${progressFromLocalStorage}%`;
+
+            console.log(`Progress untuk courseId ${courseId} diambil dari localStorage: ${progressFromLocalStorage}%`);
+        } else {
+            // Jika progress dari database tidak 0, tampilkan nilai tersebut
+            progressElement.style.width = `${progressFromDatabase}%`;
+            progressElement.setAttribute('aria-valuenow', progressFromDatabase);
+            progressSpan.innerText = `${progressFromDatabase}%`;
+
+            console.log(`Progress untuk courseId ${courseId} diambil dari database: ${progressFromDatabase}%`);
+        }
+
+        // Simpan progress di localStorage untuk keperluan berikutnya
+        const progressStorageKey = `progress_bar_course_${courseId}`;
+        localStorage.setItem(progressStorageKey, progressElement.getAttribute('aria-valuenow'));
+    });
+});
     </script>
 @endsection

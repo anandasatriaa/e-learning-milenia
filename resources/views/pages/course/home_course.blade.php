@@ -20,11 +20,6 @@
         .card img {
             transition: transform 0.3s ease;
         }
-
-        .card:hover .card-img-top {
-            transform: scale(1.1);
-            /* Membesarkan gambar sedikit saat hover */
-        }
     </style>
 
 @endsection
