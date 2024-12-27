@@ -222,7 +222,7 @@
                                         <th scope="col">Judul</th>
                                         <th scope="col" class="text-center">Media</th>
                                         <th scope="col" class="text-center">Tipe</th>
-                                        <th scope="col" class="text-center">Status</th>
+                                        {{-- <th scope="col" class="text-center">Status</th> --}}
                                         <th scope="col" class="text-center">Quiz</th>
                                         <th scope="col" class="text-center">Essay</th>
                                     </tr>
@@ -305,7 +305,7 @@
                                                     @default
                                                 @endswitch
                                             </td>
-                                            <td class="text-center">
+                                            {{-- <td class="text-center">
                                                 <div class="form-check form-switch text-center p-1">
                                                     <div class="d-flex justify-content-center">
                                                         <input class="form-check-input" type="checkbox" role="switch"
@@ -318,7 +318,7 @@
                                                         {{ $item->active == 1 ? 'Aktif' : 'Non Aktif' }}
                                                     </label>
                                                 </div>
-                                            </td>
+                                            </td> --}}
                                             <td class="text-center">
                                                 <p class="form-text mb-1">Total soal : {{ count($item->modulQuiz) }}</p>
                                                 <button type="button" class="btn btn-success btn-sm"
@@ -697,59 +697,59 @@
             }
         }
 
-        function setStatusActive(id) {
-            var isActive = $('#is_active_' + id).is(':checked');
-            $.ajax({
-                method: "POST",
-                url: "{{ url('/admin/course/course') }}" + "/" + "{{ $data->id }}" +
-                    "/modul/update-is-active/" +
-                    id,
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    _method: 'PATCH',
-                    active: isActive === true ? 1 : 0,
-                    updateStatus: true
-                },
-            }).done(function(data) {
-                if (data.isActive == 1) {
-                    $('#label_check_' + id).text('Aktif')
-                    $('#is_active_' + id).prop('checked', true)
-                } else {
-                    $('#label_check_' + id).text('Non Aktif')
-                    $('#is_active_' + id).prop('checked', false)
-                }
-                $.notify({
-                    icon: "icon-check",
-                    title: 'Sukses',
-                    message: 'Berhasil mengubah status data',
-                }, {
-                    type: "info",
-                    allow_dismiss: true,
-                    placement: {
-                        from: "bottom",
-                        align: "right"
-                    },
-                    timer: 1000,
-                });
-            }).fail(function(data) {
+        // function setStatusActive(id) {
+        //     var isActive = $('#is_active_' + id).is(':checked');
+        //     $.ajax({
+        //         method: "POST",
+        //         url: "{{ url('/admin/course/course') }}" + "/" + "{{ $data->id }}" +
+        //             "/modul/update-is-active/" +
+        //             id,
+        //         data: {
+        //             _token: "{{ csrf_token() }}",
+        //             _method: 'PATCH',
+        //             active: isActive === true ? 1 : 0,
+        //             updateStatus: true
+        //         },
+        //     }).done(function(data) {
+        //         if (data.isActive == 1) {
+        //             $('#label_check_' + id).text('Aktif')
+        //             $('#is_active_' + id).prop('checked', true)
+        //         } else {
+        //             $('#label_check_' + id).text('Non Aktif')
+        //             $('#is_active_' + id).prop('checked', false)
+        //         }
+        //         $.notify({
+        //             icon: "icon-check",
+        //             title: 'Sukses',
+        //             message: 'Berhasil mengubah status data',
+        //         }, {
+        //             type: "info",
+        //             allow_dismiss: true,
+        //             placement: {
+        //                 from: "bottom",
+        //                 align: "right"
+        //             },
+        //             timer: 1000,
+        //         });
+        //     }).fail(function(data) {
 
-                $('#is_active_' + id).prop('checked', !isActive)
+        //         $('#is_active_' + id).prop('checked', !isActive)
 
-                $.notify({
-                    icon: "icon-close",
-                    title: 'Gagal',
-                    message: 'Gagal mengubah status data',
-                }, {
-                    type: "danger",
-                    allow_dismiss: true,
-                    placement: {
-                        from: "bottom",
-                        align: "right"
-                    },
-                    timer: 1000,
-                });
-            });
-        }
+        //         $.notify({
+        //             icon: "icon-close",
+        //             title: 'Gagal',
+        //             message: 'Gagal mengubah status data',
+        //         }, {
+        //             type: "danger",
+        //             allow_dismiss: true,
+        //             placement: {
+        //                 from: "bottom",
+        //                 align: "right"
+        //             },
+        //             timer: 1000,
+        //         });
+        //     });
+        // }
 
         $('#btnHapus').click(function(e) {
             e.preventDefault();
