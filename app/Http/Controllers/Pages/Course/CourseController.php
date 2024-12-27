@@ -20,8 +20,21 @@ class CourseController extends Controller
 {
     public function detailcourse(Request $request, $course_id)
     {
-        $course = Course::with(['modul', 'modul.quizzes', 'modul.essays'])->where('id', $course_id)->first();
-        return view('pages.course.course.index', compact('course'));
+        $course = Course::with(['modul.quizzes', 'modul.essays'])->find($course_id);
+
+        // Siapkan data untuk JavaScript
+        $courseModules = $course->modul->map(function ($modul) {
+            return [
+                'namaModul' => $modul->nama_modul,
+                'quizIds' => $modul->quizzes->pluck('id')->toArray(),
+                'essayIds' => $modul->essays->pluck('course_modul_id')->toArray(),
+            ];
+        });
+
+        return view('pages.course.course.index', [
+            'course' => $course,
+            'courseModules' => $courseModules, // Data untuk digunakan di JS
+        ]);
     }
 
     public function lesson(Request $request, $course_modul_id)
@@ -57,23 +70,20 @@ class CourseController extends Controller
 
     public function getFirstModul($course_id)
     {
-        // Ambil modul dengan `course_id` yang diurutkan berdasarkan `no_urut` (aktif)
-        $modul = CourseModul::where('course_id', $course_id)
-            ->where('active', 1)
-            ->orderBy('no_urut', 'asc')
-            ->first();
-
-        if ($modul) {
-            return response()->json([
-                'success' => true,
-                'url' => $modul->url_media,
-                'tipe_media' => $modul->tipe_media,
-            ]);
-        }
+        $modules = Course::with(['modul.quizzes', 'modul.essays'])
+        ->find($course_id)
+        ->modul
+        ->map(function ($modul) {
+            return [
+                'namaModul' => $modul->nama_modul,
+                'quizIds' => $modul->quizzes->pluck('id')->toArray(),
+                'essayIds' => $modul->essays->pluck('course_modul_id')->toArray(),
+            ];
+        });
 
         return response()->json([
-            'success' => false,
-            'message' => 'Tidak ada modul yang ditemukan.'
+            'success' => true,
+            'modules' => $modules,
         ]);
     }
 
@@ -156,26 +166,40 @@ class CourseController extends Controller
     {
         $userId = auth()->id(); // Ambil user ID dari session
 
-        // Ambil pertanyaan dan jawaban terkait modul
-        $essays = ModulEssay::where('course_modul_id', $course_modul_id)->get();
-        $answers = ModulEssayAnswer::where('course_modul_id', $course_modul_id)
-            ->where('user_id', $userId)
-            ->first(); // Hanya ambil jawaban user terkait modul ini
-
-        if ($essays->isNotEmpty()) {
-            return response()->json([
-                'questions' => $essays->map(function ($essay) {
-                    return [
-                        'id' => $essay->id,
-                        'question' => $essay->pertanyaan,
-                    ];
-                }),
-                'answer' => $answers ? $answers->jawaban : null, // Kirim jawaban jika ada
-            ]);
+        // Validasi modul ID
+        if (!$course_modul_id) {
+            return response()->json(['message' => 'Invalid course module ID'], 400);
         }
 
-        return response()->json(['message' => 'No essays found for this module'], 404);
+        // Ambil semua essay terkait modul
+        $essays = ModulEssay::where('course_modul_id', $course_modul_id)->get();
+
+        // Ambil jawaban user terkait modul ini
+        $answers = ModulEssayAnswer::where('course_modul_id', $course_modul_id)
+            ->where('user_id', $userId)
+            ->first();
+
+        // Jika tidak ada essay ditemukan
+        if ($essays->isEmpty()) {
+            return response()->json(['message' => 'No essays found for this module'], 404);
+        }
+
+        // Buat respons dengan essayIds dan detail pertanyaan
+        $essayIds = $essays->pluck('course_modul_id'); // Ambil ID semua essay
+
+        return response()->json([
+            'essayIds' => $essayIds, // Array ID essay
+            'questions' => $essays->map(function ($essay) {
+                return [
+                    'id' => $essay->id,
+                    'question' => $essay->pertanyaan,
+                ];
+            }),
+            'answer' => $answers ? $answers->jawaban : null, // Jawaban user jika ada
+            'totalEssays' => $essays->count(), // Jumlah total essay
+        ]);
     }
+
 
 
     public function submitQuiz(Request $request, $modulId, $userId)

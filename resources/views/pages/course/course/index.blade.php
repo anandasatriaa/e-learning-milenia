@@ -56,7 +56,7 @@
                                 <button type="button" class="btn btn-label-info btn-round btn-sm me-2" id="goToLastAccess">
                                     Last access : <span id="lastAccess">00:00</span> <i class="fas fa-history ms-1"></i>
                                 </button>
-                                <a href="#" id="selesaiKelas" class="btn btn-danger btn-round btn-sm me-2">
+                                <a href="#" id="selesaiKelas" class="btn btn-danger btn-round btn-sm me-2 disabled">
                                     Submit & End Course <i class="fas fa-arrow-right ms-2"></i>
                                 </a>
                             </div>
@@ -160,9 +160,6 @@
                                 </div>
                             @endforeach
                         </div>
-
-
-
                     </div>
                 </div>
             </div>
@@ -273,7 +270,7 @@
                 iframeVideo.setAttribute("controlslist", "nodownload");
                 iframeVideo.setAttribute("oncontextmenu", "return false");
                 iframeVideo.setAttribute("id", "mainVideo");
-                console.log(iframeVideo.duration)
+                // console.log(iframeVideo.duration)
                 var supposedCurrentTime = 0;
                 var lastLongAccessTime = 0;
 
@@ -364,9 +361,59 @@
         }
     </script>
 
+
+<script>
+    // Deklarasikan courseModules di JavaScript
+    const courseModules = @json($courseModules);
+    console.log('Data courseModules:', courseModules); // Debugging untuk memastikan data diterima
+</script>
+
+<script>
+    function validateCompletion(courseModules) {
+        console.log('Validasi mulai dengan modul:', courseModules);
+
+        // Memeriksa apakah semua quiz dan essay di setiap modul telah dijawab
+        const allModulesComplete = courseModules.every(modul => {
+            // Memeriksa semua quiz di modul
+            const allQuizzesAnswered = modul.quizIds.every(quizId => {
+                const isAnswered = userAnswers[quizId]; // Jawaban quiz disimpan di `userAnswers`
+                console.log(`Quiz ID ${quizId} Terjawab:`, isAnswered);
+                return isAnswered;
+            });
+
+            // Memeriksa semua essay di modul
+            const allEssaysAnswered = modul.essayIds.every(courseModulId => {
+                const essayAnswer = localStorage.getItem(`essayAnswer-${courseModulId}`); // Jawaban essay disimpan di `localStorage`
+                const isAnswered = essayAnswer && essayAnswer.trim() !== '';
+                console.log(`Essay ID ${courseModulId} Terjawab:`, isAnswered, 'Jawaban:', essayAnswer);
+                return isAnswered;
+            });
+
+            // Modul dianggap lengkap jika semua quiz dan essay terjawab
+            const isModuleComplete = allQuizzesAnswered && allEssaysAnswered;
+            console.log(`Modul ${modul.namaModul}: Status Lengkap:`, isModuleComplete);
+
+            return isModuleComplete;
+        });
+
+        // Mengatur tombol selesai kelas sesuai dengan status
+        const selesaiKelasButton = document.getElementById("selesaiKelas");
+        if (allModulesComplete) {
+            selesaiKelasButton.classList.remove('disabled');
+            selesaiKelasButton.removeAttribute('disabled');
+            console.log('Semua modul telah selesai. Tombol Selesai Kelas diaktifkan.');
+        } else {
+            selesaiKelasButton.classList.add('disabled');
+            selesaiKelasButton.setAttribute('disabled', 'disabled');
+            console.log('Belum semua modul selesai. Tombol Selesai Kelas dinonaktifkan.');
+        }
+    }
+</script>
+
+{{-- Quiz --}}
     <script>
         let userAnswers = JSON.parse(localStorage.getItem('userAnswers')) || {};
-
+        
         function loadQuiz(courseModulId) {
             // Clear iframe and hide ratio
             const iframe = document.getElementById("videoSource");
@@ -382,6 +429,9 @@
                         alert(data.message); // In case of an error
                         return;
                     }
+
+                    quizIds = data.quizIds;
+                    console.log('data quizIds:', quizIds);
 
                     const iframeContent = `
                         <div class="container mt-4">
@@ -436,7 +486,7 @@
                 }
             }
 
-            console.log(`Jawaban terpilih untuk modul ${courseModulId}: ${answer}, Indeks radio button: ${selectedIndex}`);
+            // console.log(`Jawaban terpilih untuk modul ${courseModulId}: ${answer}, Indeks radio button: ${selectedIndex}`);
 
             if (!userAnswers) userAnswers = {};
             if (userAnswers[courseModulId]) {
@@ -450,12 +500,14 @@
                 kode_jawaban: selectedIndex.toString() // Menyimpan indeks sebagai kode jawaban
             };
 
-            console.log('Jawaban yang disimpan ke userAnswers:', userAnswers);
+            // console.log('Jawaban yang disimpan ke userAnswers:', userAnswers);
 
             // Simpan jawaban di LocalStorage
             localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
 
-            console.log('Data LocalStorage setelah saveAnswer:', localStorage.getItem('userAnswers'));
+            validateCompletion(courseModules);
+
+            // console.log('Data LocalStorage setelah saveAnswer:', localStorage.getItem('userAnswers'));
         }
 
 
@@ -547,8 +599,8 @@
                     }
 
                     const userAnswerFromDb = data.userAnswer;
-            console.log('User Answer from DB:', userAnswerFromDb); // Untuk debugging
-            console.log('Answer Options:', data.kunci_jawaban); // Untuk debugging
+            // console.log('User Answer from DB:', userAnswerFromDb); // Untuk debugging
+            // console.log('Answer Options:', data.kunci_jawaban); // Untuk debugging
 
             let userAnswer = userAnswerFromDb || JSON.parse(localStorage.getItem('userAnswers'))?.[courseModulId]?.answer;
 
@@ -636,6 +688,9 @@
                         return;
                     }
 
+                    essayIds = data.essayIds;
+                    console.log('data essayIds:', essayIds);
+
                     // Combine all questions into a single list
                     const questionsList = data.questions.map((question, index) => `
                 <p><strong>${index + 1}. </strong> ${question.question}</p>
@@ -649,7 +704,7 @@
                         <div class="mb-3">${questionsList}</div>
                     </div>
                     <div class="card-body">
-                        <textarea class="form-control" id="essayFrame-${courseModulId}" rows="6" required></textarea>
+                        <textarea class="form-control essay-textarea" id="essayFrame-${courseModulId}" rows="6" required></textarea>
                     </div>
                 </div>
             `;
@@ -675,8 +730,17 @@
                     // Add event listener to save the content when the user types
                     CKEDITOR.instances[`essayFrame-${courseModulId}`].on('change', function () {
                         const currentContent = CKEDITOR.instances[`essayFrame-${courseModulId}`].getData();
+                        console.log(`Simpan jawaban untuk essay ID ${courseModulId}:`, currentContent); // Debugging
                         localStorage.setItem(`essayAnswer-${courseModulId}`, currentContent);
+
+                        // Periksa apakah data telah disimpan dengan benar
+                        const savedAnswer = localStorage.getItem(`essayAnswer-${courseModulId}`);
+                        console.log(`Jawaban yang disimpan di localStorage untuk ${courseModulId}:`, savedAnswer); // Debugging
+
+                        // Memvalidasi apakah semua quiz dan essay sudah terjawab
+                        validateCompletion(courseModules);
                     });
+
                 })
                 .catch(err => console.error('Error loading essay:', err));
 
@@ -708,16 +772,16 @@
             const storageKey = `timeElapsed_course_${courseId}`;
             const timeSpend = parseInt(localStorage.getItem(storageKey)) || 0;
 
-            console.log("Time Spend untuk course ini (dalam detik):", timeSpend);
+            // console.log("Time Spend untuk course ini (dalam detik):", timeSpend);
 
             // Mengambil Progress Bar dari localStorage
             const progressBar = parseInt(localStorage.getItem('progress_bar')) || 0;
-            console.log("Progress Bar:", progressBar + "%");
+            // console.log("Progress Bar:", progressBar + "%");
 
             const userAnswers = JSON.parse(localStorage.getItem('userAnswers')) || {};
             const essayAnswers = Object.keys(localStorage).filter(key => key.startsWith('essayAnswer-'));
 
-            console.log("User Answers:", userAnswers);
+            // console.log("User Answers:", userAnswers);
 
             // Pastikan progress menjadi 100% ketika selesai kelas ditekan
             currentModule = totalModules;
@@ -730,8 +794,8 @@
                     kode_jawaban
                 } = userAnswers[modulquizzesId];
 
-                console.log(`Mengirim jawaban quiz untuk modul ${modulquizzesId}`);
-                console.log(`Jawaban: ${answer}, Kode Jawaban: ${kode_jawaban}`);
+                // console.log(`Mengirim jawaban quiz untuk modul ${modulquizzesId}`);
+                // console.log(`Jawaban: ${answer}, Kode Jawaban: ${kode_jawaban}`);
 
                 const quizData = {
                     user_id: userId,
@@ -759,7 +823,7 @@
                     .catch(err => console.error('Quiz Error:', err));
             });
 
-            console.log(`Jawaban essay: ${essayAnswers}`);
+            // console.log(`Jawaban essay: ${essayAnswers}`);
 
             // Mengirim jawaban essay ke backend
             essayAnswers.forEach((key) => {
@@ -772,7 +836,7 @@
                     jawaban: essayContent
                 };
 
-                console.log(`Mengirim jawaban essay untuk modul ${courseModulId}:`, essayData);
+                // console.log(`Mengirim jawaban essay untuk modul ${courseModulId}:`, essayData);
 
                 fetch(`/course/essay/${essayData.course_modul_id}/submit/${essayData.user_id}`, {
                     method: 'POST',
@@ -794,7 +858,7 @@
                 progress_bar: 100 // Pastikan progress menjadi 100%
             };
 
-            console.log('Mengirim data summary:', summaryData);
+            // console.log('Mengirim data summary:', summaryData);
 
             fetch('/course/update-course-enrolls', {
                     method: 'POST',
