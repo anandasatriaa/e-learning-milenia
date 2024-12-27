@@ -137,7 +137,7 @@
                         <p>Course Schedule</p>
                     </a>
                 </li>
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a href="widgets.html">
                         <i class="fas fa-desktop"></i>
                         <p>Widgets</p>
@@ -201,7 +201,7 @@
                             </li>
                         </ul>
                     </div>
-                </li>
+                </li> --}}
             </ul>
         </div>
     </div>

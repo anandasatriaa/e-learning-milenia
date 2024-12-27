@@ -60,7 +60,7 @@
                                 <th class="text-center">Learning Category</th>
                                 <th class="text-center">Name</th>
                                 <th class="text-center">Description</th>
-                                <th class="text-center" colspan="2" style="width: 20%"><i class="fas fa-cogs"></i></th>
+                                <th class="text-center"><i class="fas fa-cogs"></i></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -74,7 +74,7 @@
                                     <td>{{ $item->learningCategory->nama ?? 'Tidak ada' }}</td>
                                     <td>{{ $item->nama }}</td>
                                     <td>{!! $item->deskripsi !!}</td>
-                                    <td class="text-center">
+                                    {{-- <td class="text-center">
                                         <div class="form-check form-switch text-center p-1">
                                             <div class="d-flex justify-content-center">
                                                 <input class="form-check-input" type="checkbox" role="switch"
@@ -87,7 +87,7 @@
                                                 {{ $item->active == 1 ? 'Active' : 'Non Active' }}
                                             </label>
                                         </div>
-                                    </td>
+                                    </td> --}}
                                     <td class="text-center">
                                         <a href="{{ route('admin.category.divisi-category.edit', $item->id) }}"
                                             data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"
@@ -145,57 +145,57 @@
             $('#formSearch').submit();
         });
 
-        function setStatusActive(id) {
-            var isActive = $('#is_active_' + id).is(':checked');
-            $.ajax({
-                method: "POST",
-                url: "{{ url('/admin/category/divisi-category/') }}" + "/" + id,
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    _method: 'PATCH',
-                    active: isActive === true ? 1 : 0,
-                    updateStatus: true
-                },
-            }).done(function(data) {
-                if (data.isActive == 1) {
-                    $('#label_check_' + id).text('Active')
-                    $('#is_active_' + id).prop('checked', true)
-                } else {
-                    $('#label_check_' + id).text('Non Active')
-                    $('#is_active_' + id).prop('checked', false)
-                }
-                $.notify({
-                    icon: "icon-check",
-                    title: 'Sukses',
-                    message: 'Berhasil mengubah status data',
-                }, {
-                    type: "info",
-                    allow_dismiss: true,
-                    placement: {
-                        from: "bottom",
-                        align: "right"
-                    },
-                    timer: 1000,
-                });
-            }).fail(function(data) {
+        // function setStatusActive(id) {
+        //     var isActive = $('#is_active_' + id).is(':checked');
+        //     $.ajax({
+        //         method: "POST",
+        //         url: "{{ url('/admin/category/divisi-category/') }}" + "/" + id,
+        //         data: {
+        //             _token: "{{ csrf_token() }}",
+        //             _method: 'PATCH',
+        //             active: isActive === true ? 1 : 0,
+        //             updateStatus: true
+        //         },
+        //     }).done(function(data) {
+        //         if (data.isActive == 1) {
+        //             $('#label_check_' + id).text('Active')
+        //             $('#is_active_' + id).prop('checked', true)
+        //         } else {
+        //             $('#label_check_' + id).text('Non Active')
+        //             $('#is_active_' + id).prop('checked', false)
+        //         }
+        //         $.notify({
+        //             icon: "icon-check",
+        //             title: 'Sukses',
+        //             message: 'Berhasil mengubah status data',
+        //         }, {
+        //             type: "info",
+        //             allow_dismiss: true,
+        //             placement: {
+        //                 from: "bottom",
+        //                 align: "right"
+        //             },
+        //             timer: 1000,
+        //         });
+        //     }).fail(function(data) {
 
-                $('#is_active_' + id).prop('checked', !isActive)
+        //         $('#is_active_' + id).prop('checked', !isActive)
 
-                $.notify({
-                    icon: "icon-close",
-                    title: 'Gagal',
-                    message: 'Gagal mengubah status data',
-                }, {
-                    type: "danger",
-                    allow_dismiss: true,
-                    placement: {
-                        from: "bottom",
-                        align: "right"
-                    },
-                    timer: 1000,
-                });
-            });
-        }
+        //         $.notify({
+        //             icon: "icon-close",
+        //             title: 'Gagal',
+        //             message: 'Gagal mengubah status data',
+        //         }, {
+        //             type: "danger",
+        //             allow_dismiss: true,
+        //             placement: {
+        //                 from: "bottom",
+        //                 align: "right"
+        //             },
+        //             timer: 1000,
+        //         });
+        //     });
+        // }
 
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('searchInput');
