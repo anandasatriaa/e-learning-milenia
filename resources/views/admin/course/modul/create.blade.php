@@ -86,6 +86,7 @@
                                 <label class="fw-bold" for="url_media">Masukan File Media<span
                                         class="text-danger">*</span></label>
                                 <input id="url_media" type="file" name="url_media" class="form-control" required>
+                                <small class="text-danger">*File maksimal berukuran 2GB</small>
                             </div>
                             <div class="form-group input-bar" style="display: none">
                                 <label class="fw-bold">Preview</label>
