@@ -516,11 +516,10 @@
                                             <i class="fas fa-user-plus me-1"></i>
                                             Tambah Peserta
                                         </a>
-
-                                        <div class="dropdown-divider"></div>
+                                        {{-- <div class="dropdown-divider"></div>
                                         <a class="dropdown-item" href="#" id="">
                                             <i class="fas fa-list me-1"></i>
-                                            Urutkan</a>
+                                            Urutkan</a> --}}
                                     </div>
                                 </div>
                             </div>
