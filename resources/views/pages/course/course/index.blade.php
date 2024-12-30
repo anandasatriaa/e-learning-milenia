@@ -903,7 +903,7 @@
     {{-- Time Spend --}}
     <script>
         // Fungsi untuk format waktu
-        function formatTime(seconds) {
+        function formatTimeSpend(seconds) {
             const hours = Math.floor(seconds / 3600);
             const minutes = Math.floor((seconds % 3600) / 60);
             const secs = seconds % 60;
@@ -941,7 +941,7 @@
             if (!timer) {
                 timer = setInterval(() => {
                     timeElapsed++;
-                    document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
+                    document.getElementById('time').innerText = `Time Spend: ${formatTimeSpend(timeElapsed)}`;
                     localStorage.setItem(storageKey, timeElapsed);
                 }, 1000);
             }
@@ -949,9 +949,12 @@
 
         // Fungsi untuk berhenti timer
         function stopTimer() {
+        if (timer) {
             clearInterval(timer);
-            localStorage.setItem(storageKey, timeElapsed);
+            timer = null; // Set timer ke null untuk mencegah setInterval ganda
         }
+        localStorage.setItem(storageKey, timeElapsed);
+    }
 
         // Event listener untuk mendeteksi perubahan visibility halaman
         document.addEventListener('visibilitychange', () => {
@@ -965,7 +968,7 @@
         // Ambil data dari database atau localStorage saat halaman dimuat
         document.addEventListener('DOMContentLoaded', async () => {
             await fetchTimeSpendFromDatabase();
-            document.getElementById('time').innerText = `Time Spend: ${formatTime(timeElapsed)}`;
+            document.getElementById('time').innerText = `Time Spend: ${formatTimeSpend(timeElapsed)}`;
             startTimer();
         });
     </script>
