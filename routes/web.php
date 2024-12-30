@@ -103,6 +103,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update-course-enrolls',[CourseController::class, 'updateCourseEnrollSummary'])->name('course.updateCourseEnrollSummary');
             Route::get('/getQuiz/{quiz_id}', [CourseController::class, 'getQuiz'])->name('course.getQuiz');
             Route::get('/get-time-spend-and-progress-bar/{course_id}/{user_id}', [CourseController::class, 'getTimeandProgress'])->name('course.getTimeandProgress');
+            Route::post('/post-time-spend-and-progress-bar', [CourseController::class, 'postTimeandProgress'])->name('course.postTimeandProgress');
         });
     });
 });

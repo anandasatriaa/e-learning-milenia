@@ -291,4 +291,28 @@ class CourseController extends Controller
             ]);
         }
     }
+
+    public function postTimeandProgress(Request $request)
+    {
+        $validatedData = $request->validate([
+            'course_id' => 'required|integer',
+            'user_id' => 'required|integer',
+            'progress_bar' => 'required|integer|min:0|max:100',
+            'time_spend' => 'required|integer|min:0',
+        ]);
+
+        $enrollment = UserCourseEnroll::where('course_id', $validatedData['course_id'])
+        ->where('user_id', $validatedData['user_id'])
+        ->first();
+
+        if ($enrollment) {
+            $enrollment->progress_bar = $validatedData['progress_bar'];
+            $enrollment->time_spend = $validatedData['time_spend'];
+            $enrollment->save();
+
+            return response()->json(['status' => 'success'], 200);
+        }
+
+        return response()->json(['status' => 'error', 'message' => 'Enrollment not found'], 404);
+    }
 }
