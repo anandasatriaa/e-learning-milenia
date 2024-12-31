@@ -67,7 +67,7 @@
                                 <tr>
                                     <th class="text-center" scope="row"> {{ $data->firstItem() + $loop->index }}</th>
                                     <td class="text-center">
-                                        <img src="{{ Storage::url('category/learning/'.$item->image) }}" alt="{{ $item->image }}"
+                                        <img src="{{ $item->image_url }}" alt="{{ $item->image }}"
                                                             class="w-75 rounded">
                                     </td>
                                     <td>{{ $item->nama }}</td>
