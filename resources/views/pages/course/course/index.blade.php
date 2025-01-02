@@ -422,7 +422,7 @@
             ratio.style.display = "none";
 
             // Fetch quiz data from the backend using the course module ID
-            fetch(`/course/quiz/${courseModulId}`)
+            fetch("{{ url('course/quiz') }}/" + courseModulId)
                 .then(response => response.json())
                 .then(data => {
                     if (data.message) {
@@ -590,7 +590,7 @@
             ratio.style.display = "none";
 
             // Fetch quiz data from the backend using the course module ID
-            fetch(`/course/getQuiz/${courseModulId}`)
+            fetch("{{ url('course/getQuiz') }}/" + courseModulId)
                 .then(response => response.json())
                 .then(data => {
                     if (data.message) {
@@ -680,7 +680,7 @@
             ratio.style.display = "none";
 
             // Fetch essay data from the backend using the course module ID
-            fetch(`/course/essay/${courseModulId}`)
+            fetch("{{ url('course/essay') }}/" + courseModulId)
                 .then(response => response.json())
                 .then(data => {
                     if (data.message) {
@@ -804,7 +804,7 @@
                     kode_jawaban: kode_jawaban
                 };
 
-                fetch(`/course/quiz/${quizData.modul_quizzes_id}/submit/${quizData.user_id}`, {
+                fetch("{{ url('course/quiz') }}/" + quizData.modul_quizzes_id + "/submit/" + quizData.user_id, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -838,7 +838,7 @@
 
                 // console.log(`Mengirim jawaban essay untuk modul ${courseModulId}:`, essayData);
 
-                fetch(`/course/essay/${essayData.course_modul_id}/submit/${essayData.user_id}`, {
+                fetch("{{ url('course/essay') }}/" + essayData.course_modul_id + "/submit/" + essayData.user_id, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -860,7 +860,7 @@
 
             // console.log('Mengirim data summary:', summaryData);
 
-            fetch('/course/update-course-enrolls', {
+            fetch("{{ url('course/update-course-enrolls') }}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -923,7 +923,7 @@
 
         async function updateTimeSpendToDatabase() {
             const userId = @json(auth()->user()->ID);
-            const response = await fetch('/course/post-time-spend-and-progress-bar', {
+            const response = await fetch("{{ url('course/post-time-spend-and-progress-bar') }}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -945,7 +945,9 @@
         // Fungsi untuk ambil data dari server (API)
         async function fetchTimeSpendFromDatabase() {
             const userId = @json(auth()->user()->ID); // Ganti dengan ID pengguna yang sesuai
-            const response = await fetch(`/course/get-time-spend-and-progress-bar/${courseId}/${userId}`);
+            const url = "{{ url('course/get-time-spend-and-progress-bar') }}/" + courseId + "/" + userId;
+
+            const response = await fetch(url);
             const data = await response.json();
             if (data && data.time_spend) {
                 timeElapsed = data.time_spend;
@@ -1008,7 +1010,7 @@
             const userId = @json(auth()->user()->ID);
             const progressPercent = Math.floor((currentModule / totalModules) * 100);
 
-            const response = await fetch('/course/post-time-spend-and-progress-bar', {
+            const response = await fetch("{{ url('course/post-time-spend-and-progress-bar') }}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1055,7 +1057,9 @@
         // Fungsi untuk ambil data dari server (API)
         async function fetchProgressFromDatabase() {
             const userId = @json(auth()->user()->ID); // Ganti dengan ID pengguna yang sesuai
-            const response = await fetch(`/course/get-time-spend-and-progress-bar/${courseId}/${userId}`);
+            const url = "{{ url('course/get-time-spend-and-progress-bar') }}/" + courseId + "/" + userId;
+
+            const response = await fetch(url);
             const data = await response.json();
             if (data && data.progress_bar) {
                 const savedProgress = data.progress_bar;

@@ -354,8 +354,7 @@
                 if (willDelete) {
                     // Mengirim permintaan DELETE menggunakan Ajax
                     $.ajax({
-                        url: '/admin/calendar/course-schedule/calendar/destroy/' +
-                            eventId, // URL untuk menghapus event berdasarkan ID
+                        url: `{{ url('admin/calendar/course-schedule/calendar/destroy') }}/${eventId}`,
                         method: 'DELETE',
                         data: {
                             _token: '{{ csrf_token() }}' // Token CSRF untuk keamanan

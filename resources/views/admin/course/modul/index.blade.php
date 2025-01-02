@@ -368,8 +368,8 @@
                                                                             download> disini
                                                                             <i class="bi bi-download"></i></a>
                                                                         <br>
-                                                                        *apabila anda mengimport quiz, daftar quiz yang
-                                                                        sebelumnya akan terhapus
+                                                                        <span class="text-danger">*apabila anda mengimport quiz, daftar quiz yang
+                                                                        sebelumnya akan terhapus</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1038,6 +1038,8 @@
             document.querySelectorAll(".deleteEssay").forEach(button => {
                 button.addEventListener("click", function() {
                     const modalId = this.getAttribute("data-modal-id"); // Ambil ID modal
+                    const courseId = this.getAttribute("data-course-id"); // Ambil ID course
+                    const modulId = this.getAttribute("data-modul-id"); // Ambil ID modul
                     const container = document.getElementById(
                     `essay-container${modalId}`); // Cari container spesifik
 
@@ -1070,7 +1072,7 @@
                     });
 
                     if (essayId) {
-                        fetch(`/admin/course/course/{course_id}/modul/{modul_id}/delete-essay/${essayId}`, {
+                        fetch("{{ url('admin/course/course') }}/" + courseId + "/modul/" + modulId + "/delete-essay/" + essayId, {
                                 method: 'DELETE',
                                 headers: {
                                     'X-CSRF-TOKEN': document.querySelector(

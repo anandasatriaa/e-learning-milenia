@@ -187,7 +187,7 @@
             saveButton.setAttribute('data-user-id', userId);
 
             $.ajax({
-                url: '/admin/course/get-review-data/' + courseId + '/' + userId,
+                url: `{{ url('admin/course/get-review-data') }}/${courseId}/${userId}`,
                 method: 'GET',
                 success: function(response) {
                     modal.find('.modal-title').text('Review & Penilaian ' + response.user.name);
@@ -404,15 +404,15 @@
             console.log('Request URL:', `/admin/course/get-review-data/${courseId}/${userId}`);
 
             // Pertama, cek apakah review sudah ada di database
-            fetch(`/admin/course/get-review-data/${courseId}/${userId}`)
+            fetch("{{ url('admin/course/get-review-data') }}/" + courseId + "/" + userId)
                 .then(response => response.json())
                 .then(data => {
-                    var url = '/admin/course/nilai/store'; // Default untuk POST (insert)
+                    var url = `{{ url('admin/course/nilai/store') }}`; // Default untuk POST (insert)
                     var method = 'POST'; // Default untuk POST (insert)
 
                     // Jika review sudah ada, kita gunakan PUT untuk update
                     if (data.review) {
-                        url = `/admin/course/nilai/update/${courseId}/${userId}`; // Gunakan route update
+                        url = `{{ url('admin/course/nilai/update') }}/${courseId}/${userId}`; // Gunakan route update
                         method = 'PUT'; // Menggunakan PUT, jadi method 'POST' dengan pengubahan URL
                     }
 
