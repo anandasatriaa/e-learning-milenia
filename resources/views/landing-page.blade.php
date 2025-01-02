@@ -26,32 +26,35 @@
             /* Animasi transisi */
         }
 
-    /* Untuk layar dengan lebar maksimum 1024px */
-    @media (max-width: 1024px) {
-        .responsive-heading {
-            font-size: 80px; /* Sesuaikan ukuran font di layar tablet */
-        }
-    }
-
-    /* Untuk layar dengan lebar maksimum 768px */
-    @media (max-width: 768px) {
-        .responsive-heading {
-            font-size: 60px; /* Sesuaikan ukuran font di layar tablet kecil atau lebih kecil */
-        }
-    }
-
-    /* Untuk layar dengan lebar maksimum 425px (ponsel) */
-    @media (max-width: 425px) {
-        .responsive-heading {
-            font-size: 50px; /* Sesuaikan ukuran font di layar ponsel */
-            text-align: center;
+        /* Untuk layar dengan lebar maksimum 1024px */
+        @media (max-width: 1024px) {
+            .responsive-heading {
+                font-size: 80px;
+                /* Sesuaikan ukuran font di layar tablet */
+            }
         }
 
-        .selamat {
-            font-size: 15px;
-            text-align: center;
+        /* Untuk layar dengan lebar maksimum 768px */
+        @media (max-width: 768px) {
+            .responsive-heading {
+                font-size: 60px;
+                /* Sesuaikan ukuran font di layar tablet kecil atau lebih kecil */
+            }
         }
-    }
+
+        /* Untuk layar dengan lebar maksimum 425px (ponsel) */
+        @media (max-width: 425px) {
+            .responsive-heading {
+                font-size: 50px;
+                /* Sesuaikan ukuran font di layar ponsel */
+                text-align: center;
+            }
+
+            .selamat {
+                font-size: 15px;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 
@@ -94,7 +97,7 @@
         <!-- Video Local -->
         <div class="d-flex justify-content-center mt-4">
             <video class="img-fluid" controls width="700px">
-                <source src="{{ asset('img/Revisi Tutorial Apk Sales Representative.mp4') }}" type="video/mp4">
+                <source src="{{ asset('img/bumper_watermark.mp4') }}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
