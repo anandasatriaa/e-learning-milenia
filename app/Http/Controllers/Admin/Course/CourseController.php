@@ -17,7 +17,7 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $show = $request->get('show') ?? 15;
+        $show = $request->get('show') ?? 1000;
         $query = Course::withCount('modul', 'user')
             ->with(['subCategory.category.divisiCategory.learningCategory']) // Memuat relasi yang diperlukan
             ->latest();
