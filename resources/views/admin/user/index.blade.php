@@ -133,15 +133,20 @@
             );
             modalStore.show();
 
-            $.ajax({
+            var jqxhr = $.ajax({
                 method: "GET",
                 url: "{{ route('admin.user.api-sync') }}",
-                uploadProgress: uploadProgress,
                 cache: false,
                 contentType: false,
                 processData: false,
+                xhr: function() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', uploadProgress, false); // Attach progress event handler
+                    return xhr;
+                }
+            });
 
-            }).done(function(data) {
+            jqxhr.done(function(data) {
                 modalStore.hide();
                 $.notify({
                     icon: "icon-check",
@@ -180,20 +185,19 @@
                 window.location.replace("{{ route('admin.user.employee.index') }}");
             }
 
-            $(jqxhr).on('uploadProgress', uploadProgress);
-
+            // Event handler to update progress bar
             function uploadProgress(e) {
                 if (e.lengthComputable) {
                     var percentComplete = (e.loaded * 100) / e.total;
-                    $('#progress_status').text(Math.round(percentComplete) + '%')
-                    $('#progress_bar').css('width', percentComplete + '%')
-                    $('#progress_bar').attr('aria-valuenow', percentComplete)
+                    $('#progress_status').text(Math.round(percentComplete) + '%');
+                    $('#progress_bar').css('width', percentComplete + '%');
+                    $('#progress_bar').attr('aria-valuenow', percentComplete);
                     if (percentComplete >= 100) {
-                        // process completed
-                        $('#progress_title_status').text('Menyelesaikan proses...')
+                        $('#progress_title_status').text('Menyelesaikan proses...');
                     }
                 }
             }
         });
     </script>
+
 @endsection
