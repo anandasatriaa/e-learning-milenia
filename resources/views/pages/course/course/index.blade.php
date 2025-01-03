@@ -258,67 +258,101 @@
             setActiveModule(0); // Set progress to the Introduction module (index 0)
         }
 
-        $(document).ready(function() {
-            var course_id = "{{ $course->id }}";
-            var videoUrl = "{{ url('/course/embed-video/') }}" + "/" + course_id;
-            $('#videoSource').attr('src', videoUrl);
-        });
+let isVideoCompleted = false; // Status untuk melacak apakah video selesai
 
-        $('#videoSource').on("load", function() {
+    $(document).ready(function () {
+        var course_id = "{{ $course->id }}";
+        var videoUrl = "{{ url('/course/embed-video/') }}" + "/" + course_id;
+        $('#videoSource').attr('src', videoUrl);
+
+        $('#videoSource').on("load", function () {
             const iframeVideo = $(this)[0].contentWindow.document.querySelector('video');
             if (iframeVideo) {
                 iframeVideo.setAttribute("controlslist", "nodownload");
                 iframeVideo.setAttribute("oncontextmenu", "return false");
                 iframeVideo.setAttribute("id", "mainVideo");
-                // console.log(iframeVideo.duration)
                 var supposedCurrentTime = 0;
                 var lastLongAccessTime = 0;
 
-                $('#goToLastAccess').click(function(e) {
-                    e.preventDefault();
-                    iframeVideo.currentTime = lastLongAccessTime;
-                });
-
-                $(iframeVideo).on('timeupdate', function() {
+                // Event listener untuk memperbarui status waktu
+                $(iframeVideo).on('timeupdate', function () {
                     if (!iframeVideo.seeking) {
                         supposedCurrentTime = iframeVideo.currentTime;
                         if (lastLongAccessTime < iframeVideo.currentTime) {
                             lastLongAccessTime = iframeVideo.currentTime;
                         }
-
                     }
-                    $('#lastAccess').text(formatTime(lastLongAccessTime))
+                    $('#lastAccess').text(formatTime(lastLongAccessTime));
                 });
 
-                $(iframeVideo).on('seeking', function() {
+                // Mencegah video di-seek ke depan
+                $(iframeVideo).on('seeking', function () {
                     var delta = iframeVideo.currentTime - supposedCurrentTime;
-                    var lastAccess = iframeVideo.currentTime - lastLongAccessTime;
-
-                    if (delta > 0) {
-                        if (iframeVideo.currentTime > lastLongAccessTime) {
-                            iframeVideo.currentTime = supposedCurrentTime;
-                        } else {
-                            supposedCurrentTime = iframeVideo.currentTime;
-                        }
-
-                    } else if (iframeVideo.currentTime < supposedCurrentTime) {
+                    if (delta > 0 && iframeVideo.currentTime > lastLongAccessTime) {
+                        iframeVideo.currentTime = supposedCurrentTime;
+                    } else {
                         supposedCurrentTime = iframeVideo.currentTime;
                     }
                 });
 
-                $(iframeVideo).on('ended', function() {
+                // Perbarui status saat video selesai
+                $(iframeVideo).on('ended', function () {
                     supposedCurrentTime = 0;
+                    isVideoCompleted = true; // Tandai video selesai
+                    console.log("Video selesai diputar.");
+                    validateCompletion(courseModules); // Periksa ulang validasi tombol
                 });
             }
         });
+    });
 
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            const formattedMinutes = String(minutes).padStart(2, '0'); // Tambahkan nol di depan jika perlu
-            const formattedSeconds = String(secs).padStart(2, '0'); // Tambahkan nol di depan jika perlu
-            return `${formattedMinutes}:${formattedSeconds}`;
+    function validateCompletion(courseModules) {
+        console.log('Validasi mulai dengan modul:', courseModules);
+
+        const hasQuizzesOrEssays = courseModules.some(modul => modul.quizIds.length > 0 || modul.essayIds.length > 0);
+
+        if (!hasQuizzesOrEssays && isVideoCompleted) {
+            activateSelesaiKelasButton();
+            console.log('Tidak ada kuis atau esai dan video selesai. Tombol Selesai Kelas diaktifkan.');
+            return;
         }
+
+        const allModulesComplete = courseModules.every(modul => {
+            const allQuizzesAnswered = modul.quizIds.every(quizId => userAnswers[quizId]);
+            const allEssaysAnswered = modul.essayIds.every(courseModulId => {
+                const essayAnswer = localStorage.getItem(`essayAnswer-${courseModulId}`);
+                return essayAnswer && essayAnswer.trim() !== '';
+            });
+
+            return allQuizzesAnswered && allEssaysAnswered;
+        });
+
+        if (allModulesComplete && isVideoCompleted) {
+            activateSelesaiKelasButton();
+            console.log('Semua modul selesai dan video selesai. Tombol Selesai Kelas diaktifkan.');
+        } else {
+            deactivateSelesaiKelasButton();
+            console.log('Belum semua modul selesai atau video belum selesai. Tombol Selesai Kelas dinonaktifkan.');
+        }
+    }
+
+    function activateSelesaiKelasButton() {
+        const selesaiKelasButton = document.getElementById("selesaiKelas");
+        selesaiKelasButton.classList.remove('disabled');
+        selesaiKelasButton.removeAttribute('disabled');
+    }
+
+    function deactivateSelesaiKelasButton() {
+        const selesaiKelasButton = document.getElementById("selesaiKelas");
+        selesaiKelasButton.classList.add('disabled');
+        selesaiKelasButton.setAttribute('disabled', 'disabled');
+    }
+
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
     </script>
 
     <script>
@@ -366,49 +400,73 @@
     // Deklarasikan courseModules di JavaScript
     const courseModules = @json($courseModules);
     console.log('Data courseModules:', courseModules); // Debugging untuk memastikan data diterima
+
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     console.log('Halaman dimuat, validasi tombol selesai kelas.');
+    //     validateCompletion(courseModules); // Memastikan tombol diperiksa saat halaman dimuat
+    // });
 </script>
 
-<script>
+{{-- <script>
     function validateCompletion(courseModules) {
         console.log('Validasi mulai dengan modul:', courseModules);
 
+        // Cek apakah tidak ada quiz dan essay sama sekali
+        const noQuizAndEssay = courseModules.every(modul => 
+            (!modul.quizIds || modul.quizIds.length === 0) && 
+            (!modul.essayIds || modul.essayIds.length === 0)
+        );
+
+        // Jika tidak ada quiz dan essay, tombol langsung aktif
+        if (noQuizAndEssay) {
+            console.log('Tidak ada quiz dan essay. Tombol Selesai Kelas diaktifkan.');
+            activateSelesaiKelasButton();
+            return;
+        }
+
         // Memeriksa apakah semua quiz dan essay di setiap modul telah dijawab
         const allModulesComplete = courseModules.every(modul => {
-            // Memeriksa semua quiz di modul
-            const allQuizzesAnswered = modul.quizIds.every(quizId => {
+            const allQuizzesAnswered = modul.quizIds?.every(quizId => {
                 const isAnswered = userAnswers[quizId]; // Jawaban quiz disimpan di `userAnswers`
                 console.log(`Quiz ID ${quizId} Terjawab:`, isAnswered);
                 return isAnswered;
-            });
+            }) ?? true; // Jika tidak ada quiz, anggap sudah terjawab
 
-            // Memeriksa semua essay di modul
-            const allEssaysAnswered = modul.essayIds.every(courseModulId => {
+            const allEssaysAnswered = modul.essayIds?.every(courseModulId => {
                 const essayAnswer = localStorage.getItem(`essayAnswer-${courseModulId}`); // Jawaban essay disimpan di `localStorage`
                 const isAnswered = essayAnswer && essayAnswer.trim() !== '';
                 console.log(`Essay ID ${courseModulId} Terjawab:`, isAnswered, 'Jawaban:', essayAnswer);
                 return isAnswered;
-            });
+            }) ?? true; // Jika tidak ada essay, anggap sudah terjawab
 
-            // Modul dianggap lengkap jika semua quiz dan essay terjawab
             const isModuleComplete = allQuizzesAnswered && allEssaysAnswered;
             console.log(`Modul ${modul.namaModul}: Status Lengkap:`, isModuleComplete);
 
             return isModuleComplete;
         });
 
-        // Mengatur tombol selesai kelas sesuai dengan status
-        const selesaiKelasButton = document.getElementById("selesaiKelas");
         if (allModulesComplete) {
-            selesaiKelasButton.classList.remove('disabled');
-            selesaiKelasButton.removeAttribute('disabled');
-            console.log('Semua modul telah selesai. Tombol Selesai Kelas diaktifkan.');
+            activateSelesaiKelasButton();
         } else {
-            selesaiKelasButton.classList.add('disabled');
-            selesaiKelasButton.setAttribute('disabled', 'disabled');
-            console.log('Belum semua modul selesai. Tombol Selesai Kelas dinonaktifkan.');
+            deactivateSelesaiKelasButton();
         }
     }
-</script>
+
+    function activateSelesaiKelasButton() {
+        const selesaiKelasButton = document.getElementById("selesaiKelas");
+        selesaiKelasButton.classList.remove('disabled');
+        selesaiKelasButton.removeAttribute('disabled');
+        console.log('Tombol Selesai Kelas diaktifkan.');
+    }
+
+    function deactivateSelesaiKelasButton() {
+        const selesaiKelasButton = document.getElementById("selesaiKelas");
+        selesaiKelasButton.classList.add('disabled');
+        selesaiKelasButton.setAttribute('disabled', 'disabled');
+        console.log('Tombol Selesai Kelas dinonaktifkan.');
+    }
+</script> --}}
+
 
 {{-- Quiz --}}
     <script>
