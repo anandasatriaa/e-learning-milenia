@@ -148,6 +148,33 @@
         </div>
     </div>
 
+    <!-- Modal Progress -->
+    <div class="modal" id="modalStore" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog"
+        aria-labelledby="modalTitleId" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="progress-card my-auto">
+                        <div class="progress-status">
+                            <span class="text-muted" id="progress_title_status">Proses Upload Data</span>
+                            <span class="text-muted fw-bold" id="progress_status">0%</span>
+                        </div>
+                        <div class="progress">
+                            <div id="progress_bar"
+                                class="progress-bar progress-bar-striped bg-warning progress-bar-animated"
+                                role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0"
+                                aria-valuemax="100" data-toggle="tooltip" data-placement="top">
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <small><i>*jangan me-refresh atau menutup halaman ini</i></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('js')
@@ -222,8 +249,18 @@
                                 personName
                             ) // Menambahkan user_id (null jika personName tidak ada)
                         },
+                        beforeSend: function() {
+                            // Tampilkan modal progress sebelum request dikirim
+                            $('#modalStore').modal('show');
+                            $('#progress_bar').css('width', '0%');
+                            $('#progress_status').text('0%');
+                        },
                         success: function(response) {
                             console.log('Data berhasil disimpan:', response);
+
+                            // Update progress ke 100% saat berhasil
+                            $('#progress_bar').css('width', '100%');
+                            $('#progress_status').text('100%');
 
                             // Menambahkan event ke calendar setelah berhasil
                             calendar.addEvent({
@@ -254,6 +291,14 @@
                         },
                         error: function(xhr, status, error) {
                             console.error('Terjadi kesalahan saat mengirim data:', error);
+                            $('#progress_status').text('Gagal!');
+                            $('#progress_bar').css('width', '100%');
+                        },
+                        complete: function() {
+                            // Menyembunyikan spinner loading setelah request selesai
+                            setTimeout(function() {
+                                $('#modalStore').modal('hide');
+                            }, 500); // Delay sejenak sebelum modal ditutup
                         }
                     });
                 }

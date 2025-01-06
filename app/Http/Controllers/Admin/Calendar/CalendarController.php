@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use App\Mail\ReminderEmail;
+use Illuminate\Support\Facades\Mail;
 
 class CalendarController extends Controller
 {
@@ -81,9 +83,25 @@ class CalendarController extends Controller
         $event->end_date = $request->input('endDate');
         $event->bg_color = $request->input('backgroundColor');
         $event->user_id = $userId;
+
         try {
             $event->save();
             Log::debug('Event saved successfully:', $event->toArray());
+
+            // Ambil email_karyawan berdasarkan user_id
+            $user = User::find($event->user_id);
+            if ($user && $user->email_karyawan) {
+                $details = [
+                    'eventName' => $event->acara,
+                    'division' => $event->divisi,
+                    'personName' => $event->nama,
+                    'startDate' => $event->start_date,
+                    'endDate' => $event->end_date,
+                ];
+
+                // Kirim email
+                Mail::to($user->email_karyawan)->send(new ReminderEmail($details));
+            }
         } catch (\Exception $e) {
             Log::error('Error saving event: ' . $e->getMessage());
         }
