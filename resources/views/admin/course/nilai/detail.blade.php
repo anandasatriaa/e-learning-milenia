@@ -227,8 +227,11 @@
                                             return `
                                                 <div class="mb-4 p-3 border rounded shadow-sm bg-light">
                                                     <h5><strong>${index + 1}. </strong> ${quiz.pertanyaan || 'Tidak ada pertanyaan'}</h5>
-                                                    <p><strong>Jawaban Pengguna:</strong> ${quiz.userAnswer.jawaban}</p>
-                                                    <p><strong>Kunci Jawaban:</strong> ${quiz.correct_answer || 'Tidak ada kunci jawaban'}</p>
+                                                    ${quiz.image ? `
+                                                        <div class="mt-2 ms-4">
+                                                            <img src="{{ asset('${quiz.image}') }}" class="img-fluid rounded" width="100px" alt="Gambar Pertanyaan">
+                                                        </div>
+                                                    ` : ''}
                                                     ${quiz.options.length > 0 ? `
                                                             <p><strong>Opsi Jawaban:</strong></p>
                                                             <ul class="list-group">
@@ -250,11 +253,15 @@
                                                                     </span>`; // Ikon di pojok kanan
                                                                 }
 
-                                                                // Cetak pilihan ke console
-                                                                console.log(`Pilihan: ${option.pilihan}, Index: ${index + 1}, Kode Jawaban Pengguna: ${kodeJawabanPengguna}, Kunci Jawaban: ${correctAnswer}`);
+                                                                // Tampilkan gambar jika pilihan berupa path gambar
+                                                                const optionContent = option.pilihan.startsWith('storage/quiz/answers/') ? `
+                                                                    <div class="d-flex align-items-center">
+                                                                        <img src="{{ asset('${option.pilihan}') }}" class="img-fluid" alt="Gambar Jawaban" style="width: 100px;">
+                                                                    </div>
+                                                                ` : `<span>${option.pilihan}</span>`;
 
                                                                 return `<li class="list-group-item ${optionClass} d-flex align-items-center position-relative">
-                                                                    <span>${option.pilihan}</span>
+                                                                    <span>${optionContent}</span>
                                                                     ${correctIcon}
                                                                     </li>`;
                                                                 }).join('')

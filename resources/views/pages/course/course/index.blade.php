@@ -663,41 +663,47 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
             let userAnswer = userAnswerFromDb || JSON.parse(localStorage.getItem('userAnswers'))?.[courseModulId]?.answer;
 
                     const iframeContent = `
-                <div class="">
-                    <div class="card-header">
-                        <p class="fw-bold">Pertanyaan ${data.quizIndex}:</p>
-                        <p class="mt-2">${data.question}</p>
-                    </div>
-                    <div class="card-body">
-                        <p class="fw-bold">Jawaban:</p>
-                        <form>
-                            ${data.kunci_jawaban.map((answer, index) => {
-                                const isChecked = userAnswer === answer ? 'checked' : '';
-                                return `
-                                    <div class="form-check">
-                                        <input 
-                                            class="form-check-input" 
-                                            type="radio" 
-                                            name="answer" 
-                                            id="answer${index + 1}" 
-                                            value="${answer}" 
-                                            ${isChecked}
-                                            onclick="saveAnswer(${courseModulId}, '${answer}')"
-                                        >
-                                        <label class="form-check-label" for="answer${index + 1}">${answer}</label>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </form>
-                    </div>
-                    <div class="card-footer text-muted">
-                        Pilih salah satu jawaban di atas.
-                    </div>
-                    <div class="d-flex justify-content-center mt-3">
-                        ${generateQuestionNav(data.quizIds, courseModulId)} <!-- Passing quizIds array -->
-                    </div>
-                </div>
-            `;
+                        <div class="">
+                            <div class="card-header">
+                                <p class="fw-bold">Pertanyaan ${data.quizIndex}:</p>
+                                <p class="mt-2">${data.question}</p>
+                                ${data.questionImage ? `<img src="${data.questionImage}" alt="Question Image" class="img-fluid rounded" style="width: 100px;">` : ''}
+                            </div>
+                            <div class="card-body">
+                                <p class="fw-bold">Jawaban:</p>
+                                <form>
+                                    ${data.kunci_jawaban.map((answer, index) => {
+                                        const isChecked = userAnswer === answer ? 'checked' : '';
+                                        const isImage = answer.startsWith('storage/quiz/answers/');
+                                        return `
+                                            <div class="form-check">
+                                                <input 
+                                                    class="form-check-input" 
+                                                    type="radio" 
+                                                    name="answer" 
+                                                    id="answer${index + 1}" 
+                                                    value="${answer}" 
+                                                    ${isChecked}
+                                                    onclick="saveAnswer(${courseModulId}, '${answer}')"
+                                                >
+                                                <label class="form-check-label" for="answer${index + 1}">
+                                                    ${isImage 
+                                                        ? `<img src="{{ asset('${answer}') }}" alt="Answer Image" class="img-fluid rounded" style="width: 100px;">`
+                                                        : answer}
+                                                </label>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </form>
+                            </div>
+                            <div class="card-footer text-muted">
+                                Pilih salah satu jawaban di atas.
+                            </div>
+                            <div class="d-flex justify-content-center mt-3">
+                                ${generateQuestionNav(data.quizIds, courseModulId)} <!-- Passing quizIds array -->
+                            </div>
+                        </div>
+                    `;
                     document.getElementById('iframeContent').innerHTML = iframeContent;
 
                     // Update the active button and color

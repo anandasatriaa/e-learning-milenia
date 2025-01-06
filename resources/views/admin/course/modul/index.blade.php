@@ -142,7 +142,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="accordion accordion-secondary">
+                        <div class="accordion accordion-black">
                             <div class="card">
                                 <div class="card-header collapsed" id="headingOne" data-bs-toggle="collapse"
                                     data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
@@ -383,10 +383,10 @@
                                                                     <p class="form-text fst-italic">Anda belum menambahkan
                                                                         quiz</p>
                                                                 @endif
-                                                                <div class="accordion accordion-secondary">
+                                                                <div class="accordion accordion-black">
                                                                     @foreach ($item->modulQuiz as $quiz)
                                                                         <div class="card my-1">
-                                                                            <div class="card-header" id="headingOne"
+                                                                            <div class="card-header collapsed" id="headingOne"
                                                                                 data-bs-toggle="collapse"
                                                                                 data-bs-target="#collapsQuestion{{ $quiz->id }}"
                                                                                 aria-expanded="true"
@@ -394,6 +394,11 @@
                                                                                 <div class="span-title">
                                                                                     {{ $loop->iteration }}.
                                                                                     {{ $quiz->pertanyaan }}
+                                                                                    @if($quiz->image)
+                                                                                        <div class="ms-4">
+                                                                                            <img src="{{ asset($quiz->image) }}" width="100px" alt="Quiz Image" class="img-fluid rounded">
+                                                                                        </div>
+                                                                                    @endif
                                                                                 </div>
                                                                                 <div class="span-mode"></div>
                                                                             </div>
@@ -404,11 +409,13 @@
                                                                                 <div class="card-body py-2 px-3">
                                                                                     <ol class="list-group">
                                                                                         @foreach ($quiz->modulQuizAnswer as $answer)
-                                                                                            <li
-                                                                                                class="list-group-item {{ $quiz->kunci_jawaban == $loop->iteration ? 'active' : '' }}">
-                                                                                                {{ chr(64 + $loop->iteration) }}
-                                                                                                .
-                                                                                                {{ $answer->pilihan }}
+                                                                                            <li class="list-group-item {{ $quiz->kunci_jawaban == $loop->iteration ? 'active' : '' }}">
+                                                                                                {{ chr(64 + $loop->iteration) }} .
+                                                                                                @if (Str::startsWith($answer->pilihan, 'storage/quiz/answers/'))
+                                                                                                    <img src="{{ asset($answer->pilihan) }}" alt="Answer Image" class="img-fluid rounded" width="100px">
+                                                                                                @else
+                                                                                                    {{ $answer->pilihan }}
+                                                                                                @endif
                                                                                             </li>
                                                                                         @endforeach
                                                                                     </ol>

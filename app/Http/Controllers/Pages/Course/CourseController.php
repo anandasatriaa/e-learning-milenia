@@ -114,6 +114,7 @@ class CourseController extends Controller
 
             return response()->json([
                 'question' => $quiz->pertanyaan,
+                'questionImage' => $quiz->image ? asset($quiz->image) : null,
                 'kunci_jawaban' => $quiz->answers->pluck('pilihan')->toArray(),
                 'userAnswer' => $userAnswer, // User answer jika tersedia
                 'totalQuizzes' => count($quizzesInModule),
@@ -150,6 +151,7 @@ class CourseController extends Controller
 
             return response()->json([
                 'question' => $quiz->pertanyaan,
+                'questionImage' => $quiz->image ? asset($quiz->image) : null,
                 'kunci_jawaban' => $quiz->answers->pluck('pilihan')->toArray(),
                 'totalQuizzes' => count($quizzesInModule), // Count quizzes in the module
                 'quizIds' => $quizzesInModule, // Send only IDs from the same module
