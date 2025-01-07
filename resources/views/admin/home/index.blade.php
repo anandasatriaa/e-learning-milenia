@@ -88,8 +88,8 @@
                                     </div>
                                     <div class="col col-stats ms-3 ms-sm-0">
                                         <div class="numbers">
-                                            <p class="card-category">Total Course</p>
-                                            <h4 class="card-title">{{ $totalCourses }}</h4>
+                                            <p class="card-category">Total Course Enrolls</p>
+                                            <h4 class="card-title">{{ $totalCourseEnrolls }}</h4>
                                         </div>
                                     </div>
                                 </div>
@@ -117,7 +117,7 @@
             <div class="d-flex justify-content-center align-items-center">
                 <div class="mb-3 container d-flex justify-content-end align-items-center">
                     <select id="divisi" class="form-control" style="width: 50%;">
-                        <option value="">Semua Divisi</option>
+                        <option value="semuadivisi" selected>Semua Divisi</option>
                         <option value="divisi1">Divisi 1</option>
                         <option value="divisi2">Divisi 2</option>
                         <option value="divisi3">Divisi 3</option>
@@ -126,7 +126,7 @@
                 </div>
                 <div class="mb-3 container d-flex justify-content-start align-items-center">
                     <select id="tahun" class="form-control" style="width: 50%;">
-                        <option value="">Semua Tahun</option>
+                        <option value="semuatahun" selected>Semua Tahun</option>
                         <option value="tahun1">2025</option>
                         <option value="tahun2">2026</option>
                         <option value="tahun3">2027</option>
@@ -137,7 +137,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">Growth of Learning Participant</div>
+                        <div class="card-title">Growth of Participant Enrolls</div>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
@@ -179,7 +179,7 @@
                         <div class="chart-container d-flex flex-column justify-content-center align-items-center">
                             <div id="progress_user"></div>
                             <div class="chart-legend d-flex align-items-center mt-3">
-                                <span class="legend-box bg-primary me-2"></span>
+                                <span class="legend-box me-2" style="background-color: #6f42c1;"></span>
                                 <span>Semua Divisi</span>
                             </div>
                         </div>
@@ -346,7 +346,7 @@
             text: function(value) {
                 return '<span style="font-size: 30px; line-height: 1;">' + value.toFixed(1) + '%</span>';
             },
-            colors: ['#eee', '#177dff'],
+            colors: ['#eee', '#6f42c1'],
             duration: 400,
             wrpClass: 'circles-wrp',
             textClass: 'circles-text',
@@ -360,7 +360,7 @@
             data: {
                 labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
                 datasets: [{
-                    label: "Participants",
+                    label: "Participant Enrolls",
                     borderColor: "#1d7af3",
                     pointBorderColor: "#FFF",
                     pointBackgroundColor: "#1d7af3",
@@ -410,8 +410,8 @@
                 labels: @json($divisionLabels),
                 datasets: [{
                     label: "Average Time Spend (in minutes)",
-                    backgroundColor: 'rgb(23, 125, 255)',
-                    borderColor: 'rgb(23, 125, 255)',
+                    backgroundColor: '#d63384',
+                    borderColor: '#d63384',
                     data: @json($divisionData),
                 }],
             },
@@ -425,7 +425,30 @@
                         }
                     }]
                 },
-            }
+                plugins: {
+                    tooltip: {
+                        enabled: true
+                    }
+                }
+            },
+            plugins: [{
+                id: 'barValues',
+                afterDatasetsDraw: function(chart) {
+                    var ctx = chart.ctx;
+                    chart.data.datasets.forEach(function(dataset, i) {
+                        var meta = chart.getDatasetMeta(i);
+                        meta.data.forEach(function(bar, index) {
+                            var value = dataset.data[index];
+                            ctx.fillStyle = '#000'; // Warna teks
+                            ctx.font = '12px Arial'; // Gaya font
+                            ctx.textAlign = 'left';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(value, bar._model.x + 5, bar._model
+                                .y); // Posisi teks
+                        });
+                    });
+                }
+            }]
         });
 
         var mycourseComparison = new Chart(courseComparison, {
@@ -434,8 +457,8 @@
                 labels: ["Semua Divisi"],
                 datasets: [{
                         label: "Course in Progress",
-                        backgroundColor: '#f3545d', // Merah untuk in progress
-                        borderColor: '#f3545d', // Border sesuai dengan warna background
+                        backgroundColor: '#fdaf4b', // Merah untuk in progress
+                        borderColor: '#fdaf4b', // Border sesuai dengan warna background
                         data: [{{ $inProgressData }}],
                     },
                     {
@@ -456,21 +479,53 @@
                         }
                     }]
                 },
-            }
+                plugins: {
+                    tooltip: {
+                        enabled: true
+                    }
+                }
+            },
+            plugins: [{
+                id: 'barValues',
+                afterDatasetsDraw: function(chart) {
+                    var ctx = chart.ctx;
+
+                    // Hitung total data untuk persentase
+                    var total = chart.data.datasets.reduce((sum, dataset) => {
+                        return sum + dataset.data[0];
+                    }, 0);
+
+                    chart.data.datasets.forEach(function(dataset, i) {
+                        var meta = chart.getDatasetMeta(i);
+                        meta.data.forEach(function(bar, index) {
+                            var value = dataset.data[index];
+                            var percentage = ((value / total) * 100).toFixed(2) +
+                                '%'; // Hitung persen
+                            ctx.fillStyle = '#fff'; // Warna teks
+                            ctx.font = '12px Arial'; // Gaya font
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'bottom';
+
+                            // Posisi teks di atas bar
+                            ctx.fillText(percentage, bar._model.x, bar._model.y - -20);
+                        });
+                    });
+                }
+            }]
         });
 
         var myloginAverage = new Chart(loginAverage, {
             type: 'doughnut',
             data: {
                 datasets: [{
-                    data: [10, 20, 30],
-                    backgroundColor: ['#f3545d', '#fdaf4b', '#1d7af3']
+                    data: [{{ $loginCategoryData['Jam Kerja (08:30 - 17:30)'] }},
+                        {{ $loginCategoryData['Luar Jam Kerja (17:31 - 08:29)'] }}
+                    ],
+                    backgroundColor: ['#0d6efd', '#fdaf4b']
                 }],
-
                 labels: [
-                    'Red',
-                    'Yellow',
-                    'Blue'
+                    'Jam Kerja (08:30 - 17:30)',
+                    'Luar Jam Kerja (17:31 - 08:29)'
                 ]
             },
             options: {
@@ -486,9 +541,46 @@
                         top: 20,
                         bottom: 20
                     }
+                },
+                plugins: {
+                    tooltip: {
+                        enabled: true
+                    }
                 }
-            }
+            },
+            plugins: [{
+                id: 'percentages',
+                afterDatasetsDraw: function(chart) {
+                    var ctx = chart.ctx;
+                    var total = chart.data.datasets[0].data.reduce((sum, value) => sum + value,
+                    0); // Hitung total data
+                    var meta = chart.getDatasetMeta(0);
+
+                    chart.data.datasets[0].data.forEach(function(value, index) {
+                        var percentage = ((value / total) * 100).toFixed(2) +
+                        '%'; // Hitung persen
+                        var model = meta.data[index]._model; // Model untuk sektor tertentu
+                        var midAngle = (model.startAngle + model.endAngle) /
+                        2; // Sudut tengah sektor
+                        var radius = (model.outerRadius + model.innerRadius) /
+                        2; // Posisi radius tengah
+
+                        // Hitung posisi teks
+                        var x = model.x + Math.cos(midAngle) * radius;
+                        var y = model.y + Math.sin(midAngle) * radius;
+
+                        // Gambar persentase
+                        ctx.fillStyle = '#fff'; // Warna teks
+                        ctx.font = '12px Arial'; // Gaya font
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(percentage, x, y);
+                    });
+                }
+            }]
         });
+
+
 
         var myRadarChart = new Chart(radarChart, {
             type: 'radar',
