@@ -61,7 +61,7 @@
 <body>
     <!-- Navbar Header -->
     <nav class="navbar navbar-expand-lg border-bottom p-1" style="background-color: #EBFAFF">
-        <a href="/" class="logo ms-5">
+        <a href="{{ route('landing.page') }}" class="logo ms-5">
             <img src="{{ asset('img/milenia-logo.png') }}" alt="navbar brand" class="navbar-brand" height="70">
         </a>
 
