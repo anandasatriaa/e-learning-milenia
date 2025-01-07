@@ -19,7 +19,7 @@
                    </li>
                </ul>
            </nav>
-           <div class="copyright ms-auto">
+           <div class="copyright ms-auto" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Hary Susilo Pratama & Ananda Satria Ariyanto">
                2024, made with <i class="fa fa-heart heart text-danger"></i> by IT Milenia Group
            </div>
        </div>
