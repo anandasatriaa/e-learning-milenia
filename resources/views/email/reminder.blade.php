@@ -56,6 +56,7 @@
             <p><span class="label">Divisi:</span> {{ $details['division'] }}</p>
             <p><span class="label">Nama Peserta:</span> {{ $details['personName'] }}</p>
             <p><span class="label">Jadwal:</span> {{ $details['startDate'] }} - {{ $details['endDate'] }}</p>
+            <p class="text-center">Silahkan akses link berikut untuk mengerjakan pelatihan: <a href="https://ccas.co.id/e-learning/">https://ccas.co.id/e-learning/</a></p>
         </div>
         <div class="footer">
             © {{ date('Y') }} - HRD Milenia Group
