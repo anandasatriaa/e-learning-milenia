@@ -105,7 +105,7 @@
                             <!-- Course Modules -->
                             @foreach ($course->modul as $index => $modul)
                                 <div class="card mb-2 border rounded m-2">
-                                    <div class="card-header"
+                                    <div class="card-header collapsed"
                                         onclick="updateIframeSource('{{ $modul->tipe_media }}', '{{ $modul->url_media_link }}', {{ $index }})"
                                         id="heading{{ $index }}" data-bs-toggle="collapse"
                                         data-bs-target="#collapse{{ $index }}" aria-expanded="false"
@@ -132,7 +132,7 @@
                                         <div class="span-mode"></div>
                                     </div>
 
-                                    <div id="collapse{{ $index }}" class="collapse show"
+                                    <div id="collapse{{ $index }}" class="collapse"
                                         aria-labelledby="heading{{ $index }}" data-bs-parent="#modulAccordion">
                                         <div class="card-body py-2 px-4">
                                             {{-- Sub-items for Quiz and Essay --}}

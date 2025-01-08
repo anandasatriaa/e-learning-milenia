@@ -33,7 +33,7 @@
                 </div>
                 <div class="row" id="courseContainer">
                     @foreach ($data as $item)
-                        <div class="col-md-4 course-item" data-nama-kelas="{{ strtolower($item->nama_kelas) }}">
+                        <div class="col-md-4 course-item" data-nama-kelas="{{ strtolower($item->nama_kelas) }}" data-category="{{ strtolower($item->learningCategory->nama ?? '') }} {{ strtolower($item->divisiCategory->nama ?? '') }} {{ strtolower($item->category->nama ?? '') }} {{ strtolower($item->subCategory->nama ?? '') }}">
                             <div class="card card-profile">
                                 <div class="card-header" style="background-image: url('{{ asset('img/blogpost.jpg') }}')">
                                     <div class="profile-picture">
@@ -231,7 +231,8 @@
 
             courses.forEach(course => {
                 const namaKelas = course.getAttribute('data-nama-kelas');
-                if (namaKelas.includes(searchTerm)) {
+                const category = course.getAttribute('data-category');
+                if (namaKelas.includes(searchTerm) || category.includes(searchTerm)) {
                     course.style.display = ''; // Tampilkan
                 } else {
                     course.style.display = 'none'; // Sembunyikan
