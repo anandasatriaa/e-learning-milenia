@@ -30,6 +30,26 @@
             height: 15px;
             /* Opsional, buat kotak dengan sudut membulat */
         }
+
+        .chart-container {
+            position: relative;
+            /* Membuat container menjadi relatif agar elemen lain dapat diposisikan absolut */
+        }
+
+        #formatted-average-time {
+            position: absolute;
+            /* Memposisikan elemen secara absolut */
+            top: 45%;
+            /* Menempatkan elemen di tengah secara vertikal */
+            left: 50%;
+            /* Menempatkan elemen di tengah secara horizontal */
+            transform: translate(-50%, -50%);
+            /* Menyesuaikan agar elemen benar-benar di tengah */
+            font-size: 20px;
+            /* Ukuran font */
+            color: black;
+            /* Warna teks */
+        }
     </style>
 @endsection
 @section('content')
@@ -115,24 +135,23 @@
         <div class="row">
             <h3 class="fw-bold mb-3 text-center">Dashboard Analytic</h3>
             <div class="d-flex justify-content-center align-items-center">
-                <div class="mb-3 container d-flex justify-content-end align-items-center">
-                    <select id="divisi" class="form-control" style="width: 50%;">
-                        <option value="semuadivisi" selected>Semua Divisi</option>
-                        <option value="divisi1">Divisi 1</option>
-                        <option value="divisi2">Divisi 2</option>
-                        <option value="divisi3">Divisi 3</option>
-                        <option value="divisi4">Divisi 4</option>
+                <div class="mb-3 container d-flex justify-content-center align-items-center">
+                    <select id="divisi" class="form-control" style="width: 30%;">
+                        <option value="">Pilih Divisi</option>
+                        <option value="Semua Divisi">SEMUA DIVISI</option>
+                        @foreach ($divisionFilter as $divisi)
+                            <option value="{{ $divisi }}">{{ $divisi }}</option>
+                        @endforeach
                     </select>
                 </div>
-                <div class="mb-3 container d-flex justify-content-start align-items-center">
+                {{-- <div class="mb-3 container d-flex justify-content-start align-items-center">
                     <select id="tahun" class="form-control" style="width: 50%;">
-                        <option value="semuatahun" selected>Semua Tahun</option>
-                        <option value="tahun1">2025</option>
-                        <option value="tahun2">2026</option>
-                        <option value="tahun3">2027</option>
-                        <option value="tahun4">2028</option>
+                        <option value="semuatahun">Semua Tahun</option>
+                        @foreach ($years as $year)
+                            <option value="tahun{{ $year }}">{{ $year }}</option>
+                        @endforeach
                     </select>
-                </div>
+                </div> --}}
             </div>
             <div class="col-md-6">
                 <div class="card">
@@ -166,6 +185,7 @@
                     <div class="card-body">
                         <div class="chart-container">
                             <canvas id="loginAverage" style="width: 50%; height: 50%"></canvas>
+                            <span id="formatted-average-time">{{ $formattedAverageLoginTime }}</span>
                         </div>
                     </div>
                 </div>
@@ -180,7 +200,7 @@
                             <div id="progress_user"></div>
                             <div class="chart-legend d-flex align-items-center mt-3">
                                 <span class="legend-box me-2" style="background-color: #6f42c1;"></span>
-                                <span>Semua Divisi</span>
+                                <span id="selected-divisi">Semua Divisi</span>
                             </div>
                         </div>
                     </div>
@@ -316,11 +336,73 @@
     <script>
         // Inisialisasi Selectize untuk dropdown
         $(document).ready(function() {
-            $('#divisi').selectize({
+            const selectDivisi = $('#divisi').selectize({
                 create: false, // Tidak membuat pilihan baru
-                sortField: 'text' // Menyortir berdasarkan teks
+                sortField: 'text', // Menyortir berdasarkan teks
+                onChange: function(selectedDivisi) {
+                    if (selectedDivisi) {
+                        $('#selected-divisi').text(selectedDivisi);
+                        var divisiLabel = selectedDivisi === 'Semua Divisi' ? 'Semua Divisi' :
+                            selectedDivisi;
+
+                        fetch("{{ url('admin/get-chart-data') }}?divisi=" + selectedDivisi)
+                            .then(function(response) {
+                                return response.json();
+                            })
+                            .then(function(data) {
+                                // Update monthly chart
+                                mygrowthParticipant.data.datasets[0].data = data.monthlyData;
+                                mygrowthParticipant.update();
+
+                                // Update division time spend chart
+                                mytimeSpend.data.labels = data.divisionLabels;
+                                mytimeSpend.data.datasets[0].data = data.divisionData;
+                                mytimeSpend.update();
+
+                                // Update login average chart
+                                myloginAverage.data.datasets[0].data = data.loginAverage;
+                                myloginAverage.update();
+
+                                // Update formatted average login time
+                                const formattedAverageLoginTime = data.formattedAverageLoginTime;
+                                document.getElementById('formatted-average-time').textContent =
+                                    formattedAverageLoginTime;
+
+                                // Update progress chart
+                                const averageProgress = data.averageProgress || 0;
+                                Circles.create({
+                                    id: 'progress_user',
+                                    radius: 100,
+                                    value: averageProgress,
+                                    maxValue: 100,
+                                    width: 10,
+                                    text: function(value) {
+                                        return '<span style="font-size: 30px; line-height: 1;">' +
+                                            value.toFixed(1) + '%</span>';
+                                    },
+                                    colors: ['#eee', '#6f42c1'],
+                                    duration: 400,
+                                    wrpClass: 'circles-wrp',
+                                    textClass: 'circles-text',
+                                    styleWrapper: true,
+                                    styleText: true
+                                });
+
+                                // Update course comparison chart
+                                mycourseComparison.data.labels = [divisiLabel];
+                                mycourseComparison.data.datasets[0].data = [data.inProgressData];
+                                mycourseComparison.data.datasets[1].data = [data.completedData];
+                                mycourseComparison.update();
+                            })
+                            .catch(function(error) {
+                                console.error('Error fetching chart data:', error);
+                            });
+                    }
+                }
             });
         });
+
+
         $(document).ready(function() {
             $('#tahun').selectize({
                 create: false, // Tidak membuat pilihan baru
@@ -451,10 +533,11 @@
             }]
         });
 
+        var divisiLabel = "Semua Divisi";
         var mycourseComparison = new Chart(courseComparison, {
             type: 'bar',
             data: {
-                labels: ["Semua Divisi"],
+                labels: [divisiLabel],
                 datasets: [{
                         label: "Course in Progress",
                         backgroundColor: '#fdaf4b', // Merah untuk in progress
@@ -553,17 +636,17 @@
                 afterDatasetsDraw: function(chart) {
                     var ctx = chart.ctx;
                     var total = chart.data.datasets[0].data.reduce((sum, value) => sum + value,
-                    0); // Hitung total data
+                        0); // Hitung total data
                     var meta = chart.getDatasetMeta(0);
 
                     chart.data.datasets[0].data.forEach(function(value, index) {
                         var percentage = ((value / total) * 100).toFixed(2) +
-                        '%'; // Hitung persen
+                            '%'; // Hitung persen
                         var model = meta.data[index]._model; // Model untuk sektor tertentu
                         var midAngle = (model.startAngle + model.endAngle) /
-                        2; // Sudut tengah sektor
+                            2; // Sudut tengah sektor
                         var radius = (model.outerRadius + model.innerRadius) /
-                        2; // Posisi radius tengah
+                            2; // Posisi radius tengah
 
                         // Hitung posisi teks
                         var x = model.x + Math.cos(midAngle) * radius;

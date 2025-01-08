@@ -28,6 +28,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/dashboard', [AdminHomeController::class, 'index']);
         Route::get('/home', [AdminHomeController::class, 'index']);
         Route::get('/', [AdminHomeController::class, 'index'])->name('dashboard');
+        Route::get('/get-chart-data', [AdminHomeController::class, 'getChartData']);
 
         Route::group(['prefix' => 'category', 'as' => 'category.'], function () {
             Route::resource('learning', AdminLearningCategoryController::class);
