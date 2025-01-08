@@ -41,12 +41,12 @@
                 </div>
             @endif
             <h1 class="text-center fw-bold" style="color: #1B7F97">Selamat Datang di Online Learning</h1>
-            <h3 class="text-center text-muted fs-6 mb-5">Silahkan Login menggunakan Email Kantor yang Anda miliki</h3>
+            <h3 class="text-center text-muted fs-6 mb-5">Silahkan Login menggunakan Username dan Password Kantor yang Anda miliki</h3>
             <form class="login-form needs-validation" action="{{ route('login.process') }}" method="POST">
                 @csrf
                 <div class="form-group">
                     <input id="uname" name="uname" type="text" class="form-control border border-black rounded"
-                        placeholder="Email" value="{{ old('uname') }}" @error('uname') is-invalid @enderror
+                        placeholder="Username" value="{{ old('uname') }}" @error('uname') is-invalid @enderror
                         required>
                     {{-- <label for="uname">Username</label> --}}
                 </div>

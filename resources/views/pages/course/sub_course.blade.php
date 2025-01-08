@@ -266,7 +266,7 @@
             var cards = document.querySelectorAll('.category-card');
 
             cards.forEach(function(card) {
-                var cardName = card.querySelector('.btn').innerText.toLowerCase();
+                var cardName = card.querySelector('.fw-bold').innerText.toLowerCase();
                 if (cardName.includes(searchValue)) {
                     card.style.display = 'block';
                 } else {
