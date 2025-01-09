@@ -697,7 +697,8 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
                                 </form>
                             </div>
                             <div class="card-footer text-muted">
-                                Pilih salah satu jawaban di atas.
+                                <div>Pilih salah satu jawaban di atas.<div>
+                                <div>*untuk melihat gambar lebih jelas, klik kanan pada gambar lalu "Buka gambar di tab baru" atau "Open image in new tab"</div>
                             </div>
                             <div class="d-flex justify-content-center mt-3">
                                 ${generateQuestionNav(data.quizIds, courseModulId)} <!-- Passing quizIds array -->
@@ -757,21 +758,26 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
 
                     // Combine all questions into a single list
                     const questionsList = data.questions.map((question, index) => `
-                <p><strong>${index + 1}. </strong> ${question.question}</p>
-            `).join('');
+                        <div class="mb-3">
+                            <p class="mb-0"><strong>${index + 1}. </strong> ${question.question}</p>
+                            ${question.image ? `<img src="${question.image}" alt="Question Image" class="ms-3" style="width: 200px;" />` : ''}
+                        </div>
+                    `).join('');
 
                     // Create a container for all questions
                     const iframeContent = `
-                <div class="">
-                    <div class="card-header">
-                        <p><strong>Pertanyaan:</strong></p>
-                        <div class="mb-3">${questionsList}</div>
-                    </div>
-                    <div class="card-body">
-                        <textarea class="form-control essay-textarea" id="essayFrame-${courseModulId}" rows="6" required></textarea>
-                    </div>
-                </div>
-            `;
+                        <div class="">
+                            <div class="card-header">
+                                <p><strong>Pertanyaan:</strong></p>
+                                <div>${questionsList}</div>
+                                <span class="text-muted">*untuk melihat gambar lebih jelas, klik kanan pada gambar lalu "Buka gambar di tab baru" atau "Open image in new tab"</span>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Jawab:</strong></p>
+                                <textarea class="form-control essay-textarea" id="essayFrame-${courseModulId}" rows="6" required></textarea>
+                            </div>
+                        </div>
+                    `;
 
                     // Insert the content into the iframeContent container
                     document.getElementById('iframeContent').innerHTML = iframeContent;

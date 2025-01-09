@@ -195,6 +195,7 @@ class CourseController extends Controller
                 return [
                     'id' => $essay->id,
                     'question' => $essay->pertanyaan,
+                    'image' => $essay->image ? asset('storage/' . $essay->image) : null,
                 ];
             }),
             'answer' => $answers ? $answers->jawaban : null, // Jawaban user jika ada
