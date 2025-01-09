@@ -197,27 +197,50 @@ class CourseModulController extends Controller
         try {
             $essay_ids = $request->input('essay_id', []);
             $essays = $request->input('essay', []);
+            $files = $request->file('essay_image', []);
+
+            Log::info('Essay Image Mapping:', $request->file('essay_image', []));
+            Log::info('Essay Data Mapping:', $essays);
 
             // Log incoming data
             Log::info('Received Essay Data:', [
                 'essay_ids' => $essay_ids,
                 'essays' => $essays,
+                'files' => $files,
             ]);
 
             foreach ($essays as $index => $essay) {
-                $essayId = isset($essay_ids[$index]) ? $essay_ids[$index] : null;
+                $essayId = $essay_ids[$index] ?? null;
+                $file = $files[$index] ?? null;
+                $oldImage = $request->input("old_image_{$essayId}", null);
 
                 if ($essayId) {
                     // Update existing essay
                     $existingEssay = ModulEssay::find($essayId);
                     if ($existingEssay) {
                         $existingEssay->pertanyaan = $essay;
+
+                        // Handle file upload if a new file is provided
+                        if ($file) {
+                            // Cek jika ada gambar lama dan hapus file yang lama
+                            if ($existingEssay->image) {
+                                Storage::delete('public/' . $existingEssay->image);
+                            }
+
+                            $path = $file->store('essay/questions', 'public');
+                            $existingEssay->image = $path;
+                        } else if ($oldImage) {
+                            // Jika tidak ada gambar baru, tetap kirim gambar lama
+                            $existingEssay->image = $oldImage;
+                        }
+
                         $existingEssay->save();
 
                         // Log the updated essay
                         Log::info('Updated Essay:', [
                             'essay_id' => $essayId,
-                            'pertanyaan' => $essay
+                            'pertanyaan' => $essay,
+                            'image' => $existingEssay->image ?? 'No Image Uploaded',
                         ]);
                     }
                 } else {
@@ -228,10 +251,16 @@ class CourseModulController extends Controller
                         ->first();
 
                     if (!$existingEssayCheck) {
+                        $path = null;
+                        if ($file) {
+                            $path = $file->store('essay/questions', 'public');
+                        }
+
                         // Add new essay only if not already present
                         $newEssay = ModulEssay::create([
                             'course_modul_id' => $modul_id,
                             'pertanyaan' => $essay,
+                            'image' => $path,
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
@@ -239,7 +268,8 @@ class CourseModulController extends Controller
                         // Log the newly created essay
                         Log::info('Created New Essay:', [
                             'new_essay_id' => $newEssay->id,
-                            'pertanyaan' => $essay
+                            'pertanyaan' => $essay,
+                            'image' => $newEssay->image,
                         ]);
                     } else {
                         // Log if the essay already exists (skip creation)

@@ -10,7 +10,7 @@ class ModulEssayAnswer extends Model
     use HasFactory;
 
     protected $table = 'modul_essay_answers';
-    protected $fillable = ['course_modul_id', 'user_id', 'jawaban'];
+    protected $fillable = ['course_modul_id', 'user_id', 'jawaban', 'image'];
 
     public function courseModul()
     {

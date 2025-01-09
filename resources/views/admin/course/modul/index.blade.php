@@ -368,8 +368,9 @@
                                                                             download> disini
                                                                             <i class="bi bi-download"></i></a>
                                                                         <br>
-                                                                        <span class="text-danger">*apabila anda mengimport quiz, daftar quiz yang
-                                                                        sebelumnya akan terhapus</span>
+                                                                        <span class="text-danger">*apabila anda mengimport
+                                                                            quiz, daftar quiz yang
+                                                                            sebelumnya akan terhapus</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -386,17 +387,20 @@
                                                                 <div class="accordion accordion-black">
                                                                     @foreach ($item->modulQuiz as $quiz)
                                                                         <div class="card my-1">
-                                                                            <div class="card-header collapsed" id="headingOne"
-                                                                                data-bs-toggle="collapse"
+                                                                            <div class="card-header collapsed"
+                                                                                id="headingOne" data-bs-toggle="collapse"
                                                                                 data-bs-target="#collapsQuestion{{ $quiz->id }}"
                                                                                 aria-expanded="true"
                                                                                 aria-controls="collapsQuestion{{ $quiz->id }}">
                                                                                 <div class="span-title">
                                                                                     {{ $loop->iteration }}.
                                                                                     {{ $quiz->pertanyaan }}
-                                                                                    @if($quiz->image)
+                                                                                    @if ($quiz->image)
                                                                                         <div class="ms-4">
-                                                                                            <img src="{{ asset($quiz->image) }}" width="100px" alt="Quiz Image" class="img-fluid rounded">
+                                                                                            <img src="{{ asset($quiz->image) }}"
+                                                                                                width="100px"
+                                                                                                alt="Quiz Image"
+                                                                                                class="img-fluid rounded">
                                                                                         </div>
                                                                                     @endif
                                                                                 </div>
@@ -409,10 +413,15 @@
                                                                                 <div class="card-body py-2 px-3">
                                                                                     <ol class="list-group">
                                                                                         @foreach ($quiz->modulQuizAnswer as $answer)
-                                                                                            <li class="list-group-item {{ $quiz->kunci_jawaban == $loop->iteration ? 'active' : '' }}">
-                                                                                                {{ chr(64 + $loop->iteration) }} .
+                                                                                            <li
+                                                                                                class="list-group-item {{ $quiz->kunci_jawaban == $loop->iteration ? 'active' : '' }}">
+                                                                                                {{ chr(64 + $loop->iteration) }}
+                                                                                                .
                                                                                                 @if (Str::startsWith($answer->pilihan, 'storage/quiz/answers/'))
-                                                                                                    <img src="{{ asset($answer->pilihan) }}" alt="Answer Image" class="img-fluid rounded" width="100px">
+                                                                                                    <img src="{{ asset($answer->pilihan) }}"
+                                                                                                        alt="Answer Image"
+                                                                                                        class="img-fluid rounded"
+                                                                                                        width="100px">
                                                                                                 @else
                                                                                                     {{ $answer->pilihan }}
                                                                                                 @endif
@@ -441,7 +450,7 @@
                                         {{-- Modal Essay --}}
                                         <div class="modal fade" id="modalImportEssay{{ $item->id }}" tabindex="-1"
                                             aria-labelledby="modalImportEssayLabel" aria-hidden="true">
-                                            <div class="modal-dialog">
+                                            <div class="modal-dialog modal-xl">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title" id="modalImportEssayLabel">Tambah Essay
@@ -463,8 +472,32 @@
                                                                             <span
                                                                                 class="number">{{ $loop->iteration }}</span>
                                                                         </div>
-                                                                        <textarea class="form-control post-data" name="essay[]" rows="3" required data-id="{{ $essay->id }}"
-                                                                            data-course-id="{{ $data->id }}" data-modul-id="{{ $item->id }}">{{ $essay->pertanyaan }}</textarea>
+                                                                        <div style="flex-grow: 1;">
+                                                                            <textarea class="form-control post-data" name="essay[]" rows="3" required data-id="{{ $essay->id }}"
+                                                                                data-course-id="{{ $data->id }}" data-modul-id="{{ $item->id }}">{{ $essay->pertanyaan }}</textarea>
+
+                                                                            <!-- Input file untuk mengganti gambar -->
+                                                                            <input type="file"
+                                                                                class="form-control mt-2"
+                                                                                name="essay_image[{{ $loop->index }}]"
+                                                                                id="image-upload-{{ $essay->id }}"
+                                                                                data-id="{{ $essay->id }}"
+                                                                                accept="image/*"
+                                                                                onchange="updateImage(event, {{ $essay->id }})">
+
+                                                                            <div class="mt-2"
+                                                                                id="image-container-{{ $essay->id }}">
+                                                                                @if ($essay->image)
+                                                                                    <img src="{{ asset('storage/' . $essay->image) }}"
+                                                                                        alt="Image for essay"
+                                                                                        style="width: 200px;"
+                                                                                        id="image-preview-{{ $essay->id }}">
+                                                                                    <input type="hidden"
+                                                                                        name="old_image_{{ $essay->id }}"
+                                                                                        value="{{ $essay->image }}">
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
                                                                         <button type="button"
                                                                             class="btn btn-outline-danger btn-sm deleteEssay"
                                                                             data-modal-id="{{ $item->id }}"
@@ -1024,11 +1057,15 @@
                     <div class="me-2" style="width: 30px; text-align: center; line-height: 2;">
                         <span class="number">${count}</span>
                     </div>
-                    <textarea class="form-control post-data" name="essay[]" rows="3" required></textarea>
+                    <div style="flex-grow: 1;">
+                        <textarea class="form-control post-data mb-2" name="essay[]" rows="3" required></textarea>
+                        <input type="file" class="form-control post-data mb-2" name="essay_image[${count - 1}]" accept="image/*">
+                        <img src="" alt="Preview Gambar" class="img-thumbnail mt-2" style="display: none; width: 200px;">
+                    </div>
                     <button type="button" class="btn btn-outline-danger btn-sm deleteEssay">
                         <i class="fas fa-trash"></i>
                     </button>
-                `;
+                    `;
 
                     // Tambahkan elemen ke container
                     container.appendChild(newEssay);
@@ -1037,6 +1074,33 @@
                     newEssay.querySelector(".deleteEssay").addEventListener("click", function() {
                         newEssay.remove();
                         renumberEssay(container); // Update nomor setelah penghapusan
+                    });
+
+                    // Tambahkan event listener untuk input file
+                    const fileInput = newEssay.querySelector('input[type="file"]');
+                    const imgPreview = newEssay.querySelector("img");
+
+                    fileInput.addEventListener("change", function(event) {
+                        const file = event.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                imgPreview.src = e.target.result;
+                                imgPreview.style.display = "block"; // Tampilkan gambar
+
+                                // Log gambar yang diinput pada essay baru
+                                console.log(
+                                    `Gambar untuk essay ke-${count} yang diinput:`,
+                                    file);
+                                console.log(`Preview gambar untuk essay ke-${count}:`, e
+                                    .target.result);
+                            };
+                            reader.readAsDataURL(file);
+                        } else {
+                            imgPreview.src = "";
+                            imgPreview.style.display =
+                            "none"; // Sembunyikan gambar jika tidak ada file
+                        }
                     });
                 });
             });
@@ -1048,7 +1112,7 @@
                     const courseId = this.getAttribute("data-course-id"); // Ambil ID course
                     const modulId = this.getAttribute("data-modul-id"); // Ambil ID modul
                     const container = document.getElementById(
-                    `essay-container${modalId}`); // Cari container spesifik
+                        `essay-container${modalId}`); // Cari container spesifik
 
                     if (!container) {
                         console.warn(
@@ -1079,14 +1143,15 @@
                     });
 
                     if (essayId) {
-                        fetch("{{ url('admin/course/course') }}/" + courseId + "/modul/" + modulId + "/delete-essay/" + essayId, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector(
-                                        'meta[name="csrf-token"]').getAttribute('content'),
-                                    'Content-Type': 'application/json'
-                                }
-                            })
+                        fetch("{{ url('admin/course/course') }}/" + courseId + "/modul/" +
+                                modulId + "/delete-essay/" + essayId, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'X-CSRF-TOKEN': document.querySelector(
+                                            'meta[name="csrf-token"]').getAttribute('content'),
+                                        'Content-Type': 'application/json'
+                                    }
+                                })
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
@@ -1166,21 +1231,33 @@
                     const modalId = this.getAttribute("id").replace("essayForm", "");
                     const container = document.getElementById(`essay-container${modalId}`);
                     const textareas = container.querySelectorAll("textarea");
+                    const fileInputs = container.querySelectorAll('input[type="file"]');
 
                     const formData = new FormData(this);
 
                     // Tambahkan data essay dari textarea
                     textareas.forEach(textarea => {
                         const essayId = textarea.getAttribute(
-                        'data-id'); // Mendapatkan ID jika ada
+                            'data-id'); // Mendapatkan ID jika ada
                         const essayValue = textarea.value;
 
                         if (essayId) {
                             // Jika ada ID, kirimkan ID dan value untuk update
                             formData.append("essay_id[]",
-                            essayId); // Mengirim ID untuk update
+                                essayId); // Mengirim ID untuk update
                         }
                         formData.append("essay[]", essayValue); // Kirim value dari textarea
+                    });
+
+                    // Tambahkan data file dari input file
+                    fileInputs.forEach((fileInput, index) => {
+                        const file = fileInput.files[0];
+                        if (file) {
+                            formData.append(`essay_image[${index}]`, file);
+                        } else {
+                            formData.append(`essay_image[${index}]`,
+                            null); // Kosongkan jika tidak ada file
+                        }
                     });
 
                     // Debugging untuk melihat data yang dikirim
@@ -1212,7 +1289,7 @@
 
                                 // Menutup modal yang sesuai
                                 $(`#modalImportEssay${modalId}`).modal(
-                                'hide'); // Bootstrap modal
+                                    'hide'); // Bootstrap modal
 
                                 // Reset form setelah sukses
                                 form.reset();
@@ -1250,6 +1327,53 @@
                 });
             });
         });
+
+        // Update Image
+        function updateImage(event, essayId) {
+            const fileInput = event.target; // Input file yang dipilih
+            const file = fileInput.files[0]; // Ambil file yang dipilih
+            let imagePreview = document.getElementById(
+            `image-preview-${essayId}`); // Ambil elemen preview gambar berdasarkan ID
+
+            // Jika elemen image-preview tidak ada, buat elemen baru
+            if (!imagePreview) {
+                const container = document.getElementById(`image-container-${essayId}`) || fileInput
+                .parentElement; // Gunakan container yang ada atau buat baru
+                imagePreview = document.createElement('img');
+                imagePreview.id = `image-preview-${essayId}`;
+                imagePreview.style.width = '200px';
+                imagePreview.style.display = 'block'; // Tampilkan gambar
+                imagePreview.alt = `Image for essay ${essayId}`;
+
+                console.log('Image container:', document.getElementById(`image-container-${essayId}`));
+                console.log('Image preview:', imagePreview);
+
+
+                // Tambahkan elemen img ke container
+                container.appendChild(imagePreview);
+            }
+
+            if (file) {
+                const reader = new FileReader();
+
+                // Saat gambar sudah dibaca, tampilkan sebagai preview
+                reader.onload = function(e) {
+                    // Mengganti src dengan gambar baru
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block'; // Menampilkan gambar preview
+
+                    // Log gambar baru yang diupload
+                    console.log(`Gambar baru untuk essayId ${essayId} berhasil diupload:`, e.target.result);
+                };
+
+                // Membaca file gambar sebagai data URL
+                reader.readAsDataURL(file);
+            } else {
+                // Jika file kosong, sembunyikan preview (opsional)
+                imagePreview.src = '';
+                imagePreview.style.display = 'none';
+            }
+        }
     </script>
 
     <script>

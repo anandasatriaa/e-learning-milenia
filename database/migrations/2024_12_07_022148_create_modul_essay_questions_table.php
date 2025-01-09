@@ -17,6 +17,7 @@ class CreateModulEssayQuestionsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('course_modul_id');
             $table->longText('pertanyaan');
+            $table->string('image')->nullable();
             $table->timestamps();
 
             // Foreign key constraint
