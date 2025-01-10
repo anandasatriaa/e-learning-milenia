@@ -33,7 +33,7 @@
                     <div class="container-fluid mt-4">
                         <div class="row">
                             @foreach ($courses as $course)
-                                <div class="col-lg-6 course-item" data-nama-kelas="{{ strtolower($course->nama_kelas) }}" >
+                                <div class="col-lg-6 course-item" data-nama-kelas="{{ strtolower($course->nama_kelas) }}" data-category="{{ strtolower($course->learningCategory->nama ?? '') }} {{ strtolower($course->divisiCategory->nama ?? '') }} {{ strtolower($course->category->nama ?? '') }} {{ strtolower($course->subCategory->nama ?? '') }}">
                                     <div class="card card-stats card-round shadow-sm">
                                         <div class="card-body">
                                             <div class="row align-items-center">
@@ -115,7 +115,8 @@
 
             courses.forEach(course => {
                 const namaKelas = course.getAttribute('data-nama-kelas');
-                if (namaKelas.includes(searchTerm)) {
+                const category = course.getAttribute('data-category');
+                if (namaKelas.includes(searchTerm) || category.includes(searchTerm)) {
                     course.style.display = ''; // Tampilkan
                 } else {
                     course.style.display = 'none'; // Sembunyikan
