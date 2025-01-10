@@ -49,6 +49,7 @@
                             <div class="mb-3">
                                 <label for="division" class="form-label">Divisi</label>
                                 <select id="division" name="division" class="form-select form-dropdown" required>
+                                    <option value="">Pilih Divisi</option>
                                     @foreach ($usersWithFoto->pluck('Divisi')->unique() as $division)
                                         <option value="{{ $division }}">{{ $division }}</option>
                                     @endforeach
@@ -360,8 +361,6 @@
 <script>
     $(document).ready(function() {
         $('.form-dropdown').selectize({
-            placeholder: 'Pilih Divisi', // Menambahkan placeholder
-            allowEmptyOption: true // Mengizinkan opsi kosong
         });
     });
 </script>
