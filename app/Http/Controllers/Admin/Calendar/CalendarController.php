@@ -16,7 +16,7 @@ class CalendarController extends Controller
     public function index()
     {
         // Mengambil data pengguna dengan nama dan divisi
-        $users = User::select('ID', 'Nama', 'Divisi')->get();
+        $users = User::select('ID', 'Nama', 'Divisi')->where('Aktif', 1)->get();
         $events = Calendar::all();
 
         // Menambahkan properti fotoUrl ke setiap pengguna

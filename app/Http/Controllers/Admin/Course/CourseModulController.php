@@ -39,7 +39,7 @@ class CourseModulController extends Controller
         $modul = CourseModul::with('modulEssay')->where('course_id', $course_id)->get();
 
         $checkEnrolledCourse = UserCourseEnroll::where('course_id', $course_id)->pluck('user_id');
-        $listUser = User::whereNotIn('ID', $checkEnrolledCourse)->orderBy('ID', 'desc')->get(['ID', 'Nama', 'Jabatan']);
+        $listUser = User::whereNotIn('ID', $checkEnrolledCourse)->where('Aktif', 1)->orderBy('ID', 'desc')->get(['ID', 'Nama', 'Jabatan']);
 
         $listUserWithUrls = $listUser->map(function ($user) {
             $datafoto = $user->ID;
