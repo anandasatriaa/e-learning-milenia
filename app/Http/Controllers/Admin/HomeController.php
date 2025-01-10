@@ -82,8 +82,8 @@ class HomeController extends Controller
         $loginData = DB::table('user_sessions')
             ->selectRaw("
             CASE
-                WHEN TIME(login_time) BETWEEN '08:30:00' AND '17:30:00' THEN 'Jam Kerja (08:30 - 17:30)'
-                ELSE 'Luar Jam Kerja (17:31 - 08:29)'
+                WHEN TIME(login_time) BETWEEN '07:00:00' AND '17:30:00' THEN 'Jam Kerja (07:00 - 17:30)'
+                ELSE 'Luar Jam Kerja (17:31 - 06:59)'
             END as category,
             COUNT(*) as total
         ")
@@ -94,8 +94,8 @@ class HomeController extends Controller
 
         // Isi default jika salah satu kategori kosong
         $loginCategoryData = [
-            'Jam Kerja (08:30 - 17:30)' => $loginData['Jam Kerja (08:30 - 17:30)'] ?? 0,
-            'Luar Jam Kerja (17:31 - 08:29)' => $loginData['Luar Jam Kerja (17:31 - 08:29)'] ?? 0,
+            'Jam Kerja (07:00 - 17:30)' => $loginData['Jam Kerja (07:00 - 17:30)'] ?? 0,
+            'Luar Jam Kerja (17:31 - 06:59)' => $loginData['Luar Jam Kerja (17:31 - 06:59)'] ?? 0,
         ];
 
         $averageLoginTime = DB::table('user_sessions')
@@ -145,8 +145,8 @@ class HomeController extends Controller
             ->join('users', 'user_sessions.user_id', '=', 'users.ID')
             ->selectRaw("
                 CASE
-                    WHEN TIME(user_sessions.login_time) BETWEEN '08:30:00' AND '17:30:00' THEN 'Jam Kerja (08:30 - 17:30)'
-                    ELSE 'Luar Jam Kerja (17:31 - 08:29)'
+                    WHEN TIME(user_sessions.login_time) BETWEEN '07:00:00' AND '17:30:00' THEN 'Jam Kerja (07:00 - 17:30)'
+                    ELSE 'Luar Jam Kerja (17:31 - 06:59)'
                 END as category,
                 COUNT(*) as total
             ")
@@ -161,8 +161,8 @@ class HomeController extends Controller
 
 
         $loginCategoryData = [
-            'Jam Kerja (08:30 - 17:30)' => $loginData['Jam Kerja (08:30 - 17:30)'] ?? 0,
-            'Luar Jam Kerja (17:31 - 08:29)' => $loginData['Luar Jam Kerja (17:31 - 08:29)'] ?? 0,
+            'Jam Kerja (07:00 - 17:30)' => $loginData['Jam Kerja (07:00 - 17:30)'] ?? 0,
+            'Luar Jam Kerja (17:31 - 06:59)' => $loginData['Luar Jam Kerja (17:31 - 06:59)'] ?? 0,
         ];
 
         // Data untuk averageProgress berdasarkan divisi

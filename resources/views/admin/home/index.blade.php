@@ -156,7 +156,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">Growth of Participant Enrolls</div>
+                        <div class="card-title">Grafik Peserta Pelatihan</div>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
@@ -168,7 +168,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">Time Spend</div>
+                        <div class="card-title">Durasi Pembelajaran</div>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
@@ -180,7 +180,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">Login Average</div>
+                        <div class="card-title">Waktu Akses</div>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
@@ -193,7 +193,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">Average Training Progress</div>
+                        <div class="card-title">Rata-rata Progess Pelatihan</div>
                     </div>
                     <div class="card-body">
                         <div class="chart-container d-flex flex-column justify-content-center align-items-center">
@@ -209,23 +209,11 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">Course Comparison</div>
+                        <div class="card-title">Perbandingan Progress Pelatihan</div>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
                             <canvas id="courseComparison"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Indikator Penilaian</div>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="radarChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -416,8 +404,7 @@
         var growthParticipant = document.getElementById('growthParticipant').getContext('2d'),
             timeSpend = document.getElementById('timeSpend').getContext('2d'),
             courseComparison = document.getElementById('courseComparison').getContext('2d'),
-            loginAverage = document.getElementById('loginAverage').getContext('2d'),
-            radarChart = document.getElementById('radarChart').getContext('2d');
+            loginAverage = document.getElementById('loginAverage').getContext('2d');
 
         Circles.create({
             id: 'progress_user',
@@ -442,7 +429,7 @@
             data: {
                 labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
                 datasets: [{
-                    label: "Participant Enrolls",
+                    label: "Peserta Enrolled",
                     borderColor: "#1d7af3",
                     pointBorderColor: "#FFF",
                     pointBackgroundColor: "#1d7af3",
@@ -491,7 +478,7 @@
             data: {
                 labels: @json($divisionLabels),
                 datasets: [{
-                    label: "Average Time Spend (in minutes)",
+                    label: "Rata-rata Durasi Pembelajaran (menit)",
                     backgroundColor: '#d63384',
                     borderColor: '#d63384',
                     data: @json($divisionData),
@@ -601,14 +588,14 @@
             type: 'doughnut',
             data: {
                 datasets: [{
-                    data: [{{ $loginCategoryData['Jam Kerja (08:30 - 17:30)'] }},
-                        {{ $loginCategoryData['Luar Jam Kerja (17:31 - 08:29)'] }}
+                    data: [{{ $loginCategoryData['Jam Kerja (07:00 - 17:30)'] }},
+                        {{ $loginCategoryData['Luar Jam Kerja (17:31 - 06:59)'] }}
                     ],
                     backgroundColor: ['#0d6efd', '#fdaf4b']
                 }],
                 labels: [
-                    'Jam Kerja (08:30 - 17:30)',
-                    'Luar Jam Kerja (17:31 - 08:29)'
+                    'Jam Kerja (07:00 - 17:30)',
+                    'Luar Jam Kerja (17:31 - 06:59)'
                 ]
             },
             options: {
@@ -661,39 +648,6 @@
                     });
                 }
             }]
-        });
-
-
-
-        var myRadarChart = new Chart(radarChart, {
-            type: 'radar',
-            data: {
-                labels: ['Running', 'Swimming', 'Eating', 'Cycling', 'Jumping'],
-                datasets: [{
-                    data: [20, 10, 30, 2, 30],
-                    borderColor: '#1d7af3',
-                    backgroundColor: 'rgba(29, 122, 243, 0.25)',
-                    pointBackgroundColor: "#1d7af3",
-                    pointHoverRadius: 4,
-                    pointRadius: 3,
-                    label: 'Team 1'
-                }, {
-                    data: [10, 20, 15, 30, 22],
-                    borderColor: '#716aca',
-                    backgroundColor: 'rgba(113, 106, 202, 0.25)',
-                    pointBackgroundColor: "#716aca",
-                    pointHoverRadius: 4,
-                    pointRadius: 3,
-                    label: 'Team 2'
-                }, ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                legend: {
-                    position: 'bottom'
-                }
-            }
         });
     </script>
 
