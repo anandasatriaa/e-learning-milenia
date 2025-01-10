@@ -274,9 +274,7 @@
                                             class="avatar-img rounded"></div>
                                     <div class="u-text">
                                         <h4>{{ ucwords(strtolower(Auth::user()->Nama)) }}</h4>
-                                        <p class="text-muted">{{ Auth::user()->email_karyawan }}</p><a
-                                            href="#" class="btn btn-xs btn-secondary btn-sm">View
-                                            Profile</a>
+                                        <p class="text-muted">{{ Auth::user()->email_karyawan }}</p>
                                     </div>
                                 </div>
                             </li>
