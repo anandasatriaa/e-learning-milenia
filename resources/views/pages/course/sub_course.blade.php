@@ -122,7 +122,7 @@
                                         @foreach ($division['courses'] as $course)
                                             <div class="col-12 col-md-4 category-card mt-2">
                                                 <a href="{{ route('pages.course.course.detail', $course['id']) }}"
-                                                    class="card bg-white shadow" style="width: 30rem;">
+                                                    class="card bg-white shadow">
                                                     <img class="card-img-top"
                                                         src="{{ asset('storage/course/thumbnail/' . $course['thumbnail']) }}"
                                                         alt="{{ $course['name'] }}">
@@ -167,7 +167,7 @@
                                                             @foreach ($category['courses'] as $course)
                                                                 <div class="col-12 col-md-4 category-card mt-2">
                                                                     <a href="{{ route('pages.course.course.detail', $course['id']) }}"
-                                                                        class="card bg-white shadow" style="width: 30rem;">
+                                                                        class="card bg-white shadow">
                                                                         <img class="card-img-top"
                                                                             src="{{ asset('storage/course/thumbnail/' . $course['thumbnail']) }}"
                                                                             alt="{{ $course['name'] }}">
@@ -211,7 +211,7 @@
                                                                             @foreach ($subCategory['courses'] as $course)
                                                                                 <div class="col-12 col-md-4 category-card mt-2">
                                                                                     <a href="{{ route('pages.course.course.detail', $course['id']) }}"
-                                                                                        class="card bg-white shadow" style="width: 30rem;">
+                                                                                        class="card bg-white shadow">
                                                                                         <img class="card-img-top"
                                                                                             src="{{ asset('storage/course/thumbnail/' . $course['thumbnail']) }}"
                                                                                             alt="{{ $course['name'] }}">
