@@ -134,27 +134,26 @@ class CourseController extends Controller
     public function edit($id)
     {
         $learningCategories = LearningCategory::with('divisiCategories.categories.subCategories')->get();
-        $data = Course::findOrFail($id);
-        
-        return view('admin.course.course.edit', compact('data', 'learningCategories'));
+        $course = Course::findOrFail($id);
+
+        return view('admin.course.course.edit', compact('learningCategories', 'course'));
     }
 
     public function update(Request $request, $id)
     {
         try {
             DB::beginTransaction();
+
             $course = Course::findOrFail($id);
 
             // Proses dropdown jika diisi
             if ($request->filled('form_dropdown')) {
                 $selectedValue = $request->input('form_dropdown');
-
-                // Log untuk debugging
                 Log::info('Selected Value: ' . $selectedValue);
 
                 $parts = explode('_', $selectedValue);
 
-                // Reset nilai sebelumnya terlebih dahulu
+                // Reset nilai sebelumnya
                 $course->sub_category_id = null;
                 $course->category_id = null;
                 $course->divisi_category_id = null;
@@ -181,41 +180,48 @@ class CourseController extends Controller
 
             $course->nama_kelas = $request->nama_kelas;
 
-            $oldValueImageName = $course->thumbnail;
-
-            if (isset($request->image)) {
+            // Handle thumbnail image
+            $oldImage = $course->thumbnail;
+            if ($request->filled('image')) {
                 $image_parts = explode(";base64,", $request->image);
                 $image_type_aux = explode("image/", $image_parts[0]);
                 $image_type = $image_type_aux[1];
                 $image_base64 = base64_decode($image_parts[1]);
 
                 $folderPath = storage_path('app/public/course/thumbnail/');
-                $image_name =  date('YmdHi') .  '_' . $request->nama_kelas  . '.' . $image_type;
-                $file = $folderPath . '' . $image_name;
-                $course->thumbnail = $image_name;
+                $imageName = date('YmdHi') . '_' . $request->nama_kelas . '.' . $image_type;
+                $fileImage = $folderPath . $imageName;
+
+                $course->thumbnail = $imageName;
             }
 
+            // Handle thumbnail video
+            $oldVideo = $course->thumbnail_video;
             if ($request->hasFile('thumbnail_video')) {
                 $folderPath = storage_path('app/public/course/thumbnail_video/');
-                $nameFile = date('YmdHi') . '_' . $request->nama_kelas . '.' . $request->thumbnail_video->getClientOriginalExtension();
-                $fileVideo = $folderPath . '' . $nameFile;
+                $videoName = date('YmdHi') . '_' . $request->nama_kelas . '.' . $request->thumbnail_video->getClientOriginalExtension();
 
-                $course->thumbnail_video = $nameFile;
-                file_put_contents($fileVideo, file_get_contents($request->thumbnail_video));
+                // Simpan file video
+                $request->thumbnail_video->move($folderPath, $videoName);
+                $course->thumbnail_video = $videoName;
+
+                // Hapus file lama jika ada
+                if (!empty($oldVideo) && file_exists($folderPath . $oldVideo)) {
+                    unlink($folderPath . $oldVideo);
+                }
             }
 
             $course->deskripsi = $request->deskripsi;
             $course->save();
 
             DB::commit();
-            if (isset($request->image)) {
-                file_put_contents($file, $image_base64);
-                Storage::disk('public')->delete('course/thumbnail/' . $oldValueImageName);
-            }
 
-            if ($request->hasFile($request->thumbnail_video)) {
-                file_put_contents($fileVideo, file_get_contents($request->thumbnail_video));
-                Storage::disk('public')->delete('course/thumbnail_video/' . $course->thumbnail_video);
+            // Simpan file thumbnail jika ada
+            if (isset($fileImage)) {
+                file_put_contents($fileImage, $image_base64);
+                if (!empty($oldImage)) {
+                    Storage::disk('public')->delete('course/thumbnail/' . $oldImage);
+                }
             }
 
             return redirect()->route('admin.course.course.index')->with([
@@ -229,11 +235,12 @@ class CourseController extends Controller
             return redirect()->back()->with([
                 'error' => [
                     'title' => 'Error!',
-                    'message' => $th->errorInfo[2]
+                    'message' => $th->getMessage() // Menggunakan getMessage() untuk pesan error lebih detail
                 ]
             ]);
         }
     }
+
 
     public function destroy($id)
     {
