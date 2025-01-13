@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Nilai;
 
 use App\Http\Controllers\Controller;
 use App\Models\Nilai\Nilai;
+use App\Models\Nilai\NilaiMatriks;
 use App\Models\Course\Course;
 use App\Models\User;
 use App\Models\Course\CourseModul;
@@ -15,7 +16,7 @@ use App\Models\Course\ModulEssayAnswer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class NilaiController extends Controller
+class NilaiMatriksController extends Controller
 {
     public function __construct()
     {
@@ -24,15 +25,16 @@ class NilaiController extends Controller
 
     public function index()
     {
-        // Ambil data courses dengan jumlah modul dan peserta, kecuali Matriks Kompetensi
+        // Ambil data courses yang memenuhi kriteria
         $courses = Course::withCount(['modul', 'user']) // Menghitung jumlah modul dan peserta
         ->with('modul') // Memuat data modul untuk akses lebih lanjut
-        ->whereDoesntHave('category', function ($query) {
+        ->whereHas('category', function ($query) {
             $query->where('nama', 'Matriks Kompetensi');
         })
+            ->where('learning_cat_id', 2)
             ->get();
 
-        return view('admin.course.nilai.index', compact('courses'));
+        return view('admin.course.nilai-matriks.index', compact('courses'));
     }
 
     public function store(Request $request)
@@ -41,17 +43,21 @@ class NilaiController extends Controller
         $request->validate([
             'user_id' => 'required|integer',
             'course_id' => 'required|integer',
-            'nilai_quiz' => 'nullable|numeric|between:0,10',
-            'nilai_essay' => 'nullable|numeric',
+            'nilai_quiz' => 'nullable|numeric|between:0,5',
+            'nilai_essay' => 'nullable|numeric|between:0,2',
+            'nilai_praktek' => 'nullable|numeric|between:0,8',
+            'presentase_kompetensi' => 'nullable|numeric|between:0,100',
             'komentar' => 'nullable|string|max:255',
         ]);
 
         // Simpan data penilaian ke database
-        $nilai = new Nilai();
+        $nilai = new NilaiMatriks();
         $nilai->user_id = $request->user_id;
         $nilai->course_id = $request->course_id;
         $nilai->nilai_quiz = $request->nilai_quiz;
         $nilai->nilai_essay = $request->nilai_essay;
+        $nilai->nilai_praktek = $request->nilai_praktek;
+        $nilai->presentase_kompetensi = $request->presentase_kompetensi;
         $nilai->komentar = $request->komentar;
         $nilai->save();
 
@@ -65,14 +71,14 @@ class NilaiController extends Controller
     public function detail($course_id)
     {
         // Lakukan query untuk mendapatkan data kursus berdasarkan ID
-        $course = Course::with(['user:id,ID,Nama', 'modul', 'user.nilai' => function ($query) use ($course_id) {
+        $course = Course::with(['user:id,ID,Nama', 'modul', 'user.nilaiMatriks' => function ($query) use ($course_id) {
             $query->where('course_id', $course_id);  // Menyaring nilai berdasarkan course_id
         }])
             ->withCount(['modul', 'user'])  // Menambahkan count untuk modul dan users
             ->findOrFail($course_id);
 
         // Kirim data kursus ke view
-        return view('admin.course.nilai.detail', compact('course'));
+        return view('admin.course.nilai-matriks.detail', compact('course'));
     }
 
     public function showReviewModal($course_id, $user_id)
@@ -95,8 +101,8 @@ class NilaiController extends Controller
         $moduls = CourseModul::with(['modulQuiz', 'modulEssay'])->where('course_id', $course_id)->get();
 
         // Ambil data review (nilai quiz, nilai essay, komentar) dari tabel review
-        $review = Nilai::where('course_id', $course_id)
-        ->where('user_id', $user_id)
+        $review = NilaiMatriks::where('course_id', $course_id)
+            ->where('user_id', $user_id)
             ->first();
 
         // Tambahkan quiz dan essay data pengguna
@@ -171,6 +177,8 @@ class NilaiController extends Controller
             'review' => $review ? [
                 'nilai_quiz' => $review->nilai_quiz,
                 'nilai_essay' => $review->nilai_essay,
+                'nilai_praktek' => $review->nilai_praktek,
+                'presentase_kompetensi' => $review->presentase_kompetensi,
                 'komentar' => $review->komentar,
             ] : null,
         ]);
@@ -182,11 +190,13 @@ class NilaiController extends Controller
         $validatedData = $request->validate([
             'nilai_quiz' => 'nullable|numeric',
             'nilai_essay' => 'nullable|numeric',
+            'nilai_praktek' => 'nullable|numeric',
+            'presentase_kompetensi' => 'nullable|numeric',
             'komentar' => 'nullable|string|max:255',
         ]);
 
         // Cek apakah review sudah ada di database
-        $review = Nilai::where('course_id', $course_id)
+        $review = NilaiMatriks::where('course_id', $course_id)
             ->where('user_id', $user_id)
             ->first();
 
@@ -194,6 +204,8 @@ class NilaiController extends Controller
             // Update data review jika sudah ada
             $review->nilai_quiz = $validatedData['nilai_quiz'] ?? $review->nilai_quiz;
             $review->nilai_essay = $validatedData['nilai_essay'] ?? $review->nilai_essay;
+            $review->nilai_praktek = $validatedData['nilai_praktek'] ?? $review->nilai_praktek;
+            $review->presentase_kompetensi = $validatedData['presentase_kompetensi'] ?? $review->presentase_kompetensi;
             $review->komentar = $validatedData['komentar'] ?? $review->komentar;
 
             // Simpan perubahan
@@ -203,11 +215,13 @@ class NilaiController extends Controller
             Log::info('Review updated', ['course_id' => $course_id, 'user_id' => $user_id]);
         } else {
             // Jika review belum ada, buat baru
-            $review = new Nilai();
+            $review = new NilaiMatriks();
             $review->course_id = $course_id;
             $review->user_id = $user_id;
             $review->nilai_quiz = $validatedData['nilai_quiz'];
             $review->nilai_essay = $validatedData['nilai_essay'];
+            $review->nilai_praktek = $validatedData['nilai_praktek'];
+            $review->presentase_kompetensi = $validatedData['presentase_kompetensi'];
             $review->komentar = $validatedData['komentar'];
 
             // Simpan data baru

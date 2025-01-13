@@ -121,6 +121,13 @@
                                     <span>Nilai</span>
                                 </a>
                             </li>
+                            <li class="ms-3">
+                                <a class="{{ request()->routeIs('admin.course.nilai-matriks.*') ? 'text-white fw-bold active border-start border-2' : '' }}"
+                                    href="{{ route('admin.course.nilai-matriks.index') }}">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    <span>Nilai Matriks Kompetensi</span>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </li>

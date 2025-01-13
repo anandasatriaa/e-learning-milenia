@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Nilai ')
+@section('title', 'Detail Matriks Kompetensi')
 @section('css')
     <style>
         .accordion .card {
@@ -93,12 +93,25 @@
                                                         </p>
                                                         <div class="d-flex align-items-center text-muted">
                                                             <span class="fw-semibold">Nilai Quiz:
-                                                                {{ $enrollUser->nilai->first()->nilai_quiz ?? '-' }}</span>
+                                                                {{ $enrollUser->nilaimatriks->first()->nilai_quiz ?? '-' }}
+                                                            </span>
                                                         </div>
                                                         <div class="d-flex align-items-center text-muted">
                                                             <span class="fw-semibold">Nilai Essay:
-                                                                {{ $enrollUser->nilai->first()->nilai_essay ?? '-' }}</span>
+                                                                {{ $enrollUser->nilaimatriks->first()->nilai_essay ?? '-' }}
+                                                            </span>
                                                         </div>
+                                                        <div class="d-flex align-items-center text-muted">
+                                                            <span class="fw-semibold">Nilai Praktek:
+                                                                {{ $enrollUser->nilaimatriks->first()->nilai_praktek ?? '-' }}
+                                                            </span>
+                                                        </div>
+                                                        <div class="d-flex align-items-center text-muted">
+                                                            <span class="fw-semibold">Kompetensi:
+                                                                {{ $enrollUser->nilaimatriks->first()->presentase_kompetensi ?? '-' }}%
+                                                            </span>
+                                                        </div>
+                                                        
                                                     </div>
                                                 </div>
                                             </div>
@@ -133,20 +146,33 @@
                                             </div>
                                             <form>
                                                 <div class="row align-items-center mb-3">
-                                                    <div class="col-md-6">
-                                                        <label for="nilaiQuiz" class="form-label">Nilai Quiz <span class="text-primary">(0 - 10)</span></label>
-                                                        <input type="number" class="form-control" id="nilaiQuiz"
-                                                            placeholder="Masukkan nilai quiz" min="0" max="10">
+                                                    <div class="col-md-3">
+                                                        <label for="nilaiQuiz" class="form-label">Nilai Quiz <span class="text-primary">(0 - 5)</span></label>
+                                                        <input type="number" class="form-control" id="nilaiQuiz" name="nilaiQuiz" 
+                                                            placeholder="" min="0" max="5">
                                                     </div>
-                                                    <div class="col-md-6">
-                                                        <label for="nilaiEssay" class="form-label">Nilai Essay</label>
-                                                        <input type="number" class="form-control" id="nilaiEssay"
-                                                            placeholder="Masukkan nilai essay">
+                                                    <div class="col-md-3">
+                                                        <label for="nilaiEssay" class="form-label">Nilai Essay <span class="text-primary">(0 - 2)</span></label>
+                                                        <input type="number" class="form-control" id="nilaiEssay" name="nilaiEssay" 
+                                                            placeholder="" min="0" max="2">
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label for="nilaiPraktek" class="form-label">Nilai Praktek <span class="text-primary">(0 - 8)</span></label>
+                                                        <input type="number" class="form-control" id="nilaiPraktek" name="nilaiPraktek" 
+                                                            placeholder="" min="0" max="8">
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label for="presentaseKompetensi" class="form-label">Presentase Kompetensi</label>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control" id="presentaseKompetensi" name="presentaseKompetensi" placeholder="" readonly>
+                                                            <span class="input-group-text"><i class="fas fa-percent"></i></span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="komentar" class="form-label">Komentar</label>
-                                                    <textarea class="form-control" id="komentar" rows="3" placeholder="Tulis komentar"></textarea>
+                                                    <textarea class="form-control" id="komentar" name="komentar" rows="3" 
+                                                            placeholder="Tulis komentar"></textarea>
                                                 </div>
                                             </form>
                                         </div>
@@ -191,6 +217,8 @@
             // Reset input fields hanya di modal ini
             modal.find('#nilaiQuiz').val('');
             modal.find('#nilaiEssay').val('');
+            modal.find('#nilaiPraktek').val('');
+            modal.find('#presentaseKompetensi').val('');
             modal.find('#komentar').val('');
 
             // Set data ke tombol "Simpan Penilaian"
@@ -199,7 +227,7 @@
             saveButton.attr('data-user-id', userId);
 
             $.ajax({
-                url: `{{ url('admin/course/get-review-data') }}/${courseId}/${userId}`,
+                url: `{{ url('admin/course/get-review-data-matriks') }}/${courseId}/${userId}`,
                 method: 'GET',
                 success: function(response) {
                     modal.find('.modal-title').text('Review & Penilaian ' + response.user.name);
@@ -223,11 +251,6 @@
                                             var userAnswer = quiz.userAnswer.jawaban;
                                             var correctAnswer = quiz.correct_answer;
                                             var kodeJawabanPengguna = quiz.userAnswer.kode_jawaban;
-
-                                            // Menambahkan console log untuk melihat nilai kunci jawaban, jawaban pengguna, dan kode jawaban
-                                            console.log('Kunci Jawaban:', correctAnswer);
-                                            console.log('Jawaban Pengguna:', userAnswer);
-                                            console.log('Kode Jawaban Pengguna:', kodeJawabanPengguna);
 
                                             // Hitung benar/salah
                                             if (kodeJawabanPengguna == correctAnswer) {
@@ -286,7 +309,7 @@
                                         }
 
                                         // Hitung nilai total
-                                        var scorePerQuestion = totalQuestions > 0 ? 10 / totalQuestions : 0;
+                                        var scorePerQuestion = totalQuestions > 0 ? 5 / totalQuestions : 0;
                                         var totalScore = correctCount * scorePerQuestion;
 
                                         if (totalQuestions > 0) {
@@ -385,7 +408,7 @@
                     ? totalScores.reduce((a, b) => a + b, 0) / totalScores.length
                     : 0;
 
-                    // Tampilkan rata-rata nilai di input field hanya di modal ini
+                    // Tampilkan rata-rata nilai di input field
                     modal.find('#nilaiQuiz').val(formatScore(averageScore));
 
                     modal.find('#accordionReview').html(accordionContent);
@@ -396,6 +419,8 @@
                     if (response.review) {
                         modal.find('#nilaiQuiz').val(response.review.nilai_quiz || '');
                         modal.find('#nilaiEssay').val(response.review.nilai_essay || '');
+                        modal.find('#nilaiPraktek').val(response.review.nilai_praktek || '');
+                        modal.find('#presentaseKompetensi').val(response.review.presentase_kompetensi || '');
                         modal.find('#komentar').val(response.review.komentar || '');
                     }
                 },
@@ -407,12 +432,41 @@
         });
     </script>
 
+{{-- Perhitungan Matriks Kompetensi --}}
+    <script>
+        // Fungsi untuk menghitung presentaseKompetensi
+        function hitungPresentaseKompetensi() {
+            // Ambil nilai dari input
+            var nilaiQuiz = parseFloat($('#nilaiQuiz').val()) || 0;
+            var nilaiEssay = parseFloat($('#nilaiEssay').val()) || 0;
+            var nilaiPraktek = parseFloat($('#nilaiPraktek').val()) || 0;
+
+            // Perhitungan Presentase Kompetensi
+            var presentase = (nilaiQuiz * 2.5 / 100) + (nilaiEssay * 10 / 100) + (nilaiPraktek * 8.75 / 100);
+
+            // Set nilai ke input Presentase Kompetensi tanpa dua angka di belakang koma dan tambahkan tanda %
+            $('#presentaseKompetensi').val(Math.round(presentase * 100) + '%'); // Mengalikan dengan 100 dan menghapus desimal
+        }
+
+        // Event listener untuk perubahan nilai pada input
+        $('#nilaiQuiz, #nilaiEssay, #nilaiPraktek').on('input', function() {
+            hitungPresentaseKompetensi(); // Panggil fungsi saat input berubah
+        });
+
+        // Panggil fungsi untuk menghitung presentase saat pertama kali form dimuat
+        $(document).ready(function() {
+            hitungPresentaseKompetensi();
+        });
+    </script>
+
 {{-- kirim nilai ke database --}}
     <script>
         document.getElementById('saveReviewButton').addEventListener('click', function() {
             // Ambil nilai dari input form
             var nilaiQuiz = document.getElementById('nilaiQuiz').value;
             var nilaiEssay = document.getElementById('nilaiEssay').value;
+            var nilaiPraktek = document.getElementById('nilaiPraktek').value;
+            var presentaseKompetensi = document.getElementById('presentaseKompetensi').value.replace('%', '');
             var komentar = document.getElementById('komentar').value;
 
             // Ambil nilai dari data atribut yang ada di tombol
@@ -424,22 +478,24 @@
             console.log('Course ID:', courseId);
             console.log('Nilai Quiz:', nilaiQuiz);
             console.log('Nilai Essay:', nilaiEssay);
+            console.log('Nilai Praktek:', nilaiPraktek);
+            console.log('Presentase Kompetensi:', presentaseKompetensi);
             console.log('Komentar:', komentar);
 
             // Ambil CSRF token untuk keamanan
             var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            console.log('Request URL:', `/admin/course/get-review-data/${courseId}/${userId}`);
+            console.log('Request URL:', `/admin/course/get-review-data-matriks/${courseId}/${userId}`);
 
             // Pertama, cek apakah review sudah ada di database
-            fetch("{{ url('admin/course/get-review-data') }}/" + courseId + "/" + userId)
+            fetch("{{ url('admin/course/get-review-data-matriks') }}/" + courseId + "/" + userId)
                 .then(response => response.json())
                 .then(data => {
-                    var url = `{{ url('admin/course/nilai/store') }}`; // Default untuk POST (insert)
+                    var url = `{{ url('admin/course/nilai-matriks/store') }}`; // Default untuk POST (insert)
                     var method = 'POST'; // Default untuk POST (insert)
 
                     // Jika review sudah ada, kita gunakan PUT untuk update
                     if (data.review) {
-                        url = `{{ url('admin/course/nilai/update') }}/${courseId}/${userId}`; // Gunakan route update
+                        url = `{{ url('admin/course/nilai-matriks/update') }}/${courseId}/${userId}`; // Gunakan route update
                         method = 'PUT'; // Menggunakan PUT, jadi method 'POST' dengan pengubahan URL
                     }
 
@@ -456,6 +512,8 @@
                             course_id: courseId,
                             nilai_quiz: nilaiQuiz,
                             nilai_essay: nilaiEssay,
+                            nilai_praktek: nilaiPraktek,
+                            presentase_kompetensi: presentaseKompetensi,
                             komentar: komentar
                         })
                     })
@@ -482,7 +540,7 @@
                         });
                     })
                     .catch(error => {
-                        console.error('Error:', error);
+                        console.error('Error terjadi:', error);
                         swal("Terjadi kesalahan!", "Nilai gagal disimpan.", "error");
                     });
                 })

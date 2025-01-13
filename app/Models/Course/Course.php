@@ -8,6 +8,7 @@ use App\Models\Category\DivisiCategory;
 use App\Models\Category\LearningCategory;
 use App\Models\User;
 use App\Models\Nilai\Nilai;
+use App\Models\Nilai\NilaiMatriks;
 use App\Models\UserCourseEnroll;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -81,5 +82,10 @@ class Course extends Model
     public function nilai()
     {
         return $this->hasManyThrough(Nilai::class, UserCourseEnroll::class);
+    }
+
+    public function nilaimatriks()
+    {
+        return $this->hasManyThrough(NilaiMatriks::class, UserCourseEnroll::class);
     }
 }

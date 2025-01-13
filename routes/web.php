@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 use App\Http\Controllers\Admin\User\UserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\Nilai\NilaiController;
+use App\Http\Controllers\Admin\Nilai\NilaiMatriksController;
 use App\Http\Controllers\Admin\Calendar\CalendarController;
 use App\Http\Controllers\Pages\Course\CourseController;
 use App\Http\Controllers\Pages\HomeController;
@@ -69,6 +70,12 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/get-review-data/{course_id}/{user_id}', [NilaiController::class, 'showReviewModal'])->name('nilai.showReviewModal');
             Route::post('/nilai/store', [NilaiController::class, 'store'])->name('nilai.store');
             Route::put('/nilai/update/{course_id}/{user_id}', [NilaiController::class, 'updateReview'])->name('nilai.updateReview');
+
+            Route::get('/nilai-matriks', [NilaiMatriksController::class, 'index'])->name('nilai-matriks.index');
+            Route::get('/nilai-matriks/{course_id}', [NilaiMatriksController::class, 'detail'])->name('nilai-matriks.detail');
+            Route::get('/get-review-data-matriks/{course_id}/{user_id}', [NilaiMatriksController::class, 'showReviewModal'])->name('nilai-matriks.showReviewModal');
+            Route::post('/nilai-matriks/store', [NilaiMatriksController::class, 'store'])->name('nilai.store');
+            Route::put('/nilai-matriks/update/{course_id}/{user_id}', [NilaiMatriksController::class, 'updateReview'])->name('nilai-matriks.updateReview');
         });
 
         Route::group(['prefix' => 'calendar', 'as' => 'calendar.'], function () {

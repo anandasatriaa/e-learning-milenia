@@ -38,92 +38,57 @@
                             <div class="form-group">
                                 <label class="fw-bold" for="form_dropdown">Sub Kategori<span
                                         class="text-danger">*</span></label>
-                                        <select name="form_dropdown" id="form_dropdown" required class="form-control">
-                                        <option value="">Choose Category</option>
-                                        <!-- Loop untuk menampilkan learningCategories -->
-    @foreach ($learningCategories as $category)
-        <option value="learningCategory_{{ $category->id }}" 
-            {{ $course->learning_cat_id == $category->id ? 'selected' : '' }}>
-            [{{ $category->nama }}]
-        </option>
-    @endforeach
+                                <select name="form_dropdown" id="form_dropdown" required class="form-control">
+                                    <option value="">Choose Category</option>
+                                    <!-- Loop untuk menampilkan learningCategories -->
+                                    @foreach ($learningCategories as $category)
+                                        <option value="learningCategory_{{ $category->id }}"
+                                            {{ $course->learning_cat_id == $category->id ? 'selected' : '' }}>
+                                            [{{ $category->nama }}]
+                                        </option>
+                                    @endforeach
 
-    <!-- Loop untuk kombinasi learningCategory dan divisiCategory -->
-    @foreach ($learningCategories as $category)
-        @foreach ($category->divisiCategories as $divisiCategory)
-            <option value="divisiCategory_{{ $divisiCategory->id }}_learningCategory_{{ $category->id }}"
-                {{ $course->divisi_category_id == $divisiCategory->id && $course->learning_cat_id == $category->id ? 'selected' : '' }}>
-                [{{ $category->nama }}] - [{{ $divisiCategory->nama }}]
-            </option>
-        @endforeach
-    @endforeach
+                                    <!-- Loop untuk kombinasi learningCategory dan divisiCategory -->
+                                    @foreach ($learningCategories as $category)
+                                        @foreach ($category->divisiCategories as $divisiCategory)
+                                            <option
+                                                value="divisiCategory_{{ $divisiCategory->id }}_learningCategory_{{ $category->id }}"
+                                                {{ $course->divisi_category_id == $divisiCategory->id && $course->learning_cat_id == $category->id ? 'selected' : '' }}>
+                                                [{{ $category->nama }}] - [{{ $divisiCategory->nama }}]
+                                            </option>
+                                        @endforeach
+                                    @endforeach
 
-    <!-- Loop untuk kombinasi learningCategory, divisiCategory, dan category -->
-    @foreach ($learningCategories as $category)
-        @foreach ($category->divisiCategories as $divisiCategory)
-            @foreach ($divisiCategory->categories as $cat)
-                <option value="category_{{ $cat->id }}_divisiCategory_{{ $divisiCategory->id }}_learningCategory_{{ $category->id }}"
-                    {{ $course->category_id == $cat->id && $course->divisi_category_id == $divisiCategory->id && $course->learning_cat_id == $category->id ? 'selected' : '' }}>
-                    [{{ $category->nama }}] - [{{ $divisiCategory->nama }}] - [{{ $cat->nama }}]
-                </option>
-            @endforeach
-        @endforeach
-    @endforeach
+                                    <!-- Loop untuk kombinasi learningCategory, divisiCategory, dan category -->
+                                    @foreach ($learningCategories as $category)
+                                        @foreach ($category->divisiCategories as $divisiCategory)
+                                            @foreach ($divisiCategory->categories as $cat)
+                                                <option
+                                                    value="category_{{ $cat->id }}_divisiCategory_{{ $divisiCategory->id }}_learningCategory_{{ $category->id }}"
+                                                    {{ $course->category_id == $cat->id && $course->divisi_category_id == $divisiCategory->id && $course->learning_cat_id == $category->id ? 'selected' : '' }}>
+                                                    [{{ $category->nama }}] - [{{ $divisiCategory->nama }}] -
+                                                    [{{ $cat->nama }}]
+                                                </option>
+                                            @endforeach
+                                        @endforeach
+                                    @endforeach
 
-    <!-- Loop untuk kombinasi learningCategory, divisiCategory, category, dan subCategory -->
-    @foreach ($learningCategories as $category)
-        @foreach ($category->divisiCategories as $divisiCategory)
-            @foreach ($divisiCategory->categories as $cat)
-                @foreach ($cat->subCategories as $subCategory)
-                    <option value="subCategory_{{ $subCategory->id }}_category_{{ $cat->id }}_divisiCategory_{{ $divisiCategory->id }}_learningCategory_{{ $category->id }}"
-                        {{ $course->sub_category_id == $subCategory->id && $course->category_id == $cat->id && $course->divisi_category_id == $divisiCategory->id && $course->learning_cat_id == $category->id ? 'selected' : '' }}>
-                        [{{ $category->nama }}] - [{{ $divisiCategory->nama }}] - [{{ $cat->nama }}] - [{{ $subCategory->nama }}]
-                    </option>
-                @endforeach
-            @endforeach
-        @endforeach
-    @endforeach
-
-    {{-- <!-- Loop untuk menampilkan learningCategories -->
-    @foreach ($learningCategories as $category)
-        <option value="learningCategory_{{ $category->id }}">
-            [{{ $category->nama }}]
-        </option>
-    @endforeach
-
-    <!-- Loop untuk menampilkan kombinasi learningCategory dan divisiCategory -->
-    @foreach ($learningCategories as $category)
-        @foreach ($category->divisiCategories as $divisiCategory)
-            <option value="divisiCategory_{{ $divisiCategory->id }}_learningCategory_{{ $category->id }}">
-                [{{ $category->nama }}] - [{{ $divisiCategory->nama }}]
-            </option>
-        @endforeach
-    @endforeach
-
-    <!-- Loop untuk menampilkan kombinasi learningCategory, divisiCategory, dan category -->
-    @foreach ($learningCategories as $category)
-        @foreach ($category->divisiCategories as $divisiCategory)
-            @foreach ($divisiCategory->categories as $cat)
-                <option value="category_{{ $cat->id }}_divisiCategory_{{ $divisiCategory->id }}_learningCategory_{{ $category->id }}">
-                    [{{ $category->nama }}] - [{{ $divisiCategory->nama }}] - [{{ $cat->nama }}]
-                </option>
-            @endforeach
-        @endforeach
-    @endforeach
-
-    <!-- Loop untuk menampilkan kombinasi learningCategory, divisiCategory, category, dan subCategory -->
-    @foreach ($learningCategories as $category)
-        @foreach ($category->divisiCategories as $divisiCategory)
-            @foreach ($divisiCategory->categories as $cat)
-                @foreach ($cat->subCategories as $subCategory)
-                    <option value="subCategory_{{ $subCategory->id }}_category_{{ $cat->id }}_divisiCategory_{{ $divisiCategory->id }}_learningCategory_{{ $category->id }}">
-                        [{{ $category->nama }}] - [{{ $divisiCategory->nama }}] - [{{ $cat->nama }}] - [{{ $subCategory->nama }}]
-                    </option>
-                @endforeach
-            @endforeach
-        @endforeach
-    @endforeach --}}
-</select>
+                                    <!-- Loop untuk kombinasi learningCategory, divisiCategory, category, dan subCategory -->
+                                    @foreach ($learningCategories as $category)
+                                        @foreach ($category->divisiCategories as $divisiCategory)
+                                            @foreach ($divisiCategory->categories as $cat)
+                                                @foreach ($cat->subCategories as $subCategory)
+                                                    <option
+                                                        value="subCategory_{{ $subCategory->id }}_category_{{ $cat->id }}_divisiCategory_{{ $divisiCategory->id }}_learningCategory_{{ $category->id }}"
+                                                        {{ $course->sub_category_id == $subCategory->id && $course->category_id == $cat->id && $course->divisi_category_id == $divisiCategory->id && $course->learning_cat_id == $category->id ? 'selected' : '' }}>
+                                                        [{{ $category->nama }}] - [{{ $divisiCategory->nama }}] -
+                                                        [{{ $cat->nama }}] - [{{ $subCategory->nama }}]
+                                                    </option>
+                                                @endforeach
+                                            @endforeach
+                                        @endforeach
+                                    @endforeach
+                                </select>
                             </div>
 
                             <div class="form-group">
@@ -146,7 +111,7 @@
                                     Change <i class="bi bi-arrow-repeat"></i>
                                 </button>
                             </div>
-                            
+
                         </div>
                         <div class="col-md-6">
                             <div class="form-group input-bar">
@@ -160,7 +125,9 @@
                                 <div style="height:300px" id="preview_media">
                                     @if (!empty($course->thumbnail_video))
                                         <video id="video_preview" controls style="max-height: 100%; width: 100%;">
-                                            <source src="{{ asset('storage/course/thumbnail_video/' . $course->thumbnail_video) }}" type="video/mp4">
+                                            <source
+                                                src="{{ asset('storage/course/thumbnail_video/' . $course->thumbnail_video) }}"
+                                                type="video/mp4">
                                             Your browser does not support the video tag.
                                         </video>
                                     @else

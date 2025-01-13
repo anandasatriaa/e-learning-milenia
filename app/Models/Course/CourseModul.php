@@ -3,6 +3,7 @@
 namespace App\Models\Course;
 
 use App\Models\Nilai\Nilai;
+use App\Models\Nilai\NilaiMatriks;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -73,5 +74,10 @@ class CourseModul extends Model
     public function nilai()
     {
         return $this->hasMany(Nilai::class);
+    }
+
+    public function nilaimatriks()
+    {
+        return $this->hasMany(NilaiMatriks::class);
     }
 }
