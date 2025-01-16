@@ -93,25 +93,24 @@
                                                         </p>
                                                         <div class="d-flex align-items-center text-muted">
                                                             <span class="fw-semibold">Nilai Quiz:
-                                                                {{ $enrollUser->nilaimatriks->first()->nilai_quiz ?? '-' }}
+                                                                {{ $enrollUser->nilaimatriks->firstWhere('course_id', $course_id)->nilai_quiz ?? '-' }}
                                                             </span>
                                                         </div>
                                                         <div class="d-flex align-items-center text-muted">
                                                             <span class="fw-semibold">Nilai Essay:
-                                                                {{ $enrollUser->nilaimatriks->first()->nilai_essay ?? '-' }}
+                                                                {{ $enrollUser->nilaimatriks->firstWhere('course_id', $course_id)->nilai_essay ?? '-' }}
                                                             </span>
                                                         </div>
                                                         <div class="d-flex align-items-center text-muted">
                                                             <span class="fw-semibold">Nilai Praktek:
-                                                                {{ $enrollUser->nilaimatriks->first()->nilai_praktek ?? '-' }}
+                                                                {{ $enrollUser->nilaimatriks->firstWhere('course_id', $course_id)->nilai_praktek ?? '-' }}
                                                             </span>
                                                         </div>
                                                         <div class="d-flex align-items-center text-muted">
                                                             <span class="fw-semibold">Kompetensi:
-                                                                {{ $enrollUser->nilaimatriks->first()->presentase_kompetensi ?? '-' }}%
+                                                                {{ $enrollUser->nilaimatriks->firstWhere('course_id', $course_id)->presentase_kompetensi ?? '-' }}%
                                                             </span>
                                                         </div>
-                                                        
                                                     </div>
                                                 </div>
                                             </div>
@@ -147,32 +146,39 @@
                                             <form>
                                                 <div class="row align-items-center mb-3">
                                                     <div class="col-md-3">
-                                                        <label for="nilaiQuiz" class="form-label">Nilai Quiz <span class="text-primary">(0 - 5)</span></label>
-                                                        <input type="number" class="form-control" id="nilaiQuiz" name="nilaiQuiz" 
-                                                            placeholder="" min="0" max="5">
+                                                        <label for="nilaiQuiz" class="form-label">Nilai Quiz <span
+                                                                class="text-primary">(0 - 4)</span></label>
+                                                        <input type="number" class="form-control" id="nilaiQuiz"
+                                                            name="nilaiQuiz" placeholder="" min="0" max="4">
                                                     </div>
                                                     <div class="col-md-3">
-                                                        <label for="nilaiEssay" class="form-label">Nilai Essay <span class="text-primary">(0 - 2)</span></label>
-                                                        <input type="number" class="form-control" id="nilaiEssay" name="nilaiEssay" 
-                                                            placeholder="" min="0" max="2">
+                                                        <label for="nilaiEssay" class="form-label">Nilai Essay <span
+                                                                class="text-primary">(0 - 2)</span></label>
+                                                        <input type="number" class="form-control" id="nilaiEssay"
+                                                            name="nilaiEssay" placeholder="" min="0" max="2">
                                                     </div>
                                                     <div class="col-md-3">
-                                                        <label for="nilaiPraktek" class="form-label">Nilai Praktek <span class="text-primary">(0 - 8)</span></label>
-                                                        <input type="number" class="form-control" id="nilaiPraktek" name="nilaiPraktek" 
-                                                            placeholder="" min="0" max="8">
+                                                        <label for="nilaiPraktek" class="form-label">Nilai Praktek <span
+                                                                class="text-primary">(0 - 8)</span></label>
+                                                        <input type="number" class="form-control" id="nilaiPraktek"
+                                                            name="nilaiPraktek" placeholder="" min="0"
+                                                            max="8">
                                                     </div>
                                                     <div class="col-md-3">
-                                                        <label for="presentaseKompetensi" class="form-label">Presentase Kompetensi</label>
+                                                        <label for="presentaseKompetensi" class="form-label">Presentase
+                                                            Kompetensi</label>
                                                         <div class="input-group">
-                                                            <input type="text" class="form-control" id="presentaseKompetensi" name="presentaseKompetensi" placeholder="" readonly>
-                                                            <span class="input-group-text"><i class="fas fa-percent"></i></span>
+                                                            <input type="text" class="form-control"
+                                                                id="presentaseKompetensi" name="presentaseKompetensi"
+                                                                placeholder="" readonly>
+                                                            <span class="input-group-text"><i
+                                                                    class="fas fa-percent"></i></span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="komentar" class="form-label">Komentar</label>
-                                                    <textarea class="form-control" id="komentar" name="komentar" rows="3" 
-                                                            placeholder="Tulis komentar"></textarea>
+                                                    <textarea class="form-control" id="komentar" name="komentar" rows="3" placeholder="Tulis komentar"></textarea>
                                                 </div>
                                             </form>
                                         </div>
@@ -196,7 +202,7 @@
 @endsection
 @section('js')
 
-{{-- hasil jawaban quiz dan essay user --}}
+    {{-- hasil jawaban quiz dan essay user --}}
     <script>
         // Fungsi untuk menentukan format angka
         function formatScore(score) {
@@ -209,24 +215,24 @@
         }
 
         $('#reviewModal').on('show.bs.modal', function(event) {
-            var button = $(event.relatedTarget);
-            var courseId = button.data('course-id');
-            var userId = button.data('user-id');
-            var modal = $(this);
+        var button = $(event.relatedTarget);
+        var courseId = button.data('course-id');
+        var userId = button.data('user-id');
+        var modal = $(this);
 
-            // Reset input fields hanya di modal ini
-            modal.find('#nilaiQuiz').val('');
-            modal.find('#nilaiEssay').val('');
-            modal.find('#nilaiPraktek').val('');
-            modal.find('#presentaseKompetensi').val('');
-            modal.find('#komentar').val('');
+        // Reset input fields hanya di modal ini
+        modal.find('#nilaiQuiz').val('');
+        modal.find('#nilaiEssay').val('');
+        modal.find('#nilaiPraktek').val('');
+        modal.find('#presentaseKompetensi').val('');
+        modal.find('#komentar').val('');
 
-            // Set data ke tombol "Simpan Penilaian"
-            var saveButton = modal.find('#saveReviewButton');
-            saveButton.attr('data-course-id', courseId);
-            saveButton.attr('data-user-id', userId);
+        // Set data ke tombol "Simpan Penilaian"
+        var saveButton = modal.find('#saveReviewButton');
+        saveButton.attr('data-course-id', courseId);
+        saveButton.attr('data-user-id', userId);
 
-            $.ajax({
+        $.ajax({
                 url: `{{ url('admin/course/get-review-data-matriks') }}/${courseId}/${userId}`,
                 method: 'GET',
                 success: function(response) {
@@ -238,121 +244,124 @@
                         var modulWithQuizCount = 0;
 
                         response.course.moduls.forEach(function(modul) {
-                                var totalQuestions = modul.modul_quiz ? modul.modul_quiz.length : 0;
-                                var correctCount = 0;
-                                var incorrectCount = 0;
+                            var totalQuestions = modul.modul_quiz ? modul.modul_quiz.length : 0;
+                            var correctCount = 0;
+                            var incorrectCount = 0;
 
-                                var quizContent = '';
-                                if (modul.modul_quiz && modul.modul_quiz.length > 0) {
-                                    modulWithQuizCount++;
-                                    quizContent = modul.modul_quiz.map(function(quiz, index) {
-                                        // Tampilkan jawaban quiz hanya untuk user yang sesuai
-                                        if (quiz.userAnswer && quiz.userAnswer.user_id == userId) {
-                                            var userAnswer = quiz.userAnswer.jawaban;
-                                            var correctAnswer = quiz.correct_answer;
-                                            var kodeJawabanPengguna = quiz.userAnswer.kode_jawaban;
+                            var quizContent = '';
+                            if (modul.modul_quiz && modul.modul_quiz.length > 0) {
+                                modulWithQuizCount++;
+                                quizContent = modul.modul_quiz.map(function(quiz, index) {
+                                            // Tampilkan jawaban quiz hanya untuk user yang sesuai
+                                            if (quiz.userAnswer && quiz.userAnswer.user_id ==
+                                                userId) {
+                                                var userAnswer = quiz.userAnswer.jawaban;
+                                                var correctAnswer = quiz.correct_answer;
+                                                var kodeJawabanPengguna = quiz.userAnswer
+                                                    .kode_jawaban;
 
-                                            // Hitung benar/salah
-                                            if (kodeJawabanPengguna == correctAnswer) {
-                                                correctCount++;
-                                            } else {
-                                                incorrectCount++;
-                                            }
+                                                // Hitung benar/salah
+                                                if (kodeJawabanPengguna == correctAnswer) {
+                                                    correctCount++;
+                                                } else {
+                                                    incorrectCount++;
+                                                }
 
-                                            return `
+                                                return `
                                                 <div class="mb-4 p-3 border rounded shadow-sm bg-light">
                                                     <h5><strong>${index + 1}. </strong> ${quiz.pertanyaan || 'Tidak ada pertanyaan'}</h5>
                                                     ${quiz.image ? `
-                                                        <div class="mt-2 ms-4">
-                                                            <img src="{{ asset('${quiz.image}') }}" class="img-fluid rounded" width="100px" alt="Gambar Pertanyaan">
-                                                        </div>
-                                                    ` : ''}
+                                                            <div class="mt-2 ms-4">
+                                                                <img src="{{ asset('${quiz.image}') }}" class="img-fluid rounded" width="100px" alt="Gambar Pertanyaan">
+                                                            </div>
+                                                        ` : ''}
                                                     ${quiz.options.length > 0 ? `
-                                                            <p><strong>Opsi Jawaban:</strong></p>
-                                                            <ul class="list-group">
-                                                            ${quiz.options.map(function(option, index) {
-                                                            let optionClass = '';
-                                                            let correctIcon = ''; // Variabel untuk ikon jawaban benar
+                                                                <p><strong>Opsi Jawaban:</strong></p>
+                                                                <ul class="list-group">
+                                                                ${quiz.options.map(function(option, index) {
+                                                                let optionClass = '';
+                                                                let correctIcon = ''; // Variabel untuk ikon jawaban benar
 
-                                                            // Bandingkan kode jawaban pengguna dengan kunci jawaban
-                                                            if (quiz.userAnswer.kode_jawaban == index + 1) {
-                                                                optionClass = (index + 1 == correctAnswer) 
-                                                                    ? 'bg-primary text-white' 
-                                                                    : 'bg-danger text-white';
-                                                            }
-
-                                                            // Tambahkan ikon jika ini adalah jawaban yang benar
-                                                            if (correctAnswer == index + 1) {
-                                                                    correctIcon = `<span class="position-absolute end-0 pe-3">
-                                                                    <i class="fas fa-check-circle text-success"></i>
-                                                                    </span>`; // Ikon di pojok kanan
+                                                                // Bandingkan kode jawaban pengguna dengan kunci jawaban
+                                                                if (quiz.userAnswer.kode_jawaban == index + 1) {
+                                                                    optionClass = (index + 1 == correctAnswer) 
+                                                                        ? 'bg-primary text-white' 
+                                                                        : 'bg-danger text-white';
                                                                 }
 
-                                                                // Tampilkan gambar jika pilihan berupa path gambar
-                                                                const optionContent = option.pilihan.startsWith('storage/quiz/answers/') ? `
+                                                                // Tambahkan ikon jika ini adalah jawaban yang benar
+                                                                if (correctAnswer == index + 1) {
+                                                                        correctIcon = `<span class="position-absolute end-0 pe-3">
+                                                                    <i class="fas fa-check-circle text-success"></i>
+                                                                    </span>`; // Ikon di pojok kanan
+                                                                    }
+
+                                                                    // Tampilkan gambar jika pilihan berupa path gambar
+                                                                    const optionContent = option.pilihan.startsWith('storage/quiz/answers/') ? `
                                                                     <div class="d-flex align-items-center">
                                                                         <img src="{{ asset('${option.pilihan}') }}" class="img-fluid" alt="Gambar Jawaban" style="width: 100px;">
                                                                     </div>
                                                                 ` : `<span>${option.pilihan}</span>`;
 
-                                                                return `<li class="list-group-item ${optionClass} d-flex align-items-center position-relative">
+                                                return `<li class="list-group-item ${optionClass} d-flex align-items-center position-relative">
                                                                     <span>${optionContent}</span>
                                                                     ${correctIcon}
                                                                     </li>`;
-                                                                }).join('')
-                                                            } </ul>` : ''}
-                                                        </div>`;
-                                                    }
-                                            }).join('');
-                                        } else {
-                                            quizContent = '<p class="text-muted ms-3">Tidak ada soal quiz di modul.</p>';
-                                        }
+                                            }).join('')
+                                    } < /ul>` : ''} <
+                                /div>`;
+                            }
+                        }).join('');
+                    } else {
+                        quizContent = '<p class="text-muted ms-3">Tidak ada soal quiz di modul.</p>';
+                    }
 
-                                        // Hitung nilai total
-                                        var scorePerQuestion = totalQuestions > 0 ? 5 / totalQuestions : 0;
-                                        var totalScore = correctCount * scorePerQuestion;
+                    // Hitung nilai total
+                    var scorePerQuestion = totalQuestions > 0 ? 4 / totalQuestions : 0;
+                    var totalScore = correctCount * scorePerQuestion;
 
-                                        if (totalQuestions > 0) {
-                                            totalScores.push(totalScore); // Tambahkan nilai hanya jika ada soal
-                                        }
+                    if (totalQuestions > 0) {
+                        totalScores.push(totalScore); // Tambahkan nilai hanya jika ada soal
+                    }
 
-                                        var essayContent = '';
-                                        if (modul.modul_essay && modul.modul_essay.length > 0) {
-                                            // Gabungkan semua pertanyaan dalam satu modul
-                                            var combinedEssayQuestions = modul.modul_essay.map(function (essay, index) {
-                                                // Periksa apakah ada gambar terkait pertanyaan
-                                                var imageHtml = essay.image 
-                                                    ? `<img src="{{ asset('storage/${essay.image}') }}" alt="Gambar Pertanyaan ${index + 1}" class="img-fluid rounded" width="100px">`
-                                                    : '';
-                                                
-                                                return `
+                    var essayContent = '';
+                    if (modul.modul_essay && modul.modul_essay.length > 0) {
+                        // Gabungkan semua pertanyaan dalam satu modul
+                        var combinedEssayQuestions = modul.modul_essay.map(function(essay, index) {
+                            // Periksa apakah ada gambar terkait pertanyaan
+                            var imageHtml = essay.image ?
+                                `<img src="{{ asset('storage/${essay.image}') }}" alt="Gambar Pertanyaan ${index + 1}" class="img-fluid rounded" width="100px">` :
+                                '';
+
+                            return `
                                                     <p><strong>${index + 1}. </strong> ${essay.pertanyaan || 'Tidak ada pertanyaan'}</p>
                                                     ${imageHtml}
                                                 `;
-                                            }).join('');
+                        }).join('');
 
-                                            // Cari jawaban pengguna
-                                            var userEssayAnswer = modul.modul_essay.find(function (essay) {
-                                                return essay.userAnswer && essay.userAnswer.user_id == userId;
-                                            });
+                        // Cari jawaban pengguna
+                        var userEssayAnswer = modul.modul_essay.find(function(essay) {
+                            return essay.userAnswer && essay.userAnswer.user_id == userId;
+                        });
 
-                                            // Jika ada jawaban, tampilkan
-                                            if (userEssayAnswer) {
-                                                essayContent = `
+                        // Jika ada jawaban, tampilkan
+                        if (userEssayAnswer) {
+                            essayContent = `
                                                     <div class="mb-4 p-3 border rounded shadow-sm bg-light">
                                                         <div>${combinedEssayQuestions}</div>
                                                         <p class="mt-3"><strong>Jawaban Pengguna:</strong></p>
                                                         <div>${userEssayAnswer.userAnswer.jawaban}</div>
                                                     </div>
                                                 `;
-                                            } else {
-                                                essayContent = '<p class="text-muted ms-3">Tidak ada soal essay di modul.</p>';
-                                            }
-                                        } else {
-                                            essayContent = '<p class="text-muted ms-3">Tidak ada soal essay di modul.</p>';
-                                        }
+                        } else {
+                            essayContent =
+                                '<p class="text-muted ms-3">Tidak ada soal essay di modul.</p>';
+                        }
+                    } else {
+                        essayContent = '<p class="text-muted ms-3">Tidak ada soal essay di modul.</p>';
+                    }
 
-                accordionContent += `
+                    accordionContent += `
                     <div class="card border rounded">
                         <div class="card-header collapsed" data-bs-toggle="collapse" data-bs-target="#modul${modul.id}">
                             <div class="span-title d-flex align-items-center">
@@ -403,36 +412,37 @@
                     </div>
                 `;
                 });
-                    // Hitung rata-rata nilai
-                var averageScore = totalScores.length > 0 
-                    ? totalScores.reduce((a, b) => a + b, 0) / totalScores.length
-                    : 0;
+            // Hitung rata-rata nilai
+            var averageScore = totalScores.length > 0 ?
+                totalScores.reduce((a, b) => a + b, 0) / totalScores.length :
+                0;
 
-                    // Tampilkan rata-rata nilai di input field
-                    modal.find('#nilaiQuiz').val(formatScore(averageScore));
+            // Tampilkan rata-rata nilai di input field
+            modal.find('#nilaiQuiz').val(formatScore(averageScore));
 
-                    modal.find('#accordionReview').html(accordionContent);
-                } else {
-                    modal.find('#accordionReview').html('<p>Tidak ada modul yang tersedia.</p>');
-                }
-                    // Set nilai quiz, nilai essay, dan komentar ke input form jika sudah ada di database
-                    if (response.review) {
-                        modal.find('#nilaiQuiz').val(response.review.nilai_quiz || '');
-                        modal.find('#nilaiEssay').val(response.review.nilai_essay || '');
-                        modal.find('#nilaiPraktek').val(response.review.nilai_praktek || '');
-                        modal.find('#presentaseKompetensi').val(response.review.presentase_kompetensi || '');
-                        modal.find('#komentar').val(response.review.komentar || '');
-                    }
-                },
-                error: function(err) {
-                    console.error('Error fetching review data:', err);
-                    modal.find('#accordionReview').html('<p>Gagal memuat data. Silakan coba lagi nanti.</p>');
-                }
-            });
+            modal.find('#accordionReview').html(accordionContent);
+        }
+        else {
+            modal.find('#accordionReview').html('<p>Tidak ada modul yang tersedia.</p>');
+        }
+        // Set nilai quiz, nilai essay, dan komentar ke input form jika sudah ada di database
+        if (response.review) {
+            modal.find('#nilaiQuiz').val(response.review.nilai_quiz || '');
+            modal.find('#nilaiEssay').val(response.review.nilai_essay || '');
+            modal.find('#nilaiPraktek').val(response.review.nilai_praktek || '');
+            modal.find('#presentaseKompetensi').val(response.review.presentase_kompetensi || '');
+            modal.find('#komentar').val(response.review.komentar || '');
+        }
+        },
+        error: function(err) {
+        console.error('Error fetching review data:', err);
+        modal.find('#accordionReview').html('<p>Gagal memuat data. Silakan coba lagi nanti.</p>');
+        }
+        });
         });
     </script>
 
-{{-- Perhitungan Matriks Kompetensi --}}
+    {{-- Perhitungan Matriks Kompetensi --}}
     <script>
         // Fungsi untuk menghitung presentaseKompetensi
         function hitungPresentaseKompetensi() {
@@ -445,7 +455,8 @@
             var presentase = (nilaiQuiz * 2.5 / 100) + (nilaiEssay * 10 / 100) + (nilaiPraktek * 8.75 / 100);
 
             // Set nilai ke input Presentase Kompetensi tanpa dua angka di belakang koma dan tambahkan tanda %
-            $('#presentaseKompetensi').val(Math.round(presentase * 100) + '%'); // Mengalikan dengan 100 dan menghapus desimal
+            $('#presentaseKompetensi').val(Math.round(presentase * 100) +
+            '%'); // Mengalikan dengan 100 dan menghapus desimal
         }
 
         // Event listener untuk perubahan nilai pada input
@@ -459,7 +470,7 @@
         });
     </script>
 
-{{-- kirim nilai ke database --}}
+    {{-- kirim nilai ke database --}}
     <script>
         document.getElementById('saveReviewButton').addEventListener('click', function() {
             // Ambil nilai dari input form
@@ -495,54 +506,55 @@
 
                     // Jika review sudah ada, kita gunakan PUT untuk update
                     if (data.review) {
-                        url = `{{ url('admin/course/nilai-matriks/update') }}/${courseId}/${userId}`; // Gunakan route update
+                        url =
+                        `{{ url('admin/course/nilai-matriks/update') }}/${courseId}/${userId}`; // Gunakan route update
                         method = 'PUT'; // Menggunakan PUT, jadi method 'POST' dengan pengubahan URL
                     }
 
                     // Kirim data ke backend menggunakan fetch
                     fetch(url, {
-                        method: method, // Menggunakan POST atau PUT sesuai kondisi
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken, // CSRF token untuk keamanan
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            user_id: userId,
-                            course_id: courseId,
-                            nilai_quiz: nilaiQuiz,
-                            nilai_essay: nilaiEssay,
-                            nilai_praktek: nilaiPraktek,
-                            presentase_kompetensi: presentaseKompetensi,
-                            komentar: komentar
+                            method: method, // Menggunakan POST atau PUT sesuai kondisi
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken, // CSRF token untuk keamanan
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                user_id: userId,
+                                course_id: courseId,
+                                nilai_quiz: nilaiQuiz,
+                                nilai_essay: nilaiEssay,
+                                nilai_praktek: nilaiPraktek,
+                                presentase_kompetensi: presentaseKompetensi,
+                                komentar: komentar
+                            })
                         })
-                    })
-                    .then(response => {
-                        console.log(response.status);  // Cek status kode
-                        if (response.ok) { // Jika status code adalah 200-299
-                            return response.json();
-                        } else {
-                            throw new Error('Request failed');
-                        }
-                    })
-                    .then(data => {
-                        // Tampilkan swal setelah data berhasil disimpan
-                        swal("Nilai berhasil disimpan!", { 
-                            icon: "success",
-                            buttons: {
-                                confirm: {
-                                    className: 'btn btn-success'
-                                }
+                        .then(response => {
+                            console.log(response.status); // Cek status kode
+                            if (response.ok) { // Jika status code adalah 200-299
+                                return response.json();
+                            } else {
+                                throw new Error('Request failed');
                             }
-                        }).then(() => {
-                            // Setelah swal ditutup, lakukan refresh halaman
-                            location.reload();
+                        })
+                        .then(data => {
+                            // Tampilkan swal setelah data berhasil disimpan
+                            swal("Nilai berhasil disimpan!", {
+                                icon: "success",
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-success'
+                                    }
+                                }
+                            }).then(() => {
+                                // Setelah swal ditutup, lakukan refresh halaman
+                                location.reload();
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error terjadi:', error);
+                            swal("Terjadi kesalahan!", "Nilai gagal disimpan.", "error");
                         });
-                    })
-                    .catch(error => {
-                        console.error('Error terjadi:', error);
-                        swal("Terjadi kesalahan!", "Nilai gagal disimpan.", "error");
-                    });
                 })
                 .catch(error => {
                     console.error('Error:', error);

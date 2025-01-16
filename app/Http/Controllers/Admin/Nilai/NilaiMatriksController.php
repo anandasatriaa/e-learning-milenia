@@ -43,7 +43,7 @@ class NilaiMatriksController extends Controller
         $request->validate([
             'user_id' => 'required|integer',
             'course_id' => 'required|integer',
-            'nilai_quiz' => 'nullable|numeric|between:0,5',
+            'nilai_quiz' => 'nullable|numeric|between:0,4',
             'nilai_essay' => 'nullable|numeric|between:0,2',
             'nilai_praktek' => 'nullable|numeric|between:0,8',
             'presentase_kompetensi' => 'nullable|numeric|between:0,100',
@@ -78,7 +78,7 @@ class NilaiMatriksController extends Controller
             ->findOrFail($course_id);
 
         // Kirim data kursus ke view
-        return view('admin.course.nilai-matriks.detail', compact('course'));
+        return view('admin.course.nilai-matriks.detail', compact('course', 'course_id'));
     }
 
     public function showReviewModal($course_id, $user_id)

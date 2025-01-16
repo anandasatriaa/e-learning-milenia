@@ -25,10 +25,22 @@
     <div class="sidebar-wrapper scrollbar scrollbar-inner">
         <div class="sidebar-content">
             <ul class="nav nav-secondary">
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </span>
+                    <h4 class="text-section">Dashboard</h4>
+                </li>
                 <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <a href="{{ route('admin.dashboard') }}">
                         <i class="fas fa-home"></i>
                         <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('admin.matriks-kompetensi') ? 'active' : '' }}">
+                    <a href="{{ route('admin.matriks-kompetensi') }}">
+                        <i class="fas fa-chart-bar"></i>
+                        <p>Matriks Kompetensi</p>
                     </a>
                 </li>
                 <li class="nav-section">
@@ -137,9 +149,8 @@
                     </span>
                     <h4 class="text-section">Calendar</h4>
                 </li>
-                <li class="nav-item">
-                    <a class="{{ request()->routeIs('admin.calendar.calendar.*') ? 'text-white fw-bold active border-start border-2' : '' }}" 
-                        href="{{ route('admin.calendar.calendar.index') }}">
+                <li class="nav-item" class="{{ request()->routeIs('admin.calendar.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.calendar.calendar.index') }}">
                         <i class="fas fa-calendar-alt"></i>
                         <p>Course Schedule</p>
                     </a>

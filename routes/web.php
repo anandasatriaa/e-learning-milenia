@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\Course\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\Course\CourseModulController as AdminCourseModulController;
 use App\Http\Controllers\Admin\Course\UserCourseEnrollController;
 use App\Http\Controllers\Admin\HomeController as AdminHomeController;
+use App\Http\Controllers\Admin\MatriksKompetensiController;
 use App\Http\Controllers\Admin\User\UserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\Nilai\NilaiController;
@@ -30,6 +31,10 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/home', [AdminHomeController::class, 'index']);
         Route::get('/', [AdminHomeController::class, 'index'])->name('dashboard');
         Route::get('/get-chart-data', [AdminHomeController::class, 'getChartData']);
+        Route::get('/dashboard-matriks-kompetensi', [MatriksKompetensiController::class, 'index'])->name('matriks-kompetensi');
+        Route::get('/dashboard-matriks-kompetensi/{divisi_id}', [MatriksKompetensiController::class, 'detail'])->name('matriks-kompetensi-detail');
+        Route::post('/dashboard-matriks-kompetensi/store', [MatriksKompetensiController::class, 'store'])->name('matriks-kompetensi-store');
+        Route::put('/dashboard-matriks-kompetensi/update/{id}', [MatriksKompetensiController::class, 'update'])->name('matriks-kompetensi-update');
 
         Route::group(['prefix' => 'category', 'as' => 'category.'], function () {
             Route::resource('learning', AdminLearningCategoryController::class);
