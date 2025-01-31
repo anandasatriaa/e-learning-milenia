@@ -686,7 +686,7 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
                                                     ${isChecked}
                                                     onclick="saveAnswer(${courseModulId}, '${answer}')"
                                                 >
-                                                <label class="form-check-label" for="answer${index + 1}">
+                                                <label class="form-check-label" for="answer${index + 1}" style="word-wrap: break-word; white-space: normal; display: block; max-width: 100%;">
                                                     ${isImage 
                                                         ? `<img src="{{ asset('${answer}') }}" alt="Answer Image" class="img-fluid rounded" style="width: 100px;">`
                                                         : answer}
