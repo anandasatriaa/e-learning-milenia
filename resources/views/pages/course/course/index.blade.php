@@ -9,6 +9,13 @@
         .list-group-item {
             cursor: pointer;
         }
+		
+		.quiz-nav {
+			display: grid;
+			grid-template-columns: repeat(5, 1fr); /* Maksimal 5 kolom per baris */
+			gap: 10px; /* Jarak antar tombol */
+			justify-content: center;
+		}
     </style>
 @endsection
 @section('content')
@@ -618,27 +625,22 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
         }
 
         function generateQuestionNav(quizIds, currentQuizId) {
-            // Check if quizIds is an array
-            if (!Array.isArray(quizIds)) {
-                console.error("quizIds is not an array:", quizIds);
-                return;
-            }
+			if (!Array.isArray(quizIds)) {
+				console.error("quizIds is not an array:", quizIds);
+				return '';
+			}
 
-            // Create buttons for each quiz ID
-            let buttons = quizIds.map((id, index) => {
-                return `
-                <li class="list-group-item">
-                    <button 
-                        id="quizButton-${id}" 
-                        class="btn btn-outline-primary mx-1" 
-                        onclick="getQuiz(event, ${id})">
-                        ${index + 1} <!-- Increment button number starting from 1 -->
-                    </button>
-                </li>
-                `;
-            }).join('');
-            return buttons;
-        }
+			let buttons = quizIds.map((id, index) => `
+				<button 
+					id="quizButton-${id}" 
+					class="btn btn-outline-primary" 
+					onclick="getQuiz(event, ${id})">
+					${index + 1}
+				</button>
+			`).join('');
+
+			return `<div class="quiz-nav">${buttons}</div>`;
+		}
 
         function getQuiz(event, courseModulId) {
             // Clear iframe and hide ratio
@@ -667,7 +669,7 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
                             <div class="card-header">
                                 <p class="fw-bold">Pertanyaan ${data.quizIndex}:</p>
                                 <p class="mt-2">${data.question}</p>
-                                ${data.questionImage ? `<img src="${data.questionImage}" alt="Question Image" class="img-fluid rounded" style="width: 100px;">` : ''}
+                                ${data.questionImage ? `<img src="${data.questionImage}" alt="Question Image" class="img-fluid rounded" style="width: 50%;" onclick="enlargeImage(this)">` : ''}
                             </div>
                             <div class="card-body">
                                 <p class="fw-bold">Jawaban:</p>
@@ -688,7 +690,7 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
                                                 >
                                                 <label class="form-check-label" for="answer${index + 1}" style="word-wrap: break-word; white-space: normal; display: block; max-width: 100%;">
                                                     ${isImage 
-                                                        ? `<img src="{{ asset('${answer}') }}" alt="Answer Image" class="img-fluid rounded" style="width: 100px;">`
+                                                        ? `<img src="{{ asset('${answer}') }}" alt="Answer Image" class="img-fluid rounded" style="width: 50%;" onclick="enlargeImage(this)">`
                                                         : answer}
                                                 </label>
                                             </div>
@@ -698,10 +700,21 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
                             </div>
                             <div class="card-footer text-muted">
                                 <div>Pilih salah satu jawaban di atas.<div>
-                                <div>*untuk melihat gambar lebih jelas, klik kanan pada gambar lalu "Buka gambar di tab baru" atau "Open image in new tab"</div>
+                                <div>*untuk melihat gambar lebih jelas, klik gambar</div>
                             </div>
                             <div class="d-flex justify-content-center mt-3">
                                 ${generateQuestionNav(data.quizIds, courseModulId)} <!-- Passing quizIds array -->
+                            </div>
+                        </div>
+
+                        <!-- Modal for Enlarged Image -->
+                        <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-xl modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-body text-center">
+                                        <img id="modalImage" class="img-fluid rounded">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -760,7 +773,7 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
                     const questionsList = data.questions.map((question, index) => `
                         <div class="mb-3">
                             <p class="mb-0"><strong>${index + 1}. </strong> ${question.question}</p>
-                            ${question.image ? `<img src="${question.image}" alt="Question Image" class="ms-3" style="width: 200px;" />` : ''}
+                            ${question.image ? `<img src="${question.image}" alt="Question Image" class="ms-3" style="width: 50%;" onclick="enlargeImageEssay(this)" />` : ''}
                         </div>
                     `).join('');
 
@@ -770,11 +783,22 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
                             <div class="card-header">
                                 <p><strong>Pertanyaan:</strong></p>
                                 <div>${questionsList}</div>
-                                <span class="text-muted">*untuk melihat gambar lebih jelas, klik kanan pada gambar lalu "Buka gambar di tab baru" atau "Open image in new tab"</span>
+                                <span class="text-muted">**untuk melihat gambar lebih jelas, klik gambar</span>
                             </div>
                             <div class="card-body">
                                 <p><strong>Jawab:</strong></p>
                                 <textarea class="form-control essay-textarea" id="essayFrame-${courseModulId}" rows="6" required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Modal for Enlarged Image -->
+                        <div class="modal fade" id="imageModalEssay" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-xl modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-body text-center">
+                                        <img id="modalImageEssay" class="img-fluid rounded">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1147,6 +1171,21 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
         });
     </script>
 
+    <script>
+        function enlargeImage(imgElement) {
+        const modalImage = document.getElementById("modalImage");
+        modalImage.src = imgElement.src;
+        const modal = new bootstrap.Modal(document.getElementById("imageModal"));
+        modal.show();
+    }
+
+    function enlargeImageEssay(imgElement) {
+        const modalImage = document.getElementById("modalImageEssay");
+        modalImage.src = imgElement.src;
+        const modal = new bootstrap.Modal(document.getElementById("imageModalEssay"));
+        modal.show();
+    }
+    </script>
 
 
 @endsection
