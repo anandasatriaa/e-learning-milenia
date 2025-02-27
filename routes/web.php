@@ -85,6 +85,8 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::group(['prefix' => 'calendar', 'as' => 'calendar.'], function () {
             Route::get('/course-schedule', [CalendarController::class, 'index'])->name('calendar.index');
+            Route::get('/course-schedule/data', [CalendarController::class, 'data'])->name('calendar.data');
+            Route::get('/course-schedule/export', [CalendarController::class, 'export'])->name('calendar.export');
             Route::post('/course-schedule/calendar', [CalendarController::class, 'store'])->name('calendar.store');
             Route::delete('/course-schedule/calendar/destroy/{id}', [CalendarController::class, 'destroy'])->name('calendar.destroy');
         });

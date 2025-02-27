@@ -101,57 +101,104 @@
 
         <div class="card">
             <div class="card-header">
-                <h4 class="card-title">Hapus Jadwal Pelatihan</h4>
-            </div>
-            <div class="card-body">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="table-hapus" class="display table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Pelatihan</th>
-                                    <th>Nama/Divisi</th>
-                                    <th>Tanggal Mulai</th>
-                                    <th>Tanggal Selesai</th>
-                                    <th>Color</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($events as $event)
-                                    <tr>
-                                        <td>{{ $event->acara }}</td>
-                                        <td>
-                                            @if ($event->nama)
-                                                {{ $event->nama }} - {{ $event->divisi }}
-                                            @else
-                                                {{ $event->divisi }}
-                                            @endif
-                                        </td>
-                                        <td>{{ \Carbon\Carbon::parse($event->start_date)->format('d M Y') }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($event->end_date)->format('d M Y') }}</td>
-                                        <td><span class="badge"
-                                                style="background-color: {{ $event->bg_color }}">{{ $event->bg_color }}</span>
-                                        </td>
-                                        <td>
-                                            <button type="button" id="btnHapus_{{ $event->id }}"
-                                                class="btn btn-icon btn-round btn-danger" data-id="{{ $event->id }}">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                <div class="row align-items-center">
+                    <!-- Judul di pojok kiri -->
+                    <div class="col-md-3">
+                        <h4 class="card-title mb-0">Daftar Jadwal Pelatihan</h4>
+                    </div>
+                    <!-- Form filter dan export di pojok kanan -->
+                    <div class="col-md-9">
+                        <form id="filterForm" action="{{ route('admin.calendar.calendar.index') }}" method="GET">
+                            <div class="row g-2 justify-content-end">
+                                <div class="col-auto">
+                                    <div class="form-group">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <label for="divisi" class="col-form-label mb-0">Divisi</label>
+                                            </div>
+                                            <div class="col">
+                                                <select name="divisi" id="divisi" class="divisi-excel form-control"
+                                                    style="width: 300px;">
+                                                    <option value="">Semua Divisi</option>
+                                                    @foreach ($divisi as $d)
+                                                        <option value="{{ $d }}"
+                                                            {{ request('divisi') == $d ? 'selected' : '' }}>
+                                                            {{ $d }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-group">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <label for="acara" class="col-form-label mb-0">Acara</label>
+                                            </div>
+                                            <div class="col">
+                                                <select name="acara" id="acara"
+                                                    class="pelatihan-excel form-control" style="width: 300px;">
+                                                    <option value="">Semua Acara</option>
+                                                    @foreach ($acaraDistinct as $a)
+                                                        <option value="{{ $a }}"
+                                                            {{ request('acara') == $a ? 'selected' : '' }}>
+                                                            {{ $a }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-group">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <!-- Label kosong untuk penjajaran, bisa dihilangkan pada mobile -->
+                                                <label class="col-form-label mb-0 d-none d-md-block">&nbsp;</label>
+                                            </div>
+                                            <div class="col">
+                                                <a id="exportLink"
+                                                    href="{{ route('admin.calendar.calendar.export', request()->all()) }}"
+                                                    class="btn btn-outline-success w-100">
+                                                    <li class="fas fa-file-excel me-2"></li>Export Excel
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="table-hapus" class="display table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Pelatihan</th>
+                                <th>Nama - Divisi</th>
+                                <th>Tanggal Mulai</th>
+                                <th>Tanggal Selesai</th>
+                                <th>Color</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+
     </div>
 
     <!-- Modal Progress -->
-    <div class="modal" id="modalStore" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog"
-        aria-labelledby="modalTitleId" aria-hidden="true">
+    <div class="modal" id="modalStore" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
+        role="dialog" aria-labelledby="modalTitleId" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal" role="document">
             <div class="modal-content">
                 <div class="modal-body">
@@ -285,10 +332,10 @@
                                         className: 'btn btn-success'
                                     }
                                 }
-                                }).then(() => {
-                                    // Setelah swal ditutup, lakukan refresh halaman
-                                    location.reload();
-                                });
+                            }).then(() => {
+                                // Setelah swal ditutup, lakukan refresh halaman
+                                location.reload();
+                            });
                         },
                         error: function(xhr, status, error) {
                             console.error('Terjadi kesalahan saat mengirim data:', error);
@@ -358,17 +405,9 @@
         });
     </script>
 
-<script>
-    $(document).ready(function() {
-        $('.form-dropdown').selectize({
-        });
-    });
-</script>
-
-    {{-- Data Table --}}
     <script>
         $(document).ready(function() {
-            $('#table-hapus').DataTable({});
+            $('.form-dropdown').selectize({});
         });
     </script>
 
@@ -423,10 +462,10 @@
                                         className: 'btn btn-success'
                                     }
                                 }
-                                }).then(() => {
-                                    // Setelah swal ditutup, lakukan refresh halaman
-                                    location.reload();
-                                });
+                            }).then(() => {
+                                // Setelah swal ditutup, lakukan refresh halaman
+                                location.reload();
+                            });
                         },
                         error: function() {
                             swal("Error!", "Something went wrong.", "error");
@@ -443,6 +482,91 @@
                 }
             });
         });
+    </script>
+
+    {{-- Filter Divisi & Acara untuk Jadwal --}}
+    <script>
+        $(document).ready(function() {
+            // Inisialisasi selectize dengan opsi allowEmptyOption: true
+            var divisiSelect = $('#divisi').selectize({
+                allowEmptyOption: true,
+                onChange: function(value) {
+                    table.ajax.reload();
+                    updateExportLink();
+                }
+            })[0].selectize;
+
+            var acaraSelect = $('#acara').selectize({
+                allowEmptyOption: true,
+                onChange: function(value) {
+                    table.ajax.reload();
+                    updateExportLink();
+                }
+            })[0].selectize;
+
+            // Inisialisasi DataTable (kode Anda tetap)
+            var table = $('#table-hapus').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('admin.calendar.calendar.data') }}",
+                    data: function(d) {
+                        d.divisi = $('#divisi')[0].selectize ? $('#divisi')[0].selectize.getValue() : $(
+                            '#divisi').val();
+                        d.acara = $('#acara')[0].selectize ? $('#acara')[0].selectize.getValue() : $(
+                            '#acara').val();
+                    },
+                    error: function(xhr, error, thrown) {
+                        console.error("Error in DataTable AJAX:", error);
+                    }
+                },
+                columns: [{
+                        data: 'acara',
+                        name: 'acara'
+                    },
+                    {
+                        data: 'nama_divisi',
+                        name: 'nama_divisi'
+                    },
+                    {
+                        data: 'start_date',
+                        name: 'start_date'
+                    },
+                    {
+                        data: 'end_date',
+                        name: 'end_date'
+                    },
+                    {
+                        data: 'bg_color',
+                        name: 'bg_color'
+                    },
+                    {
+                        data: 'aksi',
+                        name: 'aksi',
+                        orderable: false,
+                        searchable: false
+                    }
+                ]
+            });
+
+            // Panggil updateExportLink saat halaman pertama kali dimuat
+            updateExportLink();
+        });
+
+        function updateExportLink() {
+            var divisi = $('#divisi')[0].selectize ? $('#divisi')[0].selectize.getValue() : $('#divisi').val();
+            var acara = $('#acara')[0].selectize ? $('#acara')[0].selectize.getValue() : $('#acara').val();
+            var baseUrl = "{{ route('admin.calendar.calendar.export') }}";
+            var params = [];
+            if (divisi) {
+                params.push('divisi=' + encodeURIComponent(divisi));
+            }
+            if (acara) {
+                params.push('acara=' + encodeURIComponent(acara));
+            }
+            var queryString = params.length > 0 ? '?' + params.join('&') : '';
+            $('#exportLink').attr('href', baseUrl + queryString);
+        }
     </script>
 
 @endsection

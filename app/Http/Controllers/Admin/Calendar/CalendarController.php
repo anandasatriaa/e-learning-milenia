@@ -10,35 +10,91 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\ReminderEmail;
 use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\EventsExport;
+use Yajra\DataTables\Facades\DataTables;
 
 class CalendarController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Mengambil data pengguna dengan nama dan divisi
-        $users = User::select('ID', 'Nama', 'Divisi')->where('Aktif', 1)->get();
-        $events = Calendar::all();
+        // Mengambil daftar divisi unik dari tabel users
+        $divisi = User::where('Aktif', 1)->distinct()->pluck('Divisi');
 
-        // Menambahkan properti fotoUrl ke setiap pengguna
+        // Mengambil daftar acara unik dari tabel calendar
+        $acaraDistinct = Calendar::distinct()->pluck('acara');
+
+        // Membuat query untuk events dengan filter
+        $query = Calendar::query();
+        if ($request->filled('divisi')) {
+            $query->where('divisi', $request->divisi);
+        }
+        if ($request->filled('acara')) {
+            $query->where('acara', $request->acara);
+        }
+        $events = $query->get();
+
+        // Mendapatkan data pengguna untuk fullCalendar (jika diperlukan)
+        $users = User::select('ID', 'Nama', 'Divisi')->where('Aktif', 1)->get();
         $usersWithFoto = $users->map(function ($user) {
-            $formattedFoto = str_pad($user->ID, 5, '0', STR_PAD_LEFT); // Format ID menjadi lima digit
+            $formattedFoto = str_pad($user->ID, 5, '0', STR_PAD_LEFT);
             $user->fotoUrl = "http://192.168.0.8/hrd-milenia/foto/{$formattedFoto}.JPG";
             return $user;
         });
 
-        // Menyiapkan data untuk FullCalendar
         $eventsForFullCalendar = $events->map(function ($event) {
             return [
                 'id' => $event->id,
                 'title' => $event->acara . ' - ' . $event->nama . ' (' . $event->divisi . ')',
-                'start' => $event->start_date . 'T00:00:00', // Format tanggal ke format FullCalendar
-                'end' => $event->end_date . 'T23:59:59', // Format tanggal ke format FullCalendar
+                'start' => $event->start_date . 'T00:00:00',
+                'end' => $event->end_date . 'T23:59:59',
                 'backgroundColor' => $event->bg_color,
             ];
         });
 
-        // Mengirimkan data ke view
-        return view('admin.calendar.index', compact('usersWithFoto', 'eventsForFullCalendar', 'events'));
+        return view('admin.calendar.index', compact('usersWithFoto', 'eventsForFullCalendar', 'events', 'divisi', 'acaraDistinct'));
+    }
+
+    public function export(Request $request)
+    {
+        // Query events sesuai filter yang diterima
+        $query = Calendar::query();
+        if ($request->filled('divisi')) {
+            $query->where('divisi', $request->divisi);
+        }
+        if ($request->filled('acara')) {
+            $query->where('acara', $request->acara);
+        }
+        $events = $query->get();
+
+        // Menggunakan Laravel Excel untuk mendownload file Excel
+        return Excel::download(new EventsExport($events), 'jadwal_elearning.xlsx');
+    }
+
+    public function data(Request $request)
+    {
+        $query = Calendar::query();
+        if ($request->filled('divisi')) {
+            $query->where('divisi', $request->divisi);
+        }
+        if ($request->filled('acara')) {
+            $query->where('acara', $request->acara);
+        }
+
+        return DataTables::of($query)
+        ->addColumn('nama_divisi', function ($event) {
+            return $event->nama ? $event->nama . ' - ' . $event->divisi : $event->divisi;
+        })
+            ->editColumn('bg_color', function ($event) {
+                return '<span class="badge" style="background-color: ' . $event->bg_color . ';">' . $event->bg_color . '</span>';
+            })
+            ->addColumn('aksi', function ($event) {
+                return '<button type="button" id="btnHapus_' . $event->id . '" class="btn btn-icon btn-round btn-danger" data-id="' . $event->id . '">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>';
+            })
+            ->rawColumns(['bg_color', 'aksi'])
+            ->make(true);
     }
 
 
