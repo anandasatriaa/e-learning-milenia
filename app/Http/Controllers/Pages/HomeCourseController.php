@@ -182,6 +182,26 @@ class HomeCourseController extends Controller
         }
         // dd($group);
 
+        // Fungsi rekursif untuk mengurutkan array courses berdasarkan nama_kelas (key 'name')
+        function sortCoursesRecursively(&$group)
+        {
+            if (isset($group['courses']) && is_array($group['courses'])) {
+                usort($group['courses'], function ($a, $b) {
+                    return strcmp($a['name'], $b['name']);
+                });
+            }
+            if (isset($group['children']) && is_array($group['children'])) {
+                foreach ($group['children'] as &$child) {
+                    sortCoursesRecursively($child);
+                }
+            }
+        }
+
+        // Terapkan sorting pada masing-masing group
+        foreach ($groupedCourses as &$group) {
+            sortCoursesRecursively($group);
+        }
+
         return view('pages.course.sub_course', compact('learning','groupedCourses', 'courseIds'));
     }
 }
