@@ -101,6 +101,7 @@ class MatriksKompetensiController extends Controller
             ->where('cr.learning_cat_id', 2)
             ->where('cat.nama', 'Matriks Kompetensi')
             ->where('cr.divisi_category_id', $divisi_id)
+            ->orderBy('cr.nama_kelas', 'asc')
             ->get();
 
         foreach ($users as $user) {
