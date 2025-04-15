@@ -21,7 +21,9 @@ class AuthController extends Controller
         ]);
 
         // Retrieve the user based on the provided username
-        $user = User::where('uname', $request->input('uname'))->first();
+        $user = User::where('uname', $request->input('uname'))
+            ->where('aktif', 1)   // Menambahkan filter user aktif
+            ->first();
 
         // Check if the user exists and verify the password
         if ($user && Hash::check($request->input('pwd'), Hash::make($user->pwd))) {
