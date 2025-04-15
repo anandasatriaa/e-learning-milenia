@@ -22,7 +22,10 @@ class AuthController extends Controller
 
         // Retrieve the user based on the provided username
         $user = User::where('uname', $request->input('uname'))
-            ->where('aktif', 1)   // Menambahkan filter user aktif
+            ->where(function ($query) {
+                $query->where('aktif', 1)
+                    ->orWhere('lvl', 1); // Asumsi: lvl 1 adalah admin
+            })
             ->first();
 
         // Check if the user exists and verify the password
