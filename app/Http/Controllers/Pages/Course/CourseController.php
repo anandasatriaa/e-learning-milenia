@@ -22,7 +22,7 @@ class CourseController extends Controller
     {
         $course = Course::with(['modul.quizzes', 'modul.essays'])->find($course_id);
 
-        // Siapkan data untuk JavaScript
+        // Siapkan data untuk JavaScript: mapping modul yang terdapat di course
         $courseModules = $course->modul->map(function ($modul) {
             return [
                 'namaModul' => $modul->nama_modul,
@@ -31,9 +31,22 @@ class CourseController extends Controller
             ];
         });
 
+        // Ambil data enrollment dari user yang sedang login jika ada
+        $courseStatus = null;
+        if (auth()->check()) {
+            $enrollment = \App\Models\UserCourseEnroll::where('course_id', $course_id)
+                ->where('user_id', auth()->user()->ID)
+                ->first();
+            if ($enrollment) {
+                $courseStatus = $enrollment->status; // contoh nilai: 'completed', 'in_progress', dsb.
+            }
+        }
+
+        // Kirim data course, courseModules, dan courseStatus ke view
         return view('pages.course.course.index', [
             'course' => $course,
             'courseModules' => $courseModules, // Data untuk digunakan di JS
+            'courseStatus' => $courseStatus,
         ]);
     }
 
@@ -300,7 +313,6 @@ class CourseController extends Controller
         $validatedData = $request->validate([
             'course_id' => 'required|integer',
             'user_id' => 'required|integer',
-            'progress_bar' => 'required|integer|min:0|max:100',
             'time_spend' => 'required|integer|min:0',
         ]);
 
@@ -309,7 +321,6 @@ class CourseController extends Controller
         ->first();
 
         if ($enrollment) {
-            $enrollment->progress_bar = $validatedData['progress_bar'];
             $enrollment->time_spend = $validatedData['time_spend'];
             $enrollment->save();
 

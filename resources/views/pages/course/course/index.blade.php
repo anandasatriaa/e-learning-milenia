@@ -9,13 +9,15 @@
         .list-group-item {
             cursor: pointer;
         }
-		
-		.quiz-nav {
-			display: grid;
-			grid-template-columns: repeat(5, 1fr); /* Maksimal 5 kolom per baris */
-			gap: 10px; /* Jarak antar tombol */
-			justify-content: center;
-		}
+
+        .quiz-nav {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            /* Maksimal 5 kolom per baris */
+            gap: 10px;
+            /* Jarak antar tombol */
+            justify-content: center;
+        }
     </style>
 @endsection
 @section('content')
@@ -265,101 +267,101 @@
             setActiveModule(0); // Set progress to the Introduction module (index 0)
         }
 
-let isVideoCompleted = false; // Status untuk melacak apakah video selesai
+        let isVideoCompleted = false; // Status untuk melacak apakah video selesai
 
-    $(document).ready(function () {
-        var course_id = "{{ $course->id }}";
-        var videoUrl = "{{ url('/course/embed-video/') }}" + "/" + course_id;
-        $('#videoSource').attr('src', videoUrl);
+        $(document).ready(function() {
+            var course_id = "{{ $course->id }}";
+            var videoUrl = "{{ url('/course/embed-video/') }}" + "/" + course_id;
+            $('#videoSource').attr('src', videoUrl);
 
-        $('#videoSource').on("load", function () {
-            const iframeVideo = $(this)[0].contentWindow.document.querySelector('video');
-            if (iframeVideo) {
-                iframeVideo.setAttribute("controlslist", "nodownload");
-                iframeVideo.setAttribute("oncontextmenu", "return false");
-                iframeVideo.setAttribute("id", "mainVideo");
-                var supposedCurrentTime = 0;
-                var lastLongAccessTime = 0;
+            $('#videoSource').on("load", function() {
+                const iframeVideo = $(this)[0].contentWindow.document.querySelector('video');
+                if (iframeVideo) {
+                    iframeVideo.setAttribute("controlslist", "nodownload");
+                    iframeVideo.setAttribute("oncontextmenu", "return false");
+                    iframeVideo.setAttribute("id", "mainVideo");
+                    var supposedCurrentTime = 0;
+                    var lastLongAccessTime = 0;
 
-                // Event listener untuk memperbarui status waktu
-                $(iframeVideo).on('timeupdate', function () {
-                    if (!iframeVideo.seeking) {
-                        supposedCurrentTime = iframeVideo.currentTime;
-                        if (lastLongAccessTime < iframeVideo.currentTime) {
-                            lastLongAccessTime = iframeVideo.currentTime;
+                    // Event listener untuk memperbarui status waktu
+                    $(iframeVideo).on('timeupdate', function() {
+                        if (!iframeVideo.seeking) {
+                            supposedCurrentTime = iframeVideo.currentTime;
+                            if (lastLongAccessTime < iframeVideo.currentTime) {
+                                lastLongAccessTime = iframeVideo.currentTime;
+                            }
                         }
-                    }
-                    $('#lastAccess').text(formatTime(lastLongAccessTime));
-                });
+                        $('#lastAccess').text(formatTime(lastLongAccessTime));
+                    });
 
-                // Mencegah video di-seek ke depan
-                $(iframeVideo).on('seeking', function () {
-                    var delta = iframeVideo.currentTime - supposedCurrentTime;
-                    if (delta > 0 && iframeVideo.currentTime > lastLongAccessTime) {
-                        iframeVideo.currentTime = supposedCurrentTime;
-                    } else {
-                        supposedCurrentTime = iframeVideo.currentTime;
-                    }
-                });
+                    // Mencegah video di-seek ke depan
+                    $(iframeVideo).on('seeking', function() {
+                        var delta = iframeVideo.currentTime - supposedCurrentTime;
+                        if (delta > 0 && iframeVideo.currentTime > lastLongAccessTime) {
+                            iframeVideo.currentTime = supposedCurrentTime;
+                        } else {
+                            supposedCurrentTime = iframeVideo.currentTime;
+                        }
+                    });
 
-                // Perbarui status saat video selesai
-                $(iframeVideo).on('ended', function () {
-                    supposedCurrentTime = 0;
-                    isVideoCompleted = true; // Tandai video selesai
-                    console.log("Video selesai diputar.");
-                    validateCompletion(courseModules); // Periksa ulang validasi tombol
-                });
-            }
+                    // Perbarui status saat video selesai
+                    $(iframeVideo).on('ended', function() {
+                        supposedCurrentTime = 0;
+                        isVideoCompleted = true; // Tandai video selesai
+                        console.log("Video selesai diputar.");
+                        validateCompletion(courseModules); // Periksa ulang validasi tombol
+                    });
+                }
+            });
         });
-    });
 
-    function validateCompletion(courseModules) {
-        console.log('Validasi mulai dengan modul:', courseModules);
+        function validateCompletion(courseModules) {
+            console.log('Validasi mulai dengan modul:', courseModules);
 
-        const hasQuizzesOrEssays = courseModules.some(modul => modul.quizIds.length > 0 || modul.essayIds.length > 0);
+            const hasQuizzesOrEssays = courseModules.some(modul => modul.quizIds.length > 0 || modul.essayIds.length > 0);
 
-        if (!hasQuizzesOrEssays && isVideoCompleted) {
-            activateSelesaiKelasButton();
-            console.log('Tidak ada kuis atau esai dan video selesai. Tombol Selesai Kelas diaktifkan.');
-            return;
-        }
+            if (!hasQuizzesOrEssays && isVideoCompleted) {
+                activateSelesaiKelasButton();
+                console.log('Tidak ada kuis atau esai dan video selesai. Tombol Selesai Kelas diaktifkan.');
+                return;
+            }
 
-        const allModulesComplete = courseModules.every(modul => {
-            const allQuizzesAnswered = modul.quizIds.every(quizId => userAnswers[quizId]);
-            const allEssaysAnswered = modul.essayIds.every(courseModulId => {
-                const essayAnswer = localStorage.getItem(`essayAnswer-${courseModulId}`);
-                return essayAnswer && essayAnswer.trim() !== '';
+            const allModulesComplete = courseModules.every(modul => {
+                const allQuizzesAnswered = modul.quizIds.every(quizId => userAnswers[quizId]);
+                const allEssaysAnswered = modul.essayIds.every(courseModulId => {
+                    const essayAnswer = localStorage.getItem(`essayAnswer-${courseModulId}`);
+                    return essayAnswer && essayAnswer.trim() !== '';
+                });
+
+                return allQuizzesAnswered && allEssaysAnswered;
             });
 
-            return allQuizzesAnswered && allEssaysAnswered;
-        });
-
-        if (allModulesComplete && isVideoCompleted) {
-            activateSelesaiKelasButton();
-            console.log('Semua modul selesai dan video selesai. Tombol Selesai Kelas diaktifkan.');
-        } else {
-            deactivateSelesaiKelasButton();
-            console.log('Belum semua modul selesai atau video belum selesai. Tombol Selesai Kelas dinonaktifkan.');
+            if (allModulesComplete && isVideoCompleted) {
+                activateSelesaiKelasButton();
+                console.log('Semua modul selesai dan video selesai. Tombol Selesai Kelas diaktifkan.');
+            } else {
+                deactivateSelesaiKelasButton();
+                console.log('Belum semua modul selesai atau video belum selesai. Tombol Selesai Kelas dinonaktifkan.');
+            }
         }
-    }
 
-    function activateSelesaiKelasButton() {
-        const selesaiKelasButton = document.getElementById("selesaiKelas");
-        selesaiKelasButton.classList.remove('disabled');
-        selesaiKelasButton.removeAttribute('disabled');
-    }
+        function activateSelesaiKelasButton() {
+            const selesaiKelasButton = document.getElementById("selesaiKelas");
+            selesaiKelasButton.classList.remove('disabled');
+            selesaiKelasButton.removeAttribute('disabled');
+        }
 
-    function deactivateSelesaiKelasButton() {
-        const selesaiKelasButton = document.getElementById("selesaiKelas");
-        selesaiKelasButton.classList.add('disabled');
-        selesaiKelasButton.setAttribute('disabled', 'disabled');
-    }
+        function deactivateSelesaiKelasButton() {
+            const selesaiKelasButton = document.getElementById("selesaiKelas");
+            selesaiKelasButton.classList.add('disabled');
+            selesaiKelasButton.setAttribute('disabled', 'disabled');
+        }
 
-    function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    }
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
     </script>
 
     <script>
@@ -403,18 +405,18 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
     </script>
 
 
-<script>
-    // Deklarasikan courseModules di JavaScript
-    const courseModules = @json($courseModules);
-    console.log('Data courseModules:', courseModules); // Debugging untuk memastikan data diterima
+    <script>
+        // Deklarasikan courseModules di JavaScript
+        const courseModules = @json($courseModules);
+        console.log('Data courseModules:', courseModules); // Debugging untuk memastikan data diterima
 
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     console.log('Halaman dimuat, validasi tombol selesai kelas.');
-    //     validateCompletion(courseModules); // Memastikan tombol diperiksa saat halaman dimuat
-    // });
-</script>
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     console.log('Halaman dimuat, validasi tombol selesai kelas.');
+        //     validateCompletion(courseModules); // Memastikan tombol diperiksa saat halaman dimuat
+        // });
+    </script>
 
-{{-- <script>
+    {{-- <script>
     function validateCompletion(courseModules) {
         console.log('Validasi mulai dengan modul:', courseModules);
 
@@ -475,10 +477,10 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
 </script> --}}
 
 
-{{-- Quiz --}}
+    {{-- Quiz --}}
     <script>
         let userAnswers = JSON.parse(localStorage.getItem('userAnswers')) || {};
-        
+
         function loadQuiz(courseModulId) {
             // Clear iframe and hide ratio
             const iframe = document.getElementById("videoSource");
@@ -625,12 +627,12 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
         }
 
         function generateQuestionNav(quizIds, currentQuizId) {
-			if (!Array.isArray(quizIds)) {
-				console.error("quizIds is not an array:", quizIds);
-				return '';
-			}
+            if (!Array.isArray(quizIds)) {
+                console.error("quizIds is not an array:", quizIds);
+                return '';
+            }
 
-			let buttons = quizIds.map((id, index) => `
+            let buttons = quizIds.map((id, index) => `
 				<button 
 					id="quizButton-${id}" 
 					class="btn btn-outline-primary" 
@@ -639,8 +641,8 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
 				</button>
 			`).join('');
 
-			return `<div class="quiz-nav">${buttons}</div>`;
-		}
+            return `<div class="quiz-nav">${buttons}</div>`;
+        }
 
         function getQuiz(event, courseModulId) {
             // Clear iframe and hide ratio
@@ -659,10 +661,11 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
                     }
 
                     const userAnswerFromDb = data.userAnswer;
-            // console.log('User Answer from DB:', userAnswerFromDb); // Untuk debugging
-            // console.log('Answer Options:', data.kunci_jawaban); // Untuk debugging
+                    // console.log('User Answer from DB:', userAnswerFromDb); // Untuk debugging
+                    // console.log('Answer Options:', data.kunci_jawaban); // Untuk debugging
 
-            let userAnswer = userAnswerFromDb || JSON.parse(localStorage.getItem('userAnswers'))?.[courseModulId]?.answer;
+                    let userAnswer = userAnswerFromDb || JSON.parse(localStorage.getItem('userAnswers'))?.[
+                        courseModulId]?.answer;
 
                     const iframeContent = `
                         <div class="">
@@ -678,23 +681,23 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
                                         const isChecked = userAnswer === answer ? 'checked' : '';
                                         const isImage = answer.startsWith('storage/quiz/answers/');
                                         return `
-                                            <div class="form-check">
-                                                <input 
-                                                    class="form-check-input" 
-                                                    type="radio" 
-                                                    name="answer" 
-                                                    id="answer${index + 1}" 
-                                                    value="${answer}" 
-                                                    ${isChecked}
-                                                    onclick="saveAnswer(${courseModulId}, '${answer}')"
-                                                >
-                                                <label class="form-check-label" for="answer${index + 1}" style="word-wrap: break-word; white-space: normal; display: block; max-width: 100%;">
-                                                    ${isImage 
-                                                        ? `<img src="{{ asset('${answer}') }}" alt="Answer Image" class="img-fluid rounded" style="width: 50%;" onclick="enlargeImage(this)">`
-                                                        : answer}
-                                                </label>
-                                            </div>
-                                        `;
+                                                <div class="form-check">
+                                                    <input 
+                                                        class="form-check-input" 
+                                                        type="radio" 
+                                                        name="answer" 
+                                                        id="answer${index + 1}" 
+                                                        value="${answer}" 
+                                                        ${isChecked}
+                                                        onclick="saveAnswer(${courseModulId}, '${answer}')"
+                                                    >
+                                                    <label class="form-check-label" for="answer${index + 1}" style="word-wrap: break-word; white-space: normal; display: block; max-width: 100%;">
+                                                        ${isImage 
+                                                            ? `<img src="{{ asset('${answer}') }}" alt="Answer Image" class="img-fluid rounded" style="width: 50%;" onclick="enlargeImage(this)">`
+                                                            : answer}
+                                                    </label>
+                                                </div>
+                                            `;
                                     }).join('')}
                                 </form>
                             </div>
@@ -822,14 +825,16 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
                     }
 
                     // Add event listener to save the content when the user types
-                    CKEDITOR.instances[`essayFrame-${courseModulId}`].on('change', function () {
+                    CKEDITOR.instances[`essayFrame-${courseModulId}`].on('change', function() {
                         const currentContent = CKEDITOR.instances[`essayFrame-${courseModulId}`].getData();
-                        console.log(`Simpan jawaban untuk essay ID ${courseModulId}:`, currentContent); // Debugging
+                        console.log(`Simpan jawaban untuk essay ID ${courseModulId}:`,
+                        currentContent); // Debugging
                         localStorage.setItem(`essayAnswer-${courseModulId}`, currentContent);
 
                         // Periksa apakah data telah disimpan dengan benar
                         const savedAnswer = localStorage.getItem(`essayAnswer-${courseModulId}`);
-                        console.log(`Jawaban yang disimpan di localStorage untuk ${courseModulId}:`, savedAnswer); // Debugging
+                        console.log(`Jawaban yang disimpan di localStorage untuk ${courseModulId}:`,
+                            savedAnswer); // Debugging
 
                         // Memvalidasi apakah semua quiz dan essay sudah terjawab
                         validateCompletion(courseModules);
@@ -898,15 +903,16 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
                     kode_jawaban: kode_jawaban
                 };
 
-                fetch("{{ url('course/quiz') }}/" + quizData.modul_quizzes_id + "/submit/" + quizData.user_id, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                .getAttribute('content')
-                        },
-                        body: JSON.stringify(quizData)
-                    })
+                fetch("{{ url('course/quiz') }}/" + quizData.modul_quizzes_id + "/submit/" + quizData
+                        .user_id, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .getAttribute('content')
+                            },
+                            body: JSON.stringify(quizData)
+                        })
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok: ' + response.status);
@@ -932,15 +938,16 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
 
                 // console.log(`Mengirim jawaban essay untuk modul ${courseModulId}:`, essayData);
 
-                fetch("{{ url('course/essay') }}/" + essayData.course_modul_id + "/submit/" + essayData.user_id, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                            .getAttribute('content')
-                    },
-                    body: JSON.stringify(essayData)
-                });
+                fetch("{{ url('course/essay') }}/" + essayData.course_modul_id + "/submit/" + essayData
+                    .user_id, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content')
+                        },
+                        body: JSON.stringify(essayData)
+                    });
             });
 
             // Mengirim summary course ke backend
@@ -1027,7 +1034,8 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
                     course_id: courseId,
                     user_id: userId,
                     time_spend: timeElapsed,
-                    progress_bar: Math.floor((currentModule / totalModules) * 100) // Kirim progress juga
+                    progress_bar: Math.floor((currentModule / totalModules) *
+                        100) // Kirim progress juga
                 })
             });
             const result = await response.json();
@@ -1096,11 +1104,18 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
         // Total jumlah modul, termasuk Introduction
         const totalModules = {{ $course->modul->count() + 1 }}; // +1 untuk Introduction
         let currentModule = 0; // Modul saat ini (dimulai dari 0 untuk Introduction)
+        let courseStatus = null; // Variabel untuk menampung status course
 
         // Gunakan course_id untuk kunci localStorage yang unik
         const progressStorageKey = `progress_bar_course_${courseId}`;
 
         async function updateProgressToDatabase() {
+            // Jika status course sudah completed, jangan kirim update progress
+            if (courseStatus === 'completed') {
+                console.log('Course telah completed, progress tidak perlu diupdate lagi');
+                return;
+            }
+
             const userId = @json(auth()->user()->ID);
             const progressPercent = Math.floor((currentModule / totalModules) * 100);
 
@@ -1138,7 +1153,7 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
             // Update tampilan progress
             document.querySelector('.progress-bar').style.width = `${progressPercent}%`;
             document.querySelector('.progress-status span.fw-bold').innerText = `${progressPercent}%`;
-            
+
             updateProgressToDatabase();
         }
 
@@ -1155,12 +1170,20 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
 
             const response = await fetch(url);
             const data = await response.json();
-            if (data && data.progress_bar) {
-                const savedProgress = data.progress_bar;
-                currentModule = Math.floor((savedProgress / 100) * totalModules);
-            } else {
-                const savedProgress = parseInt(localStorage.getItem(progressStorageKey)) || 0;
-                currentModule = Math.floor((savedProgress / 100) * totalModules);
+
+            // Asumsikan API mengembalikan 'progress_bar' dan 'status'
+            if (data) {
+                // Periksa apakah status sudah completed
+                if (data.status && data.status === 'completed') {
+                    courseStatus = 'completed';
+                    currentModule = totalModules; // Set progress menjadi 100%
+                } else if (data.progress_bar) {
+                    const savedProgress = data.progress_bar;
+                    currentModule = Math.floor((savedProgress / 100) * totalModules);
+                } else {
+                    const savedProgress = parseInt(localStorage.getItem(progressStorageKey)) || 0;
+                    currentModule = Math.floor((savedProgress / 100) * totalModules);
+                }
             }
         }
 
@@ -1171,20 +1194,21 @@ let isVideoCompleted = false; // Status untuk melacak apakah video selesai
         });
     </script>
 
+
     <script>
         function enlargeImage(imgElement) {
-        const modalImage = document.getElementById("modalImage");
-        modalImage.src = imgElement.src;
-        const modal = new bootstrap.Modal(document.getElementById("imageModal"));
-        modal.show();
-    }
+            const modalImage = document.getElementById("modalImage");
+            modalImage.src = imgElement.src;
+            const modal = new bootstrap.Modal(document.getElementById("imageModal"));
+            modal.show();
+        }
 
-    function enlargeImageEssay(imgElement) {
-        const modalImage = document.getElementById("modalImageEssay");
-        modalImage.src = imgElement.src;
-        const modal = new bootstrap.Modal(document.getElementById("imageModalEssay"));
-        modal.show();
-    }
+        function enlargeImageEssay(imgElement) {
+            const modalImage = document.getElementById("modalImageEssay");
+            modalImage.src = imgElement.src;
+            const modal = new bootstrap.Modal(document.getElementById("imageModalEssay"));
+            modal.show();
+        }
     </script>
 
 
