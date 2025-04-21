@@ -65,7 +65,7 @@
                                 <button type="button" class="btn btn-label-info btn-round btn-sm me-2" id="goToLastAccess">
                                     Last access : <span id="lastAccess">00:00</span> <i class="fas fa-history ms-1"></i>
                                 </button>
-                                <a href="#" id="selesaiKelas" class="btn btn-danger btn-round btn-sm me-2 disabled">
+                                <a href="#" id="selesaiKelas" class="btn btn-danger btn-round btn-sm me-2">
                                     Submit & End Course <i class="fas fa-arrow-right ms-2"></i>
                                 </a>
                             </div>
@@ -270,92 +270,65 @@
         let isVideoCompleted = false; // Status untuk melacak apakah video selesai
 
         $(document).ready(function() {
-            var course_id = "{{ $course->id }}";
-            var videoUrl = "{{ url('/course/embed-video/') }}" + "/" + course_id;
-            $('#videoSource').attr('src', videoUrl);
+            const courseId = "{{ $course->id }}";
+            const iframe = document.getElementById("videoSource");
+            const videoUrl = "{{ url('/course/embed-video/') }}/" + courseId;
 
-            $('#videoSource').on("load", function() {
-                const iframeVideo = $(this)[0].contentWindow.document.querySelector('video');
-                if (iframeVideo) {
-                    iframeVideo.setAttribute("controlslist", "nodownload");
-                    iframeVideo.setAttribute("oncontextmenu", "return false");
-                    iframeVideo.setAttribute("id", "mainVideo");
-                    var supposedCurrentTime = 0;
-                    var lastLongAccessTime = 0;
+            const videoCurrentTimeKey = `videoCurrentTime_${courseId}`;
+            const videoDurationKey = `videoDuration_${courseId}`;
 
-                    // Event listener untuk memperbarui status waktu
-                    $(iframeVideo).on('timeupdate', function() {
-                        if (!iframeVideo.seeking) {
-                            supposedCurrentTime = iframeVideo.currentTime;
-                            if (lastLongAccessTime < iframeVideo.currentTime) {
-                                lastLongAccessTime = iframeVideo.currentTime;
+            // Pasang src & listener load sekali saja
+            iframe.src = videoUrl;
+            iframe.addEventListener("load", () => {
+                console.log("🖥️ iframe loaded");
+
+                const doc = iframe.contentWindow.document;
+                const checkInterval = setInterval(() => {
+                    const video = doc.querySelector("video");
+                    if (!video) return;
+                    clearInterval(checkInterval);
+                    console.log("✅ video element ditemukan");
+
+                    // --- Setup metadata & duration logging ---
+                    video.preload = "metadata";
+                    video.load(); // pastikan metadata dipanggil ulang
+
+                    video.addEventListener("loadedmetadata", () => {
+                        console.log("🎬 loadedmetadata fired — durasi:", video.duration);
+                        localStorage.setItem(videoDurationKey, video.duration);
+                    });
+
+                    // --- Setup timeupdate & lastAccess ---
+                    let supposedCurrentTime = parseFloat(localStorage.getItem(
+                        videoCurrentTimeKey)) || 0;
+                    let lastLongAccessTime = supposedCurrentTime;
+                    video.currentTime = supposedCurrentTime;
+
+                    video.addEventListener('timeupdate', () => {
+                        if (!video.seeking) {
+                            supposedCurrentTime = video.currentTime;
+                            if (video.currentTime > lastLongAccessTime) {
+                                lastLongAccessTime = video.currentTime;
+                                localStorage.setItem(videoCurrentTimeKey,
+                                    lastLongAccessTime);
                             }
                         }
                         $('#lastAccess').text(formatTime(lastLongAccessTime));
                     });
 
-                    // Mencegah video di-seek ke depan
-                    $(iframeVideo).on('seeking', function() {
-                        var delta = iframeVideo.currentTime - supposedCurrentTime;
-                        if (delta > 0 && iframeVideo.currentTime > lastLongAccessTime) {
-                            iframeVideo.currentTime = supposedCurrentTime;
-                        } else {
-                            supposedCurrentTime = iframeVideo.currentTime;
+                    video.addEventListener('seeking', () => {
+                        if (video.currentTime > lastLongAccessTime) {
+                            video.currentTime = lastLongAccessTime;
                         }
                     });
 
-                    // Perbarui status saat video selesai
-                    $(iframeVideo).on('ended', function() {
-                        supposedCurrentTime = 0;
-                        isVideoCompleted = true; // Tandai video selesai
-                        console.log("Video selesai diputar.");
-                        validateCompletion(courseModules); // Periksa ulang validasi tombol
+                    video.addEventListener('ended', () => {
+                        isVideoCompleted = true;
                     });
-                }
+                }, 200); // polling tiap 200ms
             });
+
         });
-
-        function validateCompletion(courseModules) {
-            console.log('Validasi mulai dengan modul:', courseModules);
-
-            const hasQuizzesOrEssays = courseModules.some(modul => modul.quizIds.length > 0 || modul.essayIds.length > 0);
-
-            if (!hasQuizzesOrEssays && isVideoCompleted) {
-                activateSelesaiKelasButton();
-                console.log('Tidak ada kuis atau esai dan video selesai. Tombol Selesai Kelas diaktifkan.');
-                return;
-            }
-
-            const allModulesComplete = courseModules.every(modul => {
-                const allQuizzesAnswered = modul.quizIds.every(quizId => userAnswers[quizId]);
-                const allEssaysAnswered = modul.essayIds.every(courseModulId => {
-                    const essayAnswer = localStorage.getItem(`essayAnswer-${courseModulId}`);
-                    return essayAnswer && essayAnswer.trim() !== '';
-                });
-
-                return allQuizzesAnswered && allEssaysAnswered;
-            });
-
-            if (allModulesComplete && isVideoCompleted) {
-                activateSelesaiKelasButton();
-                console.log('Semua modul selesai dan video selesai. Tombol Selesai Kelas diaktifkan.');
-            } else {
-                deactivateSelesaiKelasButton();
-                console.log('Belum semua modul selesai atau video belum selesai. Tombol Selesai Kelas dinonaktifkan.');
-            }
-        }
-
-        function activateSelesaiKelasButton() {
-            const selesaiKelasButton = document.getElementById("selesaiKelas");
-            selesaiKelasButton.classList.remove('disabled');
-            selesaiKelasButton.removeAttribute('disabled');
-        }
-
-        function deactivateSelesaiKelasButton() {
-            const selesaiKelasButton = document.getElementById("selesaiKelas");
-            selesaiKelasButton.classList.add('disabled');
-            selesaiKelasButton.setAttribute('disabled', 'disabled');
-        }
 
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
@@ -408,74 +381,8 @@
     <script>
         // Deklarasikan courseModules di JavaScript
         const courseModules = @json($courseModules);
-        console.log('Data courseModules:', courseModules); // Debugging untuk memastikan data diterima
-
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     console.log('Halaman dimuat, validasi tombol selesai kelas.');
-        //     validateCompletion(courseModules); // Memastikan tombol diperiksa saat halaman dimuat
-        // });
+        console.log('Data courseModules:', courseModules);
     </script>
-
-    {{-- <script>
-    function validateCompletion(courseModules) {
-        console.log('Validasi mulai dengan modul:', courseModules);
-
-        // Cek apakah tidak ada quiz dan essay sama sekali
-        const noQuizAndEssay = courseModules.every(modul => 
-            (!modul.quizIds || modul.quizIds.length === 0) && 
-            (!modul.essayIds || modul.essayIds.length === 0)
-        );
-
-        // Jika tidak ada quiz dan essay, tombol langsung aktif
-        if (noQuizAndEssay) {
-            console.log('Tidak ada quiz dan essay. Tombol Selesai Kelas diaktifkan.');
-            activateSelesaiKelasButton();
-            return;
-        }
-
-        // Memeriksa apakah semua quiz dan essay di setiap modul telah dijawab
-        const allModulesComplete = courseModules.every(modul => {
-            const allQuizzesAnswered = modul.quizIds?.every(quizId => {
-                const isAnswered = userAnswers[quizId]; // Jawaban quiz disimpan di `userAnswers`
-                console.log(`Quiz ID ${quizId} Terjawab:`, isAnswered);
-                return isAnswered;
-            }) ?? true; // Jika tidak ada quiz, anggap sudah terjawab
-
-            const allEssaysAnswered = modul.essayIds?.every(courseModulId => {
-                const essayAnswer = localStorage.getItem(`essayAnswer-${courseModulId}`); // Jawaban essay disimpan di `localStorage`
-                const isAnswered = essayAnswer && essayAnswer.trim() !== '';
-                console.log(`Essay ID ${courseModulId} Terjawab:`, isAnswered, 'Jawaban:', essayAnswer);
-                return isAnswered;
-            }) ?? true; // Jika tidak ada essay, anggap sudah terjawab
-
-            const isModuleComplete = allQuizzesAnswered && allEssaysAnswered;
-            console.log(`Modul ${modul.namaModul}: Status Lengkap:`, isModuleComplete);
-
-            return isModuleComplete;
-        });
-
-        if (allModulesComplete) {
-            activateSelesaiKelasButton();
-        } else {
-            deactivateSelesaiKelasButton();
-        }
-    }
-
-    function activateSelesaiKelasButton() {
-        const selesaiKelasButton = document.getElementById("selesaiKelas");
-        selesaiKelasButton.classList.remove('disabled');
-        selesaiKelasButton.removeAttribute('disabled');
-        console.log('Tombol Selesai Kelas diaktifkan.');
-    }
-
-    function deactivateSelesaiKelasButton() {
-        const selesaiKelasButton = document.getElementById("selesaiKelas");
-        selesaiKelasButton.classList.add('disabled');
-        selesaiKelasButton.setAttribute('disabled', 'disabled');
-        console.log('Tombol Selesai Kelas dinonaktifkan.');
-    }
-</script> --}}
-
 
     {{-- Quiz --}}
     <script>
@@ -572,7 +479,7 @@
             // Simpan jawaban di LocalStorage
             localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
 
-            validateCompletion(courseModules);
+            // validateCompletion(courseModules);
 
             // console.log('Data LocalStorage setelah saveAnswer:', localStorage.getItem('userAnswers'));
         }
@@ -665,7 +572,8 @@
                     // console.log('Answer Options:', data.kunci_jawaban); // Untuk debugging
 
                     let userAnswer = userAnswerFromDb || JSON.parse(localStorage.getItem('userAnswers'))?.[
-                        courseModulId]?.answer;
+                        courseModulId
+                    ]?.answer;
 
                     const iframeContent = `
                         <div class="">
@@ -681,23 +589,23 @@
                                         const isChecked = userAnswer === answer ? 'checked' : '';
                                         const isImage = answer.startsWith('storage/quiz/answers/');
                                         return `
-                                                <div class="form-check">
-                                                    <input 
-                                                        class="form-check-input" 
-                                                        type="radio" 
-                                                        name="answer" 
-                                                        id="answer${index + 1}" 
-                                                        value="${answer}" 
-                                                        ${isChecked}
-                                                        onclick="saveAnswer(${courseModulId}, '${answer}')"
-                                                    >
-                                                    <label class="form-check-label" for="answer${index + 1}" style="word-wrap: break-word; white-space: normal; display: block; max-width: 100%;">
-                                                        ${isImage 
-                                                            ? `<img src="{{ asset('${answer}') }}" alt="Answer Image" class="img-fluid rounded" style="width: 50%;" onclick="enlargeImage(this)">`
-                                                            : answer}
-                                                    </label>
-                                                </div>
-                                            `;
+                                                                                                <div class="form-check">
+                                                                                                    <input 
+                                                                                                        class="form-check-input" 
+                                                                                                        type="radio" 
+                                                                                                        name="answer" 
+                                                                                                        id="answer${index + 1}" 
+                                                                                                        value="${answer}" 
+                                                                                                        ${isChecked}
+                                                                                                        onclick="saveAnswer(${courseModulId}, '${answer}')"
+                                                                                                    >
+                                                                                                    <label class="form-check-label" for="answer${index + 1}" style="word-wrap: break-word; white-space: normal; display: block; max-width: 100%;">
+                                                                                                        ${isImage 
+                                                                                                            ? `<img src="{{ asset('${answer}') }}" alt="Answer Image" class="img-fluid rounded" style="width: 50%;" onclick="enlargeImage(this)">`
+                                                                                                            : answer}
+                                                                                                    </label>
+                                                                                                </div>
+                                                                                            `;
                                     }).join('')}
                                 </form>
                             </div>
@@ -828,7 +736,7 @@
                     CKEDITOR.instances[`essayFrame-${courseModulId}`].on('change', function() {
                         const currentContent = CKEDITOR.instances[`essayFrame-${courseModulId}`].getData();
                         console.log(`Simpan jawaban untuk essay ID ${courseModulId}:`,
-                        currentContent); // Debugging
+                            currentContent); // Debugging
                         localStorage.setItem(`essayAnswer-${courseModulId}`, currentContent);
 
                         // Periksa apakah data telah disimpan dengan benar
@@ -837,7 +745,7 @@
                             savedAnswer); // Debugging
 
                         // Memvalidasi apakah semua quiz dan essay sudah terjawab
-                        validateCompletion(courseModules);
+                        // validateCompletion(courseModules);
                     });
 
                 })
@@ -881,6 +789,40 @@
             const essayAnswers = Object.keys(localStorage).filter(key => key.startsWith('essayAnswer-'));
 
             // console.log("User Answers:", userAnswers);
+
+            // Ambil waktu terakhir nonton & durasi video (berdasarkan courseId)
+            const videoCurrentTimeKey = `videoCurrentTime_${courseId}`;
+            const videoDurationKey = `videoDuration_${courseId}`;
+
+            const watched = parseFloat(localStorage.getItem(videoCurrentTimeKey)) || 0;
+            const duration = parseFloat(localStorage.getItem(videoDurationKey)) || 0;
+
+            // Debug
+            console.log('▶️ videoCurrentTime:', watched);
+            console.log('⏱️ videoDuration:', duration);
+
+            // Kalau watched < duration berarti belum tuntas
+            const hasUnwatched = watched < duration;
+
+            // Cek quiz & essay
+            // const userAnswers = JSON.parse(localStorage.getItem('userAnswers')) || {};
+            const hasUnansweredQuiz = courseModules.some(mod =>
+                mod.quizIds.some(qid => !userAnswers[qid])
+            );
+            const hasUnfilledEssay = courseModules.some(mod =>
+                mod.essayIds.some(eid => {
+                    const ans = localStorage.getItem(`essayAnswer-${eid}`);
+                    return !ans || ans.trim() === '';
+                })
+            );
+
+            if (hasUnwatched || hasUnansweredQuiz || hasUnfilledEssay) {
+                let msg = "Anda belum:\n";
+                if (hasUnwatched) msg += "- Menonton video hingga akhir\n";
+                if (hasUnansweredQuiz) msg += "- Menjawab seluruh quiz\n";
+                if (hasUnfilledEssay) msg += "- Mengisi seluruh jawaban essay\n";
+                return swal("Peringatan!", msg, "warning");
+            }
 
             // Pastikan progress menjadi 100% ketika selesai kelas ditekan
             currentModule = totalModules;
@@ -1154,6 +1096,16 @@
             document.querySelector('.progress-bar').style.width = `${progressPercent}%`;
             document.querySelector('.progress-status span.fw-bold').innerText = `${progressPercent}%`;
 
+            // --- Enable/disable tombol selesaiKelas di sini ---
+            const selesaiBtn = document.getElementById('selesaiKelas');
+            if (progressPercent === 100) {
+                selesaiBtn.setAttribute('disabled', 'disabled');
+                selesaiBtn.classList.add('disabled');
+            } else {
+                selesaiBtn.removeAttribute('disabled');
+                selesaiBtn.classList.remove('disabled');
+            }
+
             updateProgressToDatabase();
         }
 
@@ -1194,7 +1146,7 @@
         });
     </script>
 
-
+    {{-- ketika diklik Image membesar --}}
     <script>
         function enlargeImage(imgElement) {
             const modalImage = document.getElementById("modalImage");
