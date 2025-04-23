@@ -156,7 +156,9 @@ class CalendarController extends Controller
                 ];
 
                 // Kirim email
-                Mail::to($user->email_karyawan)->send(new ReminderEmail($details));
+                Mail::to($user->email_karyawan)
+                    ->cc('it.web2@ccas.co.id')
+                    ->send(new ReminderEmail($details));
             }
         } catch (\Exception $e) {
             Log::error('Error saving event: ' . $e->getMessage());
