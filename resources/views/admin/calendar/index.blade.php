@@ -242,6 +242,7 @@
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 selectable: true,
+                eventDisplay: 'block',
                 events: @json($eventsForFullCalendar), // Menggunakan data events yang sudah diproses
             });
 
@@ -318,7 +319,8 @@
                                 start: response.start, // Tanggal mulai
                                 end: response.end, // Tanggal selesai
                                 backgroundColor: response
-                                    .backgroundColor // Warna latar belakang
+                                    .backgroundColor, // Warna latar belakang
+                                    display: 'background'
                             });
 
                             // Reset form input

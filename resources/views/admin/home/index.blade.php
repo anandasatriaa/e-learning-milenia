@@ -291,9 +291,11 @@
                 },
 
                 eventClick: function(info) {
-                    // Konversi tanggal end (exclusive) menjadi inclusive dengan mengurangi 1 hari
-                    let endDate = info.event.end ?
-                        new Date(info.event.end.getTime() - 86400000) : null;
+                    let startDate = info.event.start;
+                    let rawEnd = info.event.end;
+
+                    // Jika `end` kosong, anggap sama dengan `start`
+                    let endDate = rawEnd ? new Date(rawEnd.getTime() - 86400000) : startDate;
 
                     // Isi data ke dalam modal
                     document.getElementById('modalPelatihan').innerText = info.event.title;
@@ -301,10 +303,18 @@
                         '-';
                     document.getElementById('modalDivisi').innerText = info.event.extendedProps
                         .divisi || '-';
-                    document.getElementById('modalTanggal').innerText =
-                        info.event.start.toLocaleDateString() +
-                        ' - ' +
-                        (endDate ? endDate.toLocaleDateString() : 'Tidak ditentukan');
+
+                    let tanggalRentang;
+
+                    if (startDate.toDateString() === endDate.toDateString()) {
+                        tanggalRentang = startDate.toLocaleDateString() + ' - ' + endDate
+                            .toLocaleDateString();
+                    } else {
+                        tanggalRentang = startDate.toLocaleDateString() + ' - ' + endDate
+                            .toLocaleDateString();
+                    }
+
+                    document.getElementById('modalTanggal').innerText = tanggalRentang;
 
                     // Tampilkan modal
                     var eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
