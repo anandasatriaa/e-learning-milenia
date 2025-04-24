@@ -657,7 +657,8 @@
                                 <a href="#" class="item-list">
                                     @php
                                         $formattedFoto = str_pad($enrollUser->ID, 5, '0', STR_PAD_LEFT);
-                                        $fotoUrl = "http://192.168.0.8/hrd-milenia/foto/{$formattedFoto}.JPG";
+                                        $cacheBuster = time();
+                                        $fotoUrl = "http://192.168.0.8/hrd-milenia/foto/{$formattedFoto}.JPG?v={$cacheBuster}";
                                     @endphp
                                     <div class="avatar">
                                         <img src="{{ $fotoUrl }}" class="avatar-img rounded-circle">

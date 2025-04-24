@@ -98,9 +98,10 @@
                     data: 'ID',
                     className: "text-center",
                     render: function(data, type, row) {
+                        const cacheBuster = new Date().getTime();
                         return `
                         <div class="avatar avatar-xxl p-2">
-                            <img class="avatar-img " src="http://192.168.0.8/hrd-milenia/foto/${formatToFiveDigits(data)}.JPG" alt="img_${formatToFiveDigits(data)}">
+                            <img class="avatar-img " src="http://192.168.0.8/hrd-milenia/foto/${formatToFiveDigits(data)}.JPG?v=${cacheBuster}" alt="img_${formatToFiveDigits(data)}">
                         </div>
                         `
                     }

@@ -44,7 +44,8 @@ class CourseModulController extends Controller
         $listUserWithUrls = $listUser->map(function ($user) {
             $datafoto = $user->ID;
             $formattedFoto = $this->formatToFiveDigits($datafoto);
-            $user->fotoUrl = "http://192.168.0.8/hrd-milenia/foto/{$formattedFoto}.JPG";
+            $cacheBuster = time();
+            $user->fotoUrl = "http://192.168.0.8/hrd-milenia/foto/{$formattedFoto}.JPG?v={$cacheBuster}";
             return $user;
         });
 

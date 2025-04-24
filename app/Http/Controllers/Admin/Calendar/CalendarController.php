@@ -38,7 +38,8 @@ class CalendarController extends Controller
         $users = User::select('ID', 'Nama', 'Divisi')->where('Aktif', 1)->get();
         $usersWithFoto = $users->map(function ($user) {
             $formattedFoto = str_pad($user->ID, 5, '0', STR_PAD_LEFT);
-            $user->fotoUrl = "http://192.168.0.8/hrd-milenia/foto/{$formattedFoto}.JPG";
+            $cacheBuster = time();
+            $user->fotoUrl = "http://192.168.0.8/hrd-milenia/foto/{$formattedFoto}.JPG?v={$cacheBuster}";
             return $user;
         });
 

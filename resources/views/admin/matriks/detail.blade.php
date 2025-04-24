@@ -270,7 +270,8 @@
                                                 @php
                                                     // Siapkan URL foto peserta
                                                     $formattedFoto = str_pad($user->user_id, 5, '0', STR_PAD_LEFT);
-                                                    $fotoUrl = "http://192.168.0.8/hrd-milenia/foto/{$formattedFoto}.JPG";
+                                                    $cacheBuster = time();
+                                                    $fotoUrl = "http://192.168.0.8/hrd-milenia/foto/{$formattedFoto}.JPG?v={$cacheBuster}";
                                                 @endphp
                                                 <img src="{{ $fotoUrl }}" class="d-block mx-auto rounded"
                                                     height="150px" alt="Foto Karyawan" id="userFoto">

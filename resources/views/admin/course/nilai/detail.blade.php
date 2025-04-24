@@ -70,7 +70,8 @@
                                 @php
                                     // Menyiapkan URL foto peserta
                                     $formattedFoto = str_pad($enrollUser->id, 5, '0', STR_PAD_LEFT);
-                                    $fotoUrl = "http://192.168.0.8/hrd-milenia/foto/{$formattedFoto}.JPG";
+                                    $cacheBuster = time();
+                                    $fotoUrl = "http://192.168.0.8/hrd-milenia/foto/{$formattedFoto}.JPG?v={$cacheBuster}";
                                 @endphp
 
                                 <div class="col-lg-6">
