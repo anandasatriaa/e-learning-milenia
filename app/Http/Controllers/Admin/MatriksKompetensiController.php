@@ -117,6 +117,23 @@ class MatriksKompetensiController extends Controller
             });
         }
 
+        // Tambahkan rata-rata capaian ke masing-masing user dan urutkan
+        $users = collect($users)->map(function ($user) {
+            $totalCapaian = 0;
+            $jumlahKompetensi = 0;
+
+            foreach ($user->courses as $course) {
+                if ($course->presentase_kompetensi !== '-') {
+                    $totalCapaian += $course->presentase_kompetensi;
+                    $jumlahKompetensi++;
+                }
+            }
+
+            $user->rataRataCapaian = $jumlahKompetensi > 0 ? $totalCapaian / $jumlahKompetensi : 0;
+
+            return $user;
+        })->sortByDesc('rataRataCapaian')->values();
+
         return view('admin.matriks.detail', compact('divisi', 'users', 'courses', 'dashboard', 'divisiID'));
     }
 
