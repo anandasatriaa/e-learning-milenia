@@ -4,7 +4,7 @@
     <style>
         .table>tbody>tr>td,
         .table>tbody>tr>th {
-            padding: 10px !important;
+            padding: 3px !important;
         }
 
         .card .card-body,
@@ -16,10 +16,19 @@
             padding: 10px !important;
         }
 
+        .no-padding-table>tbody>tr>td,
+        .no-padding-table>tbody>tr>th {
+            padding: 6px !important;
+        }
+
+        .table {
+            margin-bottom: 0px !important;
+        }
+
         /* .chart {
-                    max-width: 250px;
-                    margin: 35px auto;
-                } */
+                            max-width: 250px;
+                            margin: 35px auto;
+                        } */
     </style>
 @endsection
 @section('content')
@@ -36,7 +45,7 @@
                     <li class="fas fa-save me-2"></li>Simpan
                 </button>
             </div>
-            <div class="card bg-dark" id="contentToPrint">
+            <div class="card border border-primary px-2" id="contentToPrint">
                 <div class="card-body">
                     <div class="card bg-primary">
                         <div class="card-body d-flex align-items-center">
@@ -63,7 +72,7 @@
                         <div class="card me-3 border border-primary bg-gray2">
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table text-center">
+                                    <table class="table text-center no-padding-table">
                                         <tr>
                                             <td colspan="3" class="fw-bold">TABEL KETERANGAN NILAI</td>
                                         </tr>
@@ -105,7 +114,7 @@
                         <div class="card me-3 border border-primary bg-gray2">
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table">
+                                    <table class="table no-padding-table">
                                         <tr class="text-center">
                                             <td colspan="3" class="fw-bold">TABEL DEFINISI</td>
                                         </tr>
@@ -143,7 +152,7 @@
                         <div class="card border border-primary bg-gray2">
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table text-center">
+                                    <table class="table text-center no-padding-table">
                                         <tr class="text-start">
                                             <td colspan="3">
                                                 <!-- Membuat d-flex untuk memisahkan teks dan form -->
@@ -296,21 +305,21 @@
                                         <div class="table-responsive">
                                             <table class="table p-0">
                                                 <thead>
-                                                    <tr>
-                                                        <th style="font-size: 10px">KOMPETENSI</th>
-                                                        <th style="font-size: 10px">KETERANGAN</th>
-                                                        <th style="font-size: 10px">MINIMAL</th>
-                                                        <th style="font-size: 10px">MAKSIMAL</th>
-                                                        <th style="font-size: 10px">CAPAIAN</th>
+                                                    <tr class="text-center">
+                                                        <th style="font-size: 12px">KOMPETENSI</th>
+                                                        <th style="font-size: 12px">KETERANGAN</th>
+                                                        <th style="font-size: 12px">MINIMAL</th>
+                                                        <th style="font-size: 12px">MAKSIMAL</th>
+                                                        <th style="font-size: 12px">CAPAIAN</th>
                                                     </tr>
                                                 </thead>
                                                 @foreach ($user->courses as $course)
                                                     <tr class="text-center">
-                                                        <td style="font-size: 10px">Kompetensi {{ $loop->iteration }}</td>
-                                                        <td style="font-size: 10px">{{ $course->course_name }}</td>
-                                                        <td style="font-size: 10px">80%</td>
-                                                        <td style="font-size: 10px">100%</td>
-                                                        <td style="font-size: 10px">
+                                                        <td style="font-size: 12px">Kompetensi {{ $loop->iteration }}</td>
+                                                        <td style="font-size: 12px">{{ $course->course_name }}</td>
+                                                        <td style="font-size: 12px">80%</td>
+                                                        <td style="font-size: 12px">100%</td>
+                                                        <td style="font-size: 12px">
                                                             {{ $course->presentase_kompetensi === '-' ? '-' : $course->presentase_kompetensi . '%' }}
                                                         </td>
                                                     </tr>
@@ -400,32 +409,97 @@
         });
     </script>
 
+    <!-- PDF POTRAIT -->
     <script>
         document.getElementById('downloadPdf').addEventListener('click', function() {
             const {
                 jsPDF
             } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF({
+                unit: 'px',
+                format: 'a4',
+                hotfixes: ['px_scaling']
+            });
 
-            // Menggunakan html2canvas untuk merender konten menjadi gambar
+            html2canvas(document.getElementById('contentToPrint'), {
+                scale: 2,
+                backgroundColor: '#212529' // biar ikut background gelap
+            }).then(function(canvas) {
+                const imgData = canvas.toDataURL('image/png');
+
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+
+                const imgWidth = pageWidth;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                let position = 0; // Mulai dari atas, no centering
+
+                let heightLeft = imgHeight;
+
+                doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft > 0) {
+                    doc.addPage();
+                    position = heightLeft - imgHeight;
+
+                    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                doc.save('Dashboard_Matriks_Kompetensi.pdf');
+            });
+        });
+    </script>
+
+
+    <!-- PDF LANDSCAPE -->
+    <!-- <script>
+        document.getElementById('downloadPdf').addEventListener('click', function() {
+            const {
+                jsPDF
+            } = window.jspdf;
+
+            // Tambahkan orientasi 'landscape' di sini
+            const doc = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            });
+
             html2canvas(document.getElementById('contentToPrint'), {
                 scale: 2,
             }).then(function(canvas) {
                 const imgData = canvas.toDataURL('image/png');
 
-                const doc = new jsPDF();
-                const pageWidth = doc.internal.pageSize.width;
-                const pageHeight = doc.internal.pageSize.height;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
 
-                // Menyesuaikan ukuran gambar agar pas dengan ukuran halaman PDF
-                const imgWidth = Math.min(pageWidth, canvas.width * 0.5);
+                const imgWidth = pageWidth;
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-                doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                let position = 0;
+                if (imgHeight < pageHeight) {
+                    position = (pageHeight - imgHeight) / 2;
+                }
+
+                let heightLeft = imgHeight;
+
+                doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft > 0) {
+                    doc.addPage();
+                    position = heightLeft - imgHeight;
+                    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
                 doc.save('Dashboard Matriks Kompetensi.pdf');
             });
         });
-    </script>
+    </script> -->
 
     <script>
         // Fungsi untuk menampilkan pratinjau gambar
@@ -503,7 +577,7 @@
                         size: 4
                     }
                 },
-                
+
             };
 
             var chart = new ApexCharts(document.querySelector("#radarChart{{ $user->user_id }}"), options);
