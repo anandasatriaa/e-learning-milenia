@@ -22,5 +22,9 @@ class ModulEssay extends Model
         return $this->hasMany(ModulEssayAnswer::class, 'course_modul_id', 'course_modul_id');
     }
 
+    public function userAnswers()
+    {
+        return $this->hasMany(ModulEssayAnswer::class, 'course_modul_id')->where('user_id', auth()->id()); // Sesuaikan nama tabel dan kolom jika berbeda
+    }
 
 }

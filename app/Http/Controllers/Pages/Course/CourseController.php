@@ -8,6 +8,7 @@ use App\Models\Course\Course;
 use App\Models\Course\ModulQuiz;
 use App\Models\Course\ModulEssay;
 use App\Models\Course\ModulQuizUserAnswer;
+use App\Models\Course\ModulQuizAnswer;
 use App\Models\Course\ModulEssayAnswer;
 use App\Models\Course\CourseModul;
 use Illuminate\Support\Facades\DB;
@@ -328,5 +329,83 @@ class CourseController extends Controller
         }
 
         return response()->json(['status' => 'error', 'message' => 'Enrollment not found'], 404);
+    }
+
+    public function review(Course $course)
+    {
+        $userId = auth()->id();
+
+        // 1) Ambil semua modul beserta quiz & essay
+        $moduls = CourseModul::with([
+            'modulQuiz',
+            'modulEssay'
+        ])->where('course_id', $course->id)->get();
+
+        $quizItems  = [];
+        $essayItems = [];
+
+        // 2) Loop setiap modul
+        foreach ($moduls as $modul) {
+            // ====== Quiz ======
+            foreach ($modul->modulQuiz as $quiz) {
+                // userAnswer
+                $userAnswer = ModulQuizUserAnswer::where('modul_quizzes_id', $quiz->id)
+                    ->where('user_id', $userId)
+                    ->first();
+
+                // opsi jawaban (pilihan)
+                $options = ModulQuizAnswer::where('modul_quiz_id', $quiz->id)->get();
+
+                $isCorrect = false;
+                if ($userAnswer) {
+                    $isCorrect = ($userAnswer->kode_jawaban === $quiz->kunci_jawaban);
+                }
+
+                $quizItems[] = [
+                    'pertanyaan'  => $quiz->pertanyaan,
+                    'image'       => $quiz->image,
+                    'jawabanUser' => $userAnswer->jawaban      ?? null,
+                    'kunci'       => $quiz->kunci_jawaban,
+                    'isCorrect'   => $isCorrect,
+                    'options'     => $options->map(fn($opt) => [
+                        'pilihan' => $opt->pilihan,
+                        'image'   => $opt->image,
+                    ]),
+                ];
+            }
+
+            // ====== Essay ======
+            foreach ($modul->modulEssay as $essay) {
+                $userAnswer = ModulEssayAnswer::where('course_modul_id', $modul->id)
+                    ->where('user_id', $userId)
+                    ->first();
+
+                $essayItems[] = [
+                    'pertanyaan'  => $essay->pertanyaan,
+                    'image'       => $essay->image,
+                    'jawabanUser' => $userAnswer->jawaban ?? null,
+                ];
+            }
+        }
+
+        // 3) Hitung skor quiz
+        $totalQuiz = count($quizItems);
+        $correct   = collect($quizItems)->where('isCorrect', true)->count();
+
+        // 4) Max score berdasarkan kategori
+        $catName  = optional($course->category)->nama;
+        $maxScore = $catName === 'Matriks Kompetensi' ? 4 : 10;
+        $score    = $totalQuiz
+            ? round($correct / $totalQuiz * $maxScore, 2)
+            : 0;
+
+        return response()->json([
+            'quizItems'  => $quizItems,
+            'essayItems' => $essayItems,
+            'score'      => $score,
+            'maxScore'   => $maxScore,
+            'correct'    => $correct,
+            'totalQuiz'  => $totalQuiz,
+        ]);
     }
 }
