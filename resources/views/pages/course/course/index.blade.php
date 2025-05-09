@@ -1118,7 +1118,7 @@
                         const ansImg = item.jawabanUser && /\.(png|jpe?g|gif)$/i.test(item.jawabanUser);
                         const answerHtml = ansImg ?
                             `<img src="${makeSrc(item.jawabanUser)}" class="img-thumbnail" style="max-height:100px;max-width:100px;">` :
-                            (item.jawabanUser || '<em class="text-muted">Belum dijawab</em>');
+                            (item.jawabanUser || '<em class="text-muted">Belum dijawab / Tidak ada soal</em>');
 
                         const optionsHtml = item.options.map((opt, idx) => {
                             // deteksi gambar di opt.image atau opt.pilihan
@@ -1188,7 +1188,7 @@
                     });
                     const allAns = data.essayItems[0]?.jawabanUser ?
                         data.essayItems[0].jawabanUser :
-                        '<em class="text-muted">Belum dijawab</em>';
+                        '<em class="text-muted">Belum dijawab / Tidak ada soal</em>';
                     eb.innerHTML = `
                         <div class="card mb-3">
                             <div class="card-header fw-bold">Pertanyaan Essay</div>
