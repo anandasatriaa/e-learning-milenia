@@ -123,7 +123,7 @@
                         </div>
                         <div class="accordion accordion-flush" id="modulAccordion">
                             <!-- Introduction Card -->
-                            <div class="card mb-2 border rounded m-2">
+                            <div class="card mb-2 border rounded m-2" id="introductionCard">
                                 <div class="card-header" onclick="loadIntroductionVideo()">
                                     <div class="span-title">
                                         <span class="me-2 bg-success px-2 py-1 my-auto rounded text-white">
@@ -433,9 +433,28 @@
         // Panggil loadVideo untuk video pengantar (jika butuh)
         function loadIntroductionVideo() {
             const courseId = "{{ $course->id }}";
+            const iframeContent = document.getElementById("iframeContent");
+            const ratio = document.querySelector('.ratio');
+            const iframe = document.getElementById("videoSource");
+
+            // Kosongkan konten sebelumnya (quiz/essay)
+            iframeContent.innerHTML = "";
+
+            // Tampilkan elemen video
+            ratio.style.display = 'block';
+            iframe.style.display = 'block';
+
+            // Load video pengantar
             loadVideo("{{ url('/course/embed-video/') }}/" + courseId, 'intro');
             setActiveModule(0);
-            highlightCard();
+
+            const introCard = document.getElementById('introductionCard');
+            if (introCard) {
+                highlightCard(introCard);
+            }
+
+            // Hapus highlight dari item quiz/essay sebelumnya
+            document.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('border-primary'));
         }
 
         // updateIframeSource dengan support video/pdf/link
@@ -464,10 +483,16 @@
         }
 
         // Highlight card aktif
-        function highlightCard() {
-            const card = event.target.closest('.card');
+        function highlightCard(element = null) {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('border-primary'));
-            if (card) card.classList.add('border-primary');
+
+            // Jika elemen diberikan langsung (bukan dari event)
+            if (element) {
+                element.classList.add('border-primary');
+            } else if (event?.target) {
+                const card = event.target.closest('.card');
+                if (card) card.classList.add('border-primary');
+            }
         }
 
         // Tombol Go To Last Access
@@ -1058,6 +1083,8 @@
         document.addEventListener('DOMContentLoaded', async () => {
             await fetchProgressFromDatabase();
             updateProgress();
+
+            loadIntroductionVideo();
         });
     </script>
 
