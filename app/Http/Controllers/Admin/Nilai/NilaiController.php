@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Nilai\Nilai;
 use App\Models\Course\Course;
 use App\Models\User;
+use App\Models\UserCourseEnroll;
 use App\Models\Course\CourseModul;
 use App\Models\Course\ModulQuiz;
 use App\Models\Course\ModulQuizAnswer;
@@ -219,5 +220,75 @@ class NilaiController extends Controller
 
         // Return response sukses
         return response()->json(['message' => 'Review saved successfully']);
+    }
+
+    public function previewNilai()
+    {
+        // 1) Ambil semua user yang punya quiz/essay
+        $users = User::select('ID', 'Nama', 'Divisi', 'email_karyawan')
+            ->whereHas(
+                'enrolls.course.moduls',
+                fn($q) =>
+                $q->whereHas('quizzes')->orWhereHas('essays')
+            )
+            ->get();
+
+        foreach ($users as $user) {
+            // 2) Fetch enrolls + data terkait
+            $enrolls = UserCourseEnroll::with([
+                'course:id,nama_kelas,thumbnail',
+                'course.moduls' => fn($q) => $q->withCount(['quizzes', 'essays']),
+                'course.moduls.quizzes.userAnswers' => fn($q) => $q->where('user_id', $user->ID),
+                'course.moduls.essays',
+            ])
+                ->where('user_id', $user->ID)
+                ->whereHas(
+                    'course.moduls',
+                    fn($q) =>
+                    $q->whereHas('quizzes')->orWhereHas('essays')
+                )
+                ->get();
+
+            // 3) Ambil semua nilai user, keyed by course_id
+            $nilaiByCourse = Nilai::where('user_id', $user->ID)
+                ->get()
+                ->keyBy('course_id');
+
+            // Assign nilai yang tepat ke setiap enroll (default 0 jika tidak ada)
+            foreach ($enrolls as $enr) {
+                $nilai = $nilaiByCourse->get($enr->course_id);
+                if (!$nilai) {
+                    $nilai = new Nilai();
+                    $nilai->nilai_quiz = 0;
+                    $nilai->nilai_essay = 0;
+                }
+                $enr->setRelation('nilai', $nilai);
+            }
+
+            $user->courses      = $enrolls;
+            $user->total_course = $enrolls->count();
+
+            // 4) Hitung quiz_score per modul
+            foreach ($user->courses as $enr) {
+                $enr->setAttribute(
+                    'modules',
+                    $enr->course->moduls->map(fn($modul) => tap((object) [
+                        'nama_modul'   => $modul->nama_modul,
+                        'quiz_details' => $modul->quizzes->map(fn($quiz) => [
+                            'is_correct' => optional(
+                                $quiz->userAnswers->first()
+                            )->kode_jawaban === $quiz->kunci_jawaban,
+                        ]),
+                    ], function ($o) {
+                        $o->quiz_score = collect($o->quiz_details)
+                            ->where('is_correct', true)
+                            ->count();
+                        $o->total_soal = count($o->quiz_details);
+                    }))
+                );
+            }
+        }
+
+        return view('admin.preview.nilai', compact('users'));
     }
 }

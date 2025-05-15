@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Course\Course;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Nilai\Nilai;
 
 class UserCourseEnroll extends Model
 {
@@ -20,6 +21,11 @@ class UserCourseEnroll extends Model
 
     public function course()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Course::class, 'course_id');
+    }
+
+    public function nilai()
+    {
+        return $this->hasOne(Nilai::class, 'user_id', 'user_id');
     }
 }

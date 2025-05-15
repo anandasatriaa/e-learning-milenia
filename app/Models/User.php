@@ -125,4 +125,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Calendar::class,'user_id');
     }
+
+    public function enrolls()
+    {
+        return $this->hasMany(UserCourseEnroll::class, 'user_id', 'ID');
+    }
 }

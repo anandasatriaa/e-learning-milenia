@@ -91,6 +91,10 @@ Route::group(['middleware' => 'auth'], function () {
             Route::delete('/course-schedule/calendar/destroy/{id}', [CalendarController::class, 'destroy'])->name('calendar.destroy');
         });
 
+        Route::group(['prefix' => 'preview', 'as' => 'preview.'], function () {
+            Route::get('/preview-nilai', [NilaiController::class, 'previewNilai'])->name('preview-nilai');
+        });
+
         Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
             Route::get('/employee/index', [UserController::class, 'index'])->name('employee.index');
             Route::get('/employee/getAllEmployee', [UserController::class, 'datatableGetAllEmployee'])->name('datatable-getAllEmployee');

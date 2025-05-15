@@ -71,6 +71,11 @@ class CourseModul extends Model
         return $this->hasMany(ModulEssay::class, 'course_modul_id');
     }
 
+    public function userQuizAnswers()
+    {
+        return $this->hasMany(ModulQuizUserAnswer::class, 'modul_quizzes_id', 'id');
+    }
+
     public function nilai()
     {
         return $this->hasMany(Nilai::class);

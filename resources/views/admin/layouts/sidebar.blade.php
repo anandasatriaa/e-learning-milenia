@@ -130,14 +130,14 @@
                                 <a class="{{ request()->routeIs('admin.course.nilai.*') ? 'text-white fw-bold active border-start border-2' : '' }}"
                                     href="{{ route('admin.course.nilai.index') }}">
                                     <i class="fas fa-clipboard-check"></i>
-                                    <span>Nilai</span>
+                                    <span>Input Nilai</span>
                                 </a>
                             </li>
                             <li class="ms-3">
                                 <a class="{{ request()->routeIs('admin.course.nilai-matriks.*') ? 'text-white fw-bold active border-start border-2' : '' }}"
                                     href="{{ route('admin.course.nilai-matriks.index') }}">
                                     <i class="fas fa-clipboard-list"></i>
-                                    <span>Nilai Matriks Kompetensi</span>
+                                    <span>Input Nilai Matriks Kompetensi</span>
                                 </a>
                             </li>
                         </ul>
@@ -149,11 +149,35 @@
                     </span>
                     <h4 class="text-section">Calendar</h4>
                 </li>
-                <li class="nav-item" class="{{ request()->routeIs('admin.calendar.*') ? 'active' : '' }}">
+                <li class="nav-item {{ request()->routeIs('admin.calendar.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.calendar.calendar.index') }}">
                         <i class="fas fa-calendar-alt"></i>
                         <p>Course Schedule</p>
                     </a>
+                </li>
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </span>
+                    <h4 class="text-section">Preview</h4>
+                </li>
+                <li class="nav-item {{ request()->routeIs('admin.preview.*') ? 'active' : '' }}">
+                    <a data-bs-toggle="collapse" href="#preview_sidebar">
+                        <i class="fas fa-award"></i>
+                        <p>Hasil Nilai Peserta</p>
+                        <span class="caret"></span>
+                    </a>
+                    <div class="collapse {{ request()->routeIs('admin.preview.*') ? 'show' : '' }}" id="preview_sidebar">
+                        <ul class="nav nav-collapse">
+                            <li class="ms-3">
+                                <a class="{{ request()->routeIs('admin.preview.*') ? 'text-white fw-bold active border-start border-2' : '' }}"
+                                    href="{{ route('admin.preview.preview-nilai') }}">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>Nilai</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
                 {{-- <li class="nav-item">
                     <a href="widgets.html">

@@ -88,4 +88,9 @@ class Course extends Model
     {
         return $this->hasManyThrough(NilaiMatriks::class, UserCourseEnroll::class);
     }
+
+    public function moduls()
+    {
+        return $this->hasMany(CourseModul::class, 'course_id');
+    }
 }
