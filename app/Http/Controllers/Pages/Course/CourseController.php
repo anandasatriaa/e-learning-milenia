@@ -315,14 +315,28 @@ class CourseController extends Controller
             'course_id' => 'required|integer',
             'user_id' => 'required|integer',
             'time_spend' => 'required|integer|min:0',
+            'progress_bar' => 'nullable|integer|min:0|max:100',
         ]);
 
         $enrollment = UserCourseEnroll::where('course_id', $validatedData['course_id'])
-        ->where('user_id', $validatedData['user_id'])
-        ->first();
+            ->where('user_id', $validatedData['user_id'])
+            ->first();
 
         if ($enrollment) {
+            // 🚫 Cek jika status sudah 'completed', jangan update apa pun
+            if ($enrollment->status === 'completed') {
+                return response()->json([
+                    'status' => 'ignored',
+                    'message' => 'Course already completed. No update performed.'
+                ], 200);
+            }
+
             $enrollment->time_spend = $validatedData['time_spend'];
+
+            if (isset($validatedData['progress_bar'])) {
+                $enrollment->progress_bar = $validatedData['progress_bar'];
+            }
+
             $enrollment->save();
 
             return response()->json(['status' => 'success'], 200);

@@ -996,7 +996,7 @@
         });
     </script>
 
-    {{-- PRGRESS BAR --}}
+    {{-- PROGRESS BAR --}}
     <script>
         // Ambil total modul & inisialisasi
         const totalModules = {{ $course->modul->count() + 1 }};
