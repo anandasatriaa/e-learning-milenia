@@ -84,7 +84,7 @@
                                 <button type="button" class="btn btn-label-info btn-round btn-sm me-2" id="goToLastAccess">
                                     Last access : <span id="lastAccess">00:00</span> <i class="fas fa-history ms-1"></i>
                                 </button>
-                                <button id="selesaiKelas" class="btn btn-danger btn-round btn-sm me-2">
+                                <button id="selesaiKelas" class="btn btn-danger btn-round btn-sm me-2" disabled>
                                     Submit & End Course <i class="fas fa-arrow-right ms-2"></i>
                                 </button>
                                 <button id="previewReviewBtn" class="btn btn-info btn-round btn-sm me-2 d-none">
@@ -355,10 +355,22 @@
         // Array untuk menyimpan semua suffix video yang pernah dibuka
         window.loadedVideoSuffixes = [];
 
+        // Ambil tombol submit
+        const btnSubmit = document.getElementById('selesaiKelas');
+
+        // Di awal page, tombol memang disabled
+        btnSubmit.disabled = true;
+
+        let videoLoadInterval = null;
         // Fungsi generik untuk load video & track position
         function loadVideo(mediaLink, videoKeySuffix) {
+            if (videoKeySuffix !== 'intro') {
+                btnSubmit.disabled = false; // Enable tombol
+                btnSubmit.classList.remove('disabled'); // Hapus kelas disabled (jika pakai Bootstrap)
+            }
+
             // simpan suffix ini jika belum ada
-            if (!window.loadedVideoSuffixes.includes(videoKeySuffix)) {
+            if (videoKeySuffix !== 'intro' && !window.loadedVideoSuffixes.includes(videoKeySuffix)) {
                 window.loadedVideoSuffixes.push(videoKeySuffix);
             }
 
@@ -377,61 +389,93 @@
             // Tampilkan iframe
             ratio.style.display = 'block';
             iframe.style.display = 'block';
+            console.log(`[LOAD VIDEO] keyDur: ${keyDur}`);
             iframe.src = mediaLink;
 
+            iframe.onload = null;
             // Pastikan hanya sekali listen load
             iframe.onload = () => {
-                const doc = iframe.contentWindow.document;
-                const interval = setInterval(() => {
-                    const video = doc.querySelector('video');
-                    if (!video) return;
-                    clearInterval(interval);
+                try {
+                    const doc = iframe.contentWindow.document;
+                    console.log("iframe loaded, mencoba akses video element...");
 
-                    // 🔥 Langsung simpan durasi begitu video tersedia
-                    const dur = video.duration;
-                    if (!isNaN(dur) && dur > 0) {
-                        localStorage.setItem(keyDur, dur);
+                    // Clear interval sebelumnya kalau ada
+                    if (videoLoadInterval) {
+                        clearInterval(videoLoadInterval);
+                        videoLoadInterval = null;
+                        console.log("Interval sebelumnya dibersihkan");
                     }
 
-                    // Restore last time
-                    let lastTime = parseFloat(localStorage.getItem(keyTime)) || 0;
-                    video.currentTime = lastTime;
-                    lastAccessEl.textContent = formatTime(lastTime);
-
-                    // Simpan duration
-                    video.addEventListener('loadedmetadata', () => {
-                        const d2 = video.duration;
-                        if (!isNaN(d2) && d2 > 0) {
-                            localStorage.setItem(keyDur, d2);
+                    videoLoadInterval = setInterval(() => {
+                        const video = doc.querySelector('video');
+                        if (!video) {
+                            console.log("Video element belum ditemukan di iframe, tunggu...");
+                            return;
                         }
-                    });
+                        clearInterval(videoLoadInterval);
+                        videoLoadInterval = null;
+                        console.log("Video element ditemukan:", video);
+                        console.log("Interval cleared karena video ditemukan");
 
-                    // Update time
-                    video.addEventListener('timeupdate', () => {
-                        if (!video.seeking && video.currentTime > lastTime) {
-                            lastTime = video.currentTime;
-                            localStorage.setItem(keyTime, lastTime);
-                            lastAccessEl.textContent = formatTime(lastTime);
+                        // 🔥 Langsung simpan durasi begitu video tersedia
+                        const dur = video.duration;
+                        if (!isNaN(dur) && dur > 0) {
+                            localStorage.setItem(keyDur, dur);
+                            console.log(`Durasi video disimpan: ${dur}`);
                         }
-                    });
 
-                    // Cegah seek di luar batas
-                    video.addEventListener('seeking', () => {
-                        if (video.currentTime > lastTime) {
-                            video.currentTime = lastTime;
-                        }
-                    });
+                        // Restore last time
+                        let lastTime = parseFloat(localStorage.getItem(keyTime)) || 0;
+                        video.currentTime = lastTime;
+                        lastAccessEl.textContent = formatTime(lastTime);
+                        console.log(`Restore last time: ${lastTime}`);
 
-                    // Jika selesai
-                    video.addEventListener('ended', () => {
-                        localStorage.setItem(keyTime, video.duration);
-                    });
-                }, 200);
+                        // Simpan durasi pada loadedmetadata
+                        video.addEventListener('loadedmetadata', () => {
+                            const d2 = video.duration;
+                            if (!isNaN(d2) && d2 > 0) {
+                                localStorage.setItem(keyDur, d2);
+                                console.log(`Loadedmetadata durasi disimpan: ${d2}`);
+                            }
+                        });
+
+                        // Update waktu tonton
+                        video.addEventListener('timeupdate', () => {
+                            if (!video.seeking && video.currentTime > lastTime) {
+                                lastTime = video.currentTime;
+                                localStorage.setItem(keyTime, lastTime);
+                                lastAccessEl.textContent = formatTime(lastTime);
+                                console.log(`Timeupdate, watched sekarang: ${lastTime}`);
+                            }
+                        });
+
+                        // Cegah seek melewati batas
+                        video.addEventListener('seeking', () => {
+                            if (video.currentTime > lastTime) {
+                                video.currentTime = lastTime;
+                                console.log(`Seek dicegah, kembali ke: ${lastTime}`);
+                            }
+                        });
+
+                        // Event selesai
+                        video.addEventListener('ended', () => {
+                            localStorage.setItem(keyTime, video.duration);
+                            console.log("Video selesai, simpan durasi penuh");
+                            btnSubmit.disabled = false;
+                        });
+                    }, 200);
+                } catch (e) {
+                    console.error("Gagal akses iframe atau video karena cross-origin:", e);
+                }
             };
+
         }
 
         // Panggil loadVideo untuk video pengantar (jika butuh)
         function loadIntroductionVideo() {
+            btnSubmit.disabled = true;
+            btnSubmit.classList.add('disabled');
+
             const courseId = "{{ $course->id }}";
             const iframeContent = document.getElementById("iframeContent");
             const ratio = document.querySelector('.ratio');
@@ -807,12 +851,12 @@
                 const keyTime = `videoCurrentTime_${userId}_${courseId}_${suffix}`;
                 const keyDur = `videoDuration_${userId}_${courseId}_${suffix}`;
                 const watched = parseFloat(localStorage.getItem(keyTime)) || 0;
-                const duration = parseFloat(localStorage.getItem(keyDur));
+                const durationStr = localStorage.getItem(keyDur);
+                const duration = durationStr !== null ? parseFloat(durationStr) : null;
 
-                console.log(`VIDEO[${suffix}] → watched=${watched}, duration=${duration}`); // debug
+                console.log(`VIDEO[${suffix}] → watched=${watched}, duration=${duration}`);
 
-                // jika durasi tidak valid (belum diset) atau belum tuntas → unwatched
-                if (!duration || isNaN(duration)) return true;
+                if (duration === null || isNaN(duration)) return true; // ← cegah undefined atau NaN
                 return watched < duration;
             });
 
