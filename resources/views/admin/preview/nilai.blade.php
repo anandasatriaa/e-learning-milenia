@@ -103,6 +103,48 @@
             margin: 0.5rem 0;
             border-left: 3px solid #3498db;
         }
+
+        /* Paksa container Select2 agar sesuai dengan width yang kita tentukan */
+        .select2-container {
+            width: 450px !important;
+        }
+
+        /* Pilihan multi-tag: gunakan flex & wrap, batasi tinggi, tambahkan scroll */
+        .select2-container--default .select2-selection--multiple {
+            min-height: 2.5em;
+            max-height: 5.5em;
+            /* misal 2 baris tag */
+            overflow-y: auto;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            display: flex !important;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            /* jarak antar tag */
+            padding: 0.25rem;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            margin: 0 !important;
+            padding: 0 1.5em;
+            height: auto;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .select2-course-option {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .select2-course-option .course-title {
+            font-weight: 600;
+        }
+
+        .select2-course-option .course-path {
+            margin-top: 2px;
+        }
     </style>
 @endsection
 @section('content')
@@ -112,6 +154,48 @@
                 <div class="card card-round">
                     <div class="card-body">
                         <h3 class="mb-4 text-primary">Nilai Peserta</h3>
+                        <form action="{{ route('admin.preview.preview-nilai') }}" method="GET" id="filter-form">
+                            <div class="d-flex flex-wrap mb-3 gap-2">
+                                <!-- Filter Peserta -->
+                                <div class="d-flex flex-column me-3">
+                                    <label for="filter-peserta" class="form-label">Filter Peserta</label>
+                                    <select name="peserta[]" id="filter-peserta" class="form-select" multiple>
+                                        @foreach ($allUsers as $u)
+                                            <option value="{{ $u->ID }}"
+                                                {{ in_array($u->ID, request('peserta', [])) ? 'selected' : '' }}>
+                                                {{ $u->Nama }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Filter Divisi -->
+                                <div class="d-flex flex-column me-3">
+                                    <label for="filter-divisi" class="form-label">Filter Divisi</label>
+                                    <select name="divisi[]" id="filter-divisi" class="form-select" multiple>
+                                        @foreach ($allDivisions as $div)
+                                            <option value="{{ $div }}"
+                                                {{ in_array($div, request('divisi', [])) ? 'selected' : '' }}>
+                                                {{ $div }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Filter Course -->
+                                <div class="d-flex flex-column me-3">
+                                    <label for="filter-course" class="form-label">Filter Course</label>
+                                    <select name="course[]" id="filter-course" class="form-select" multiple>
+                                        @foreach ($allCourses as $c)
+                                            <option value="{{ $c->id }}" data-path="{{ $c->path }}"
+                                                {{ in_array($c->id, request('course', [])) ? 'selected' : '' }}>
+                                                {{ $c->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
                         <div class="table-responsive">
                             <table class="table table-main">
                                 <thead class="bg-light">
@@ -385,4 +469,46 @@ $bgClass = 'bg-secondary text-white';
 @endsection
 @section('js')
 
+    <script>
+        $(document).ready(function() {
+            function formatCourse(option) {
+                if (!option.id) {
+                    // placeholder
+                    return option.text;
+                }
+                // ambil nama dan path
+                const name = option.text;
+                const path = $(option.element).data('path')
+                    .replace(name + '', '') // hapus nama_kelas dari path
+                    .replace(/^ >\s*/, ''); // bersihkan leading " > "
+                // bangun elemen dua baris
+                const $container = $(`
+          <div class="select2-course-option">
+            <div class="course-title">${name}</div>
+            <div class="course-path text-muted" style="font-size:0.85em;">${path}</div>
+          </div>
+        `);
+                return $container;
+            }
+
+            $('#filter-peserta, #filter-divisi').select2({
+                placeholder: 'Pilih satu atau lebih',
+                width: 'resolve',
+                dropdownAutoWidth: true
+            });
+
+            $('#filter-course').select2({
+                placeholder: 'Pilih satu atau lebih',
+                width: 'resolve',
+                dropdownAutoWidth: true,
+                templateResult: formatCourse,
+                templateSelection: formatCourse, // juga di dalam kotak setelah dipilih
+                escapeMarkup: m => m // sudah berupa HTML
+            });
+
+            $('#filter-peserta, #filter-divisi, #filter-course').on('change', function() {
+                $('#filter-form').submit();
+            });
+        });
+    </script>
 @endsection

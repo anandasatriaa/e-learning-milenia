@@ -28,10 +28,10 @@ class NilaiController extends Controller
     {
         // Ambil data courses dengan jumlah modul dan peserta, kecuali Matriks Kompetensi
         $courses = Course::withCount(['modul', 'user']) // Menghitung jumlah modul dan peserta
-        ->with('modul') // Memuat data modul untuk akses lebih lanjut
-        ->whereDoesntHave('category', function ($query) {
-            $query->where('nama', 'Matriks Kompetensi');
-        })
+            ->with('modul') // Memuat data modul untuk akses lebih lanjut
+            ->whereDoesntHave('category', function ($query) {
+                $query->where('nama', 'Matriks Kompetensi');
+            })
             ->get();
 
         return view('admin.course.nilai.index', compact('courses'));
@@ -98,7 +98,7 @@ class NilaiController extends Controller
 
         // Ambil data review (nilai quiz, nilai essay, komentar) dari tabel review
         $review = Nilai::where('course_id', $course_id)
-        ->where('user_id', $user_id)
+            ->where('user_id', $user_id)
             ->first();
 
         // Tambahkan quiz dan essay data pengguna
@@ -223,94 +223,134 @@ class NilaiController extends Controller
         return response()->json(['message' => 'Review saved successfully']);
     }
 
-    public function previewNilai()
+    public function previewNilai(Request $request)
     {
-        // 1) Ambil semua user yang punya quiz/essay atau matriks kompetensi
-        $users = User::select('ID', 'Nama', 'Divisi', 'email_karyawan')
-            ->whereHas('enrolls.course.moduls', function ($q) {
-                $q->whereHas('quizzes')
-                    ->orWhereHas('essays');
+        // Ambil data untuk filter dropdown
+        $allUsers = User::where('Aktif', 1)->orderBy('Nama')->get(['ID', 'Nama']);
+        $allDivisions = User::select('Divisi')->distinct()->orderBy('Divisi')->pluck('Divisi')->toArray();
+        $allCourses = Course::with([
+            'learningCategory:id,nama',
+            'divisiCategory:id,nama',
+            'category:id,nama',
+            'subCategory:id,nama',
+        ])
+            ->whereHas('moduls', function ($q) {
+                $q->whereHas('quizzes')->orWhereHas('essays');
             })
-            ->get();
+            ->orderBy('nama_kelas')
+            ->get()
+            ->map(function ($course) {
+                // tetap seperti sebelumnya
+                $name = $course->nama_kelas;
+                $parts = [];
+                if ($course->learningCategory) {
+                    $parts[] = $course->learningCategory->nama;
+                }
+                if ($course->divisiCategory) {
+                    $parts[] = $course->divisiCategory->nama;
+                }
+                if ($course->category) {
+                    $parts[] = $course->category->nama;
+                }
+                if ($course->subCategory) {
+                    $parts[] = $course->subCategory->nama;
+                }
+                $path = implode(' > ', $parts);
+                return (object) [
+                    'id'   => $course->id,
+                    'name' => $name,
+                    'path' => $path,
+                ];
+            });
 
+        // 1) Query awal: semua user dengan quiz/essay atau matriks kompetensi
+        $q = User::select('ID', 'Nama', 'Divisi', 'email_karyawan')
+            ->where('Aktif', 1) // << Tambahkan ini
+            ->whereHas('enrolls.course.moduls', function ($q) {
+                $q->whereHas('quizzes')->orWhereHas('essays');
+            });
+
+        // Apply filter Peserta (ID)
+        if ($peserta = $request->input('peserta', [])) {
+            $q->whereIn('ID', $peserta);
+        }
+
+        // Apply filter Divisi
+        if ($divs = $request->input('divisi', [])) {
+            $q->whereIn('Divisi', $divs);
+        }
+
+        // Apply filter Course: cuma user yang punya enroll di course terpilih
+        if ($courseIds = $request->input('course', [])) {
+            $q->whereHas('enrolls.course', function ($q2) use ($courseIds) {
+                $q2->whereIn('id', $courseIds);
+            });
+        }
+
+        // Ambil users yang sudah di-filter
+        $users = $q->get();
+
+        // 2) Proses setiap user seperti sebelumnya
         foreach ($users as $user) {
-            // 2) Fetch enrolls + data terkait, termasuk category
             $enrolls = UserCourseEnroll::with([
                 'course:id,nama_kelas,thumbnail,category_id',
                 'course.category:id,nama',
-                'course.moduls' => function ($q) {
-                    $q->withCount(['quizzes', 'essays']);
-                },
-                'course.moduls.quizzes.userAnswers' => function ($q) use ($user) {
-                    $q->where('user_id', $user->ID);
-                },
+                'course.moduls' => fn($q) => $q->withCount(['quizzes', 'essays']),
+                'course.moduls.quizzes.userAnswers' => fn($q) => $q->where('user_id', $user->ID),
                 'course.moduls.essays',
             ])
                 ->where('user_id', $user->ID)
-                ->whereHas('course.moduls', function ($q) {
-                    $q->whereHas('quizzes')->orWhereHas('essays');
-                })
+                ->whereHas('course.moduls', fn($q) => $q->whereHas('quizzes')->orWhereHas('essays'))
                 ->get();
 
-            // 3) Ambil semua nilai user di dua tabel, keyed by course_id
-            $nilaiStandard = Nilai::where('user_id', $user->ID)
-                ->get()
-                ->keyBy('course_id');
+            // Ambil nilai standar & matriks
+            $nilaiStandard = Nilai::where('user_id', $user->ID)->get()->keyBy('course_id');
+            $nilaiMatriks  = NilaiMatriks::where('user_id', $user->ID)->get()->keyBy('course_id');
 
-            $nilaiMatriks = NilaiMatriks::where('user_id', $user->ID)
-                ->get()
-                ->keyBy('course_id');
-
-            // Assign nilai yang tepat ke setiap enroll
             foreach ($enrolls as $enr) {
-                $categoryName = optional($enr->course->category)->nama;
-
-                if ($categoryName === 'Matriks Kompetensi') {
+                $cat = optional($enr->course->category)->nama;
+                if ($cat === 'Matriks Kompetensi') {
                     $nilai = $nilaiMatriks->get($enr->course_id) ?: new NilaiMatriks();
-                    $nilai->nilai_quiz = $nilai->nilai_quiz ?? 0;
-                    $nilai->nilai_essay = $nilai->nilai_essay ?? 0;
-                    $nilai->nilai_praktek = $nilai->nilai_praktek ?? 0;
+                    $nilai->nilai_quiz            = $nilai->nilai_quiz ?? 0;
+                    $nilai->nilai_essay           = $nilai->nilai_essay ?? 0;
+                    $nilai->nilai_praktek         = $nilai->nilai_praktek ?? 0;
                     $nilai->presentase_kompetensi = $nilai->presentase_kompetensi ?? 0;
                 } else {
                     $nilai = $nilaiStandard->get($enr->course_id) ?: new Nilai();
-                    $nilai->nilai_quiz = $nilai->nilai_quiz ?? 0;
-                    $nilai->nilai_essay = $nilai->nilai_essay ?? 0;
-                    $nilai->nilai_praktek = 0;
+                    $nilai->nilai_quiz            = $nilai->nilai_quiz ?? 0;
+                    $nilai->nilai_essay           = $nilai->nilai_essay ?? 0;
+                    $nilai->nilai_praktek         = 0;
                     $nilai->presentase_kompetensi = 0;
                 }
-
                 $enr->setRelation('nilai', $nilai);
             }
 
             $user->courses      = $enrolls;
             $user->total_course = $enrolls->count();
 
-            // 4) Hitung quiz_score per modul
+            // Hitung quiz_score per modul
             foreach ($user->courses as $enr) {
-                $enr->setAttribute(
-                    'modules',
-                    $enr->course->moduls->map(function ($modul) {
-                        $details = $modul->quizzes->map(function ($quiz) {
-                            return [
-                                'is_correct' => optional(
-                                    $quiz->userAnswers->first()
-                                )->kode_jawaban === $quiz->kunci_jawaban,
-                            ];
-                        });
-
-                        $score = collect($details)->where('is_correct', true)->count();
-                        $total  = $details->count();
-
-                        return (object) [
-                            'nama_modul'  => $modul->nama_modul,
-                            'quiz_score'  => $score,
-                            'total_soal'  => $total,
-                        ];
-                    })
-                );
+                $enr->setAttribute('modules', $enr->course->moduls->map(function ($modul) {
+                    $details = $modul->quizzes->map(fn($quiz) => [
+                        'is_correct' => optional($quiz->userAnswers->first())->kode_jawaban === $quiz->kunci_jawaban,
+                    ]);
+                    $score = collect($details)->where('is_correct', true)->count();
+                    $total = $details->count();
+                    return (object) [
+                        'nama_modul' => $modul->nama_modul,
+                        'quiz_score' => $score,
+                        'total_soal' => $total
+                    ];
+                }));
             }
         }
 
-        return view('admin.preview.nilai', compact('users'));
+        // Kirim ke view: users + data dropdown
+        return view('admin.preview.nilai', compact(
+            'users',
+            'allUsers',
+            'allDivisions',
+            'allCourses'
+        ));
     }
 }
