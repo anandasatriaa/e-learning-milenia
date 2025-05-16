@@ -151,6 +151,11 @@
     <div class="page-inner">
         <div class="row">
             <div class="col-12">
+                <!-- Informational Banner -->
+                <div class="alert alert-info rounded mb-4" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Nilai akhir peserta muncul ketika admin selesai melakukan input nilai.
+                </div>
                 <div class="card card-round">
                     <div class="card-body">
                         <h3 class="mb-4 text-primary">Nilai Peserta</h3>
