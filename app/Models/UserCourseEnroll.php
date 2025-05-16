@@ -6,6 +6,7 @@ use App\Models\Course\Course;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Nilai\Nilai;
+use App\Models\Nilai\NilaiMatriks;
 
 class UserCourseEnroll extends Model
 {
@@ -27,5 +28,11 @@ class UserCourseEnroll extends Model
     public function nilai()
     {
         return $this->hasOne(Nilai::class, 'user_id', 'user_id');
+    }
+
+    public function nilaiMatriks()
+    {
+        return $this->hasOne(NilaiMatriks::class, 'course_id', 'course_id')
+            ->where('user_id', $this->user_id);
     }
 }

@@ -46,6 +46,7 @@
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
             position: relative;
             border-radius: 0.5rem;
+            cursor: pointer;
         }
 
         .collapsible:not(.no-hover):hover {
@@ -59,12 +60,12 @@
             font-size: 0.8em;
             position: absolute;
             right: 15px;
-            top: 15px;
             transition: transform 0.3s ease;
+            transform: translateY(-50%);
         }
 
-        .collapsible-toggle[aria-expanded="true"]::after {
-            transform: rotate(90deg);
+        .collapsible[aria-expanded="true"] .collapsible-toggle::after {
+            transform: translateY(-50%) rotate(90deg);
         }
 
         .child-table {
@@ -144,7 +145,8 @@
                                         @endphp
 
                                         <tr class="collapsible" data-bs-toggle="collapse"
-                                            data-bs-target="#courses{{ $i }}">
+                                            data-bs-target="#courses{{ $i }}" aria-expanded="false"
+                                            aria-controls="courses{{ $i }}">
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <div class="avatar-sm me-2">
@@ -161,7 +163,8 @@
                                         </tr>
                                         <tr>
                                             <td colspan="5" class="p-0">
-                                                <div id="courses{{ $i }}" class="collapse child-table">
+                                                <div id="courses{{ $i }}" class="collapse child-table"
+                                                    aria-labelledby="courses{{ $i }}">
                                                     <div class="p-4">
                                                         <div class="nested-table">
                                                             <table class="table mb-0">
@@ -255,13 +258,12 @@
                                                                                                 <tbody>
                                                                                                     @foreach ($enr->modules as $mod)
                                                                                                         @php
-                                                                                                            $totalSoal = count(
-                                                                                                                $mod->quiz_details,
-                                                                                                            );
+                                                                                                            $totalSoal =
+                                                                                                                $mod->total_soal ??
+                                                                                                                0;
                                                                                                             $benar =
                                                                                                                 $mod->quiz_score ??
                                                                                                                 0;
-
                                                                                                             $class =
                                                                                                                 'text-muted';
                                                                                                             if (
@@ -293,33 +295,16 @@
                                                                                                                 {{ $mod->nama_modul }}
                                                                                                             </td>
                                                                                                             <td>
-                                                                                                                @php
-                                                                                                                    $bgClass =
-                                                                                                                        'bg-secondary text-white';
-                                                                                                                    if (
-                                                                                                                        $benar ===
-                                                                                                                            $totalSoal &&
-                                                                                                                        $totalSoal >
-                                                                                                                            0
-                                                                                                                    ) {
-                                                                                                                        $bgClass =
-                                                                                                                            'bg-success text-white';
-                                                                                                                    } elseif (
-                                                                                                                        $benar >
-                                                                                                                        0
-                                                                                                                    ) {
-                                                                                                                        $bgClass =
-                                                                                                                            'bg-warning text-dark';
-                                                                                                                    } elseif (
-                                                                                                                        $totalSoal >
-                                                                                                                        0
-                                                                                                                    ) {
-                                                                                                                        $bgClass =
-                                                                                                                            'bg-danger text-white';
-                                                                                                                    }
-                                                                                                                @endphp
                                                                                                                 <span
-                                                                                                                    class="d-inline-flex align-items-center px-2 py-1 rounded {{ $bgClass }}"
+                                                                                                                    class="d-inline-flex align-items-center px-2 py-1 rounded @php
+$bgClass = 'bg-secondary text-white';
+                                                                                                                    if ($benar === $totalSoal && $totalSoal > 0) {
+                                                                                                                        $bgClass = 'bg-success text-white';
+                                                                                                                    } elseif ($benar > 0) {
+                                                                                                                        $bgClass = 'bg-warning text-dark';
+                                                                                                                    } elseif ($totalSoal > 0) {
+                                                                                                                        $bgClass = 'bg-danger text-white';
+                                                                                                                    } @endphp {{ $bgClass }}"
                                                                                                                     style="font-size: 0.875rem;">
                                                                                                                     <i
                                                                                                                         class="fas fa-check-circle me-1"></i>
@@ -338,24 +323,39 @@
                                                                                                         </td>
                                                                                                         <td colspan="2">
                                                                                                             @php
-                                                                                                                $nilaiQuiz =
+                                                                                                                // Gunakan optional untuk mencegah property on null
+                                                                                                                $catName = optional(
                                                                                                                     $enr
-                                                                                                                        ->nilai
-                                                                                                                        ->nilai_quiz ??
-                                                                                                                    0;
-                                                                                                                $nilaiEssay =
-                                                                                                                    $enr
-                                                                                                                        ->nilai
-                                                                                                                        ->nilai_essay ??
-                                                                                                                    0;
+                                                                                                                        ->course
+                                                                                                                        ->category,
+                                                                                                                )->nama;
                                                                                                             @endphp
-                                                                                                            <small
-                                                                                                                class="text-primary fw-bold d-block">
-                                                                                                                Quiz:
-                                                                                                                {{ $nilaiQuiz }}
-                                                                                                                | Essay:
-                                                                                                                {{ $nilaiEssay }}
-                                                                                                            </small>
+
+                                                                                                            @if ($catName === 'Matriks Kompetensi')
+                                                                                                                <small
+                                                                                                                    class="text-primary fw-bold d-block">
+                                                                                                                    Quiz:
+                                                                                                                    {{ $enr->nilai->nilai_quiz }}
+                                                                                                                    |
+                                                                                                                    Essay:
+                                                                                                                    {{ $enr->nilai->nilai_essay }}
+                                                                                                                    |
+                                                                                                                    Praktek:
+                                                                                                                    {{ $enr->nilai->nilai_praktek }}
+                                                                                                                    |
+                                                                                                                    Kompetensi:
+                                                                                                                    {{ $enr->nilai->presentase_kompetensi }}%
+                                                                                                                </small>
+                                                                                                            @else
+                                                                                                                <small
+                                                                                                                    class="text-primary fw-bold d-block">
+                                                                                                                    Quiz:
+                                                                                                                    {{ $enr->nilai->nilai_quiz }}
+                                                                                                                    |
+                                                                                                                    Essay:
+                                                                                                                    {{ $enr->nilai->nilai_essay }}
+                                                                                                                </small>
+                                                                                                            @endif
                                                                                                         </td>
                                                                                                     </tr>
                                                                                                 </tbody>

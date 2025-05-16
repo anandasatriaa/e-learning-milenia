@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Nilai;
 
 use App\Http\Controllers\Controller;
 use App\Models\Nilai\Nilai;
+use App\Models\Nilai\NilaiMatriks;
 use App\Models\Course\Course;
 use App\Models\User;
 use App\Models\UserCourseEnroll;
@@ -224,44 +225,60 @@ class NilaiController extends Controller
 
     public function previewNilai()
     {
-        // 1) Ambil semua user yang punya quiz/essay
+        // 1) Ambil semua user yang punya quiz/essay atau matriks kompetensi
         $users = User::select('ID', 'Nama', 'Divisi', 'email_karyawan')
-            ->whereHas(
-                'enrolls.course.moduls',
-                fn($q) =>
-                $q->whereHas('quizzes')->orWhereHas('essays')
-            )
+            ->whereHas('enrolls.course.moduls', function ($q) {
+                $q->whereHas('quizzes')
+                    ->orWhereHas('essays');
+            })
             ->get();
 
         foreach ($users as $user) {
-            // 2) Fetch enrolls + data terkait
+            // 2) Fetch enrolls + data terkait, termasuk category
             $enrolls = UserCourseEnroll::with([
-                'course:id,nama_kelas,thumbnail',
-                'course.moduls' => fn($q) => $q->withCount(['quizzes', 'essays']),
-                'course.moduls.quizzes.userAnswers' => fn($q) => $q->where('user_id', $user->ID),
+                'course:id,nama_kelas,thumbnail,category_id',
+                'course.category:id,nama',
+                'course.moduls' => function ($q) {
+                    $q->withCount(['quizzes', 'essays']);
+                },
+                'course.moduls.quizzes.userAnswers' => function ($q) use ($user) {
+                    $q->where('user_id', $user->ID);
+                },
                 'course.moduls.essays',
             ])
                 ->where('user_id', $user->ID)
-                ->whereHas(
-                    'course.moduls',
-                    fn($q) =>
-                    $q->whereHas('quizzes')->orWhereHas('essays')
-                )
+                ->whereHas('course.moduls', function ($q) {
+                    $q->whereHas('quizzes')->orWhereHas('essays');
+                })
                 ->get();
 
-            // 3) Ambil semua nilai user, keyed by course_id
-            $nilaiByCourse = Nilai::where('user_id', $user->ID)
+            // 3) Ambil semua nilai user di dua tabel, keyed by course_id
+            $nilaiStandard = Nilai::where('user_id', $user->ID)
                 ->get()
                 ->keyBy('course_id');
 
-            // Assign nilai yang tepat ke setiap enroll (default 0 jika tidak ada)
+            $nilaiMatriks = NilaiMatriks::where('user_id', $user->ID)
+                ->get()
+                ->keyBy('course_id');
+
+            // Assign nilai yang tepat ke setiap enroll
             foreach ($enrolls as $enr) {
-                $nilai = $nilaiByCourse->get($enr->course_id);
-                if (!$nilai) {
-                    $nilai = new Nilai();
-                    $nilai->nilai_quiz = 0;
-                    $nilai->nilai_essay = 0;
+                $categoryName = optional($enr->course->category)->nama;
+
+                if ($categoryName === 'Matriks Kompetensi') {
+                    $nilai = $nilaiMatriks->get($enr->course_id) ?: new NilaiMatriks();
+                    $nilai->nilai_quiz = $nilai->nilai_quiz ?? 0;
+                    $nilai->nilai_essay = $nilai->nilai_essay ?? 0;
+                    $nilai->nilai_praktek = $nilai->nilai_praktek ?? 0;
+                    $nilai->presentase_kompetensi = $nilai->presentase_kompetensi ?? 0;
+                } else {
+                    $nilai = $nilaiStandard->get($enr->course_id) ?: new Nilai();
+                    $nilai->nilai_quiz = $nilai->nilai_quiz ?? 0;
+                    $nilai->nilai_essay = $nilai->nilai_essay ?? 0;
+                    $nilai->nilai_praktek = 0;
+                    $nilai->presentase_kompetensi = 0;
                 }
+
                 $enr->setRelation('nilai', $nilai);
             }
 
@@ -272,19 +289,24 @@ class NilaiController extends Controller
             foreach ($user->courses as $enr) {
                 $enr->setAttribute(
                     'modules',
-                    $enr->course->moduls->map(fn($modul) => tap((object) [
-                        'nama_modul'   => $modul->nama_modul,
-                        'quiz_details' => $modul->quizzes->map(fn($quiz) => [
-                            'is_correct' => optional(
-                                $quiz->userAnswers->first()
-                            )->kode_jawaban === $quiz->kunci_jawaban,
-                        ]),
-                    ], function ($o) {
-                        $o->quiz_score = collect($o->quiz_details)
-                            ->where('is_correct', true)
-                            ->count();
-                        $o->total_soal = count($o->quiz_details);
-                    }))
+                    $enr->course->moduls->map(function ($modul) {
+                        $details = $modul->quizzes->map(function ($quiz) {
+                            return [
+                                'is_correct' => optional(
+                                    $quiz->userAnswers->first()
+                                )->kode_jawaban === $quiz->kunci_jawaban,
+                            ];
+                        });
+
+                        $score = collect($details)->where('is_correct', true)->count();
+                        $total  = $details->count();
+
+                        return (object) [
+                            'nama_modul'  => $modul->nama_modul,
+                            'quiz_score'  => $score,
+                            'total_soal'  => $total,
+                        ];
+                    })
                 );
             }
         }
