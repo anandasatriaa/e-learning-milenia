@@ -15,6 +15,11 @@ class UserCourseEnroll extends Model
     protected $table = 'user_course_enrolls';
     protected $fillable = ['course_id', 'user_id', 'enroll_date', 'finish_date', 'status', 'time_spend', 'progress_bar'];
 
+    protected $casts = [
+        'enroll_date' => 'datetime',
+        'finish_date' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

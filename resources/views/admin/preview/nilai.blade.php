@@ -195,6 +195,11 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="mt-3">
+                                <button type="submit" name="export" value="excel" class="btn btn-outline-success">
+                                    <i class="fas fa-file-excel me-1"></i> Export Excel
+                                </button>
+                            </div>
                         </form>
                         <div class="table-responsive">
                             <table class="table table-main">

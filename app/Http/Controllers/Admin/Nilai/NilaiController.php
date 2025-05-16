@@ -16,6 +16,8 @@ use App\Models\Course\ModulEssay;
 use App\Models\Course\ModulEssayAnswer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Exports\NilaiPesertaExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class NilaiController extends Controller
 {
@@ -290,9 +292,10 @@ class NilaiController extends Controller
         // Ambil users yang sudah di-filter
         $users = $q->get();
 
-        // 2) Proses setiap user seperti sebelumnya
+        // Proses enroll dan nilai seperti sekarang
         foreach ($users as $user) {
-            $enrolls = UserCourseEnroll::with([
+            $enrolls = UserCourseEnroll::select('*') // atau sebutkan kolom spesifik
+                ->with([
                 'course:id,nama_kelas,thumbnail,category_id',
                 'course.category:id,nama',
                 'course.moduls' => fn($q) => $q->withCount(['quizzes', 'essays']),
@@ -328,21 +331,28 @@ class NilaiController extends Controller
             $user->courses      = $enrolls;
             $user->total_course = $enrolls->count();
 
-            // Hitung quiz_score per modul
+            // **Hitung quiz_score per modul** dan simpan di attribute modules
             foreach ($user->courses as $enr) {
-                $enr->setAttribute('modules', $enr->course->moduls->map(function ($modul) {
-                    $details = $modul->quizzes->map(fn($quiz) => [
-                        'is_correct' => optional($quiz->userAnswers->first())->kode_jawaban === $quiz->kunci_jawaban,
-                    ]);
-                    $score = collect($details)->where('is_correct', true)->count();
-                    $total = $details->count();
-                    return (object) [
-                        'nama_modul' => $modul->nama_modul,
-                        'quiz_score' => $score,
-                        'total_soal' => $total
-                    ];
-                }));
+                $enr->setAttribute(
+                    'modules',
+                    $enr->course->moduls->map(function ($modul) {
+                        $details = $modul->quizzes->map(fn($quiz) => [
+                            'is_correct' => optional($quiz->userAnswers->first())->kode_jawaban === $quiz->kunci_jawaban,
+                        ]);
+                        $score = collect($details)->where('is_correct', true)->count();
+                        $total = $details->count();
+                        return (object) [
+                            'nama_modul' => $modul->nama_modul,
+                            'quiz_score' => $score,
+                            'total_soal'  => $total,
+                        ];
+                    })
+                );
             }
+        }
+
+        if ($request->has('export') && $request->export == 'excel') {
+            return Excel::download(new NilaiPesertaExport($users), 'nilai_peserta.xlsx');
         }
 
         // Kirim ke view: users + data dropdown
