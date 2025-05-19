@@ -43,6 +43,12 @@
                         <p>Courses</p>
                     </a>
                 </li>
+                <li class="nav-item {{ request()->routeIs('pages.preview-nilai') ? 'active' : '' }}">
+                    <a href="{{ route('pages.preview-nilai') }}">
+                        <i class="fas fa-award"></i>
+                        <p>Nilai</p>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>

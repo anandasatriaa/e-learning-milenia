@@ -154,7 +154,7 @@
                 <!-- Informational Banner -->
                 <div class="alert alert-info rounded mb-4" role="alert">
                     <i class="fas fa-info-circle me-2"></i>
-                    Nilai akhir peserta muncul ketika admin selesai melakukan input nilai.
+                    Nilai akhir peserta akan muncul ketika admin selesai melakukan input.
                 </div>
                 <div class="card card-round">
                     <div class="card-body">
@@ -346,7 +346,7 @@
                                                                                                 <thead class="bg-light">
                                                                                                     <tr>
                                                                                                         <th>Nama Modul</th>
-                                                                                                        <th>Benar</th>
+                                                                                                        <th>Benar / Soal</th>
                                                                                                     </tr>
                                                                                                 </thead>
                                                                                                 <tbody>

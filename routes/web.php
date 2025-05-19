@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\Calendar\CalendarController;
 use App\Http\Controllers\Pages\Course\CourseController;
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\HomeCourseController;
+use App\Http\Controllers\Pages\Preview\PreviewNilaiController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/landing-page', [AuthController::class, 'landingPage'])->name('landing.page');
@@ -108,6 +109,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/', [HomeController::class, 'index'])->name('dashboard');
         Route::get('/course-learning', [HomeCourseController::class, 'index'])->name('homeCourse');
         Route::get('/course-learning/{learning_id}', [HomeCourseController::class, 'subCourse'])->name('subCourse');
+
+        Route::get('/preview-nilai', [PreviewNilaiController::class, 'index'])->name('preview-nilai');
 
         Route::group(['prefix' => 'course', 'as' => 'course.'], function () {
             Route::get('/{course_id}', [CourseController::class, 'detailcourse'])->name('course.detail');
