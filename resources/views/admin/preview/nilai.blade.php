@@ -158,7 +158,7 @@
                 </div>
                 <div class="card card-round">
                     <div class="card-body">
-                        <h3 class="mb-4 text-primary">Nilai Peserta</h3>
+                        <div class="card-title mb-4"><i class="fas fa-award"></i> Nilai Peserta</div>
                         <form action="{{ route('admin.preview.preview-nilai') }}" method="GET" id="filter-form">
                             <div class="d-flex flex-wrap mb-3 gap-2">
                                 <!-- Filter Peserta -->

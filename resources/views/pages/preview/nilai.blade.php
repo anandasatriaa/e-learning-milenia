@@ -159,7 +159,7 @@
 
                 <div class="card card-round">
                     <div class="card-body">
-                        <h3 class="mb-4 text-primary">Preview Nilai</h3>
+                        <div class="card-title mb-4"><i class="fas fa-award"></i> Preview Nilai</div>
                         <div class="table-responsive">
                             <table class="table table-main">
                                 <thead class="bg-light">
