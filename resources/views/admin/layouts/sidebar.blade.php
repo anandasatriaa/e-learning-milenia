@@ -167,6 +167,18 @@
                         <p>Hasil Nilai Peserta</p>
                     </a>
                 </li>
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </span>
+                    <h4 class="text-section">Kuesioner</h4>
+                </li>
+                <li class="nav-item {{ request()->routeIs('admin.kuesioner.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.kuesioner.feedback-kuesioner') }}">
+                        <i class="fas fa-comment-dots"></i>
+                        <p>Feedback Kuesioner</p>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>

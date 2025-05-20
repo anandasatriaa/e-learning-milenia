@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\Nilai\NilaiController;
 use App\Http\Controllers\Admin\Nilai\NilaiMatriksController;
 use App\Http\Controllers\Admin\Calendar\CalendarController;
+use App\Http\Controllers\Admin\Kuesioner\AdminKuesionerController;
 use App\Http\Controllers\Pages\Course\CourseController;
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\HomeCourseController;
@@ -94,6 +95,14 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::group(['prefix' => 'preview', 'as' => 'preview.'], function () {
             Route::get('/preview-nilai', [NilaiController::class, 'previewNilai'])->name('preview-nilai');
+        });
+
+        Route::group(['prefix' => 'kuesioner', 'as' => 'kuesioner.'], function () {
+            Route::get('/feeback-kuesioner', [AdminKuesionerController::class, 'index'])->name('feedback-kuesioner');
+            Route::post('/feedback-kuesioner/store', [AdminKuesionerController::class, 'store'])->name('feedback-kuesioner.store');
+            Route::get('/feedback-kuesioner/{questionnaire}/edit', [AdminKuesionerController::class, 'edit'])->name('feedback-kuesioner.edit');
+            Route::put('/feedback-kuesioner/{questionnaire}', [AdminKuesionerController::class, 'update'])->name('feedback-kuesioner.update');
+            Route::delete('/feedback-kuesioner/{questionnaire}', [AdminKuesionerController::class, 'destroy'])->name('feedback-kuesioner.destroy');
         });
 
         Route::group(['prefix' => 'user', 'as' => 'user.'], function () {

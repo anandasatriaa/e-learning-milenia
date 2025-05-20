@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Nilai\Nilai;
 use App\Models\Nilai\NilaiMatriks;
 use App\Models\UserCourseEnroll;
+use App\Models\Questionnaire\Questionnaire;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -92,5 +93,10 @@ class Course extends Model
     public function moduls()
     {
         return $this->hasMany(CourseModul::class, 'course_id');
+    }
+
+    public function questionnaires()
+    {
+        return $this->belongsToMany(Questionnaire::class, 'questionnaires_courses');
     }
 }
