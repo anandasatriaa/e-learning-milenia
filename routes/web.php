@@ -136,6 +136,10 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/getQuiz/{quiz_id}', [CourseController::class, 'getQuiz'])->name('course.getQuiz');
             Route::get('/get-time-spend-and-progress-bar/{course_id}/{user_id}', [CourseController::class, 'getTimeandProgress'])->name('course.getTimeandProgress');
             Route::post('/post-time-spend-and-progress-bar', [CourseController::class, 'postTimeandProgress'])->name('course.postTimeandProgress');
+
+            Route::get('/questionnaires/{id}/embed', [CourseController::class, 'embedQuestionnaires'])->name('course.questionnaires');
+            Route::post('questionnaire/{questionnaire}/response/{user}', [CourseController::class, 'submitResponse'])->name('submitResponse');
+            Route::post('questionnaire-answer/{question}/{response}', [CourseController::class, 'submitAnswer'])->name('submitAnswer');
         });
     });
 });

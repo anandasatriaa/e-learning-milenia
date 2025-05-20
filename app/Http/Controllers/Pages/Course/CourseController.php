@@ -11,6 +11,9 @@ use App\Models\Course\ModulQuizUserAnswer;
 use App\Models\Course\ModulQuizAnswer;
 use App\Models\Course\ModulEssayAnswer;
 use App\Models\Course\CourseModul;
+use App\Models\Questionnaire\Questionnaire;
+use App\Models\Questionnaire\QuestionnaireResponse;
+use App\Models\Questionnaire\QuestionnaireAnswer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -421,5 +424,53 @@ class CourseController extends Controller
             'correct'    => $correct,
             'totalQuiz'  => $totalQuiz,
         ]);
+    }
+
+    public function embedQuestionnaires($id)
+    {
+        // Ambil questionnaire beserta pertanyaannya (ordered)
+        $questionnaire = Questionnaire::with(['questions' => function ($q) {
+            $q->orderBy('position');
+        }])->findOrFail($id);
+
+        // Bangun struktur array yang akan dikirim ke JS
+        $data = [
+            'id'    => $questionnaire->id,
+            'title' => $questionnaire->title,
+            'questions' => $questionnaire->questions->map(function ($question) {
+                return [
+                    'id'        => $question->id,
+                    'type'      => $question->type,
+                    'text'      => $question->text,
+                    'scale_min' => $question->scale_min,
+                    'scale_max' => $question->scale_max,
+                    'label_min' => $question->label_min,
+                    'label_max' => $question->label_max,
+                    'position'  => $question->position,
+                ];
+            }),
+        ];
+
+        return response()->json($data);
+    }
+
+    public function submitResponse(Request $request, $questionnaire, $user)
+    {
+        $resp = QuestionnaireResponse::create([
+            'questionnaire_id' => $questionnaire,
+            'user_id'          => $user,
+            'submitted_at'     => now(),
+        ]);
+        return response()->json(['response_id' => $resp->id]);
+    }
+
+    public function submitAnswer(Request $request, $question, $response)
+    {
+        $ans = QuestionnaireAnswer::create([
+            'question_id'  => $question,
+            'response_id'  => $response,
+            'scale_value'  => $request->input('scale_value'),
+        ]);
+        return response()->json(['answer_id' => $ans->id]);
     }
 }

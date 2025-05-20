@@ -41,6 +41,73 @@
             max-width: 100%;
             height: auto;
         }
+
+        .questionnaire-wrapper {
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 0, 0, .125);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+            border-radius: .5rem;
+            /* max-width: 900px; */
+            margin: 1rem auto;
+        }
+
+        /* Judul kuesioner */
+        .questionnaire-wrapper h4 {
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Kartu tiap pertanyaan */
+        .question-card {
+            border: 1px solid rgba(0, 0, 0, .125);
+            border-radius: .5rem;
+            transition: box-shadow .2s;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-card .card-body {
+            padding: 1.25rem;
+        }
+
+        /* Scale linear */
+        .linear-scale {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .scale-options {
+            display: flex;
+        }
+
+        .scale-option {
+            flex: 1;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .scale-option .option-number {
+            font-weight: 500;
+            margin-bottom: .25rem;
+        }
+
+        .scale-option .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: .5rem;
+            font-size: .875rem;
+            color: #6c757d;
+        }
     </style>
 @endsection
 @section('content')
@@ -190,6 +257,27 @@
                                     </div>
                                 </div>
                             @endforeach
+
+                            {{-- Questionnaires --}}
+                            @if ($course->questionnaires->isNotEmpty())
+                                @foreach ($course->questionnaires as $questionnaire)
+                                    <div class="card mb-2 border rounded m-2">
+                                        <div class="card-header" {{-- pakai $loop->index untuk index 0,1,2… --}}
+                                            data-module-index="{{ $course->modul->count() + $loop->index + 1 }}"
+                                            data-questionnaire-id="{{ $questionnaire->id }}"
+                                            data-questionnaire-title="{{ $questionnaire->title }}"
+                                            data-question-count="{{ $questionnaire->questions->count() }}"
+                                            onclick="loadQuestionnaire({{ $questionnaire->id }}, this)">
+                                            <div class="span-title">
+                                                <span class="me-2 bg-secondary px-2 py-1 my-auto rounded text-white">
+                                                    <i class="fas fa-clipboard-list"></i>
+                                                </span>
+                                                {{ $questionnaire->title }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -364,9 +452,9 @@
         let videoLoadInterval = null;
         // Fungsi generik untuk load video & track position
         function loadVideo(mediaLink, videoKeySuffix) {
-            if (videoKeySuffix !== 'intro') {
-                btnSubmit.disabled = false; // Enable tombol
-                btnSubmit.classList.remove('disabled'); // Hapus kelas disabled (jika pakai Bootstrap)
+            if (videoKeySuffix !== 'intro' && !window.courseCompleted) {
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('disabled');
             }
 
             // simpan suffix ini jika belum ada
@@ -461,7 +549,7 @@
                         video.addEventListener('ended', () => {
                             localStorage.setItem(keyTime, video.duration);
                             console.log("Video selesai, simpan durasi penuh");
-                            btnSubmit.disabled = false;
+                            // btnSubmit.disabled = false;
                         });
                     }, 200);
                 } catch (e) {
@@ -473,6 +561,7 @@
 
         // Panggil loadVideo untuk video pengantar (jika butuh)
         function loadIntroductionVideo() {
+            setActiveModule(0);
             btnSubmit.disabled = true;
             btnSubmit.classList.add('disabled');
 
@@ -490,7 +579,7 @@
 
             // Load video pengantar
             loadVideo("{{ url('/course/embed-video/') }}/" + courseId, 'intro');
-            setActiveModule(0);
+
 
             const introCard = document.getElementById('introductionCard');
             if (introCard) {
@@ -503,6 +592,7 @@
 
         // updateIframeSource dengan support video/pdf/link
         function updateIframeSource(mediaType, mediaLink, index) {
+            setActiveModule(index + 1);
             const iframe = document.getElementById("videoSource");
             const iframeContent = document.getElementById("iframeContent");
             const ratio = document.querySelector('.ratio');
@@ -522,7 +612,7 @@
                 iframe.src = mediaLink;
             }
 
-            setActiveModule(index + 1);
+
             highlightCard();
         }
 
@@ -817,6 +907,186 @@
         }
     </script>
 
+    {{-- QUESIONNAIRES --}}
+    <script>
+        const embedUrlTemplate = "{{ route('pages.course.course.questionnaires', ['id' => ':id']) }}";
+
+        function pauseCurrentVideo() {
+            const iframe = document.getElementById('videoSource');
+            if (!iframe) return;
+            try {
+                const video = iframe.contentWindow?.document.querySelector('video');
+                if (video && !video.paused) {
+                    video.pause();
+                    console.log('Video paused oleh pauseCurrentVideo()');
+                }
+            } catch (e) {
+                console.warn('Tidak bisa pause video (cross-origin?):', e);
+            }
+        }
+
+        function clearContent() {
+            document.querySelector('.ratio-16x9').style.display = 'none';
+            document.getElementById('iframeContent').innerHTML = '';
+        }
+
+        function createElement(tag, attrs = {}, html = '') {
+            const el = document.createElement(tag);
+            Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+            if (html) el.innerHTML = html;
+            return el;
+        }
+
+        // Pilih renderer
+        function renderQuestion(q) {
+            if (q.type === 'linear_scale') {
+                return renderLinearScale(q);
+            }
+            return '<p><em>Tipe pertanyaan tidak didukung.</em></p>';
+        }
+
+        // Render linear scale dengan angka di atas radio
+        function renderLinearScale(q) {
+            let options = '';
+            for (let i = q.scale_min; i <= q.scale_max; i++) {
+                options += `
+              <div class="scale-option">
+                <div class="option-number">${i}</div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio"
+                         name="question_${q.id}"
+                         id="question_${q.id}_${i}"
+                         value="${i}">
+                </div>
+              </div>`;
+            }
+
+            return `
+            <div class="linear-scale">
+              <div class="scale-options">
+                ${options}
+              </div>
+              <div class="scale-labels">
+                <span>${q.label_min}</span>
+                <span>${q.label_max}</span>
+              </div>
+            </div>`;
+        }
+
+        async function loadQuestionnaire(id, clickedHeader) {
+
+            // 0) Un-disable tombol selesaiKelas
+            const btnSubmit = document.getElementById('selesaiKelas');
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('disabled');
+            }
+
+            const idx = parseInt(clickedHeader.getAttribute('data-module-index'), 10);
+            setActiveModule(idx);
+
+            // 1) Pause video jika ada
+            pauseCurrentVideo();
+            clearContent();
+
+            // 3) Collapse semua modul video/pdf agar card video terdengar tidak aktif
+            document.querySelectorAll('.collapse.show').forEach(c => c.classList.remove('show'));
+
+            // 4) Highlight kartu kuesioner
+            //    hapus semua border-primary, lalu tambahkan ke kartu yang di-klik
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('border-primary'));
+            const card = clickedHeader.closest('.card');
+            if (card) card.classList.add('border-primary');
+
+            // 5) Lakukan fetch & render kuesioner
+            const container = document.getElementById('iframeContent');
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('questionnaire-wrapper');
+            container.appendChild(wrapper);
+
+            // spinner
+            wrapper.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-3 text-secondary">Memuat kuesioner…</p>
+            </div>`;
+
+            try {
+                const url = embedUrlTemplate.replace(':id', id);
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Gagal memuat kuesioner');
+                const {
+                    title,
+                    questions
+                } = await res.json();
+
+                wrapper.innerHTML = `<h4>${title}</h4>`;
+                questions.forEach((q, idx) => {
+                    const cardQ = document.createElement('div');
+                    cardQ.className = 'question-card mb-4';
+                    cardQ.innerHTML = `
+                <div class="card-body">
+                  <h6 class="mb-3">${idx+1}. ${q.text}</h6>
+                  ${renderQuestion(q)}
+                </div>`;
+                    wrapper.appendChild(cardQ);
+                });
+
+                // 6) Load & apply saved answers
+                const userId = window.CURRENT_USER_ID;
+                const storageKey = `answers_user_${userId}_course_${courseId}_questionnaire_${id}`;
+                let saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+
+                // pre‐check radio berdasarkan saved
+                Object.entries(saved).forEach(([questionId, value]) => {
+                    const radio = wrapper.querySelector(
+                        `input[name="question_${questionId}"][value="${value}"]`
+                    );
+                    if (radio) radio.checked = true;
+                });
+
+                // 7) Pasang event listener ke semua radio dalam wrapper
+                wrapper.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.addEventListener('change', e => {
+                        const [, qid] = e.target.name.split('_'); // ['question', '<id>']
+                        saved[qid] = e.target.value;
+                        localStorage.setItem(storageKey, JSON.stringify(saved));
+                        console.log(`Jawaban pertanyaan ${qid} disimpan: ${e.target.value}`);
+                    });
+                });
+
+            } catch (err) {
+                wrapper.innerHTML = `
+          <div class="alert alert-danger">
+            <strong>Error:</strong> ${err.message}
+          </div>`;
+            }
+        }
+
+        function checkAllQuestionnairesAnswered() {
+            const userId = @json(auth()->user()->ID);
+            const headers = document.querySelectorAll('[data-questionnaire-id]');
+            for (let hdr of headers) {
+                const qid = hdr.getAttribute('data-questionnaire-id');
+                const title = hdr.getAttribute('data-questionnaire-title');
+                const total = parseInt(hdr.getAttribute('data-question-count'), 10);
+                const key = `answers_user_${userId}_course_${courseId}_questionnaire_${qid}`;
+                const saved = JSON.parse(localStorage.getItem(key) || '{}');
+                const answered = Object.keys(saved).length;
+                if (answered < total) {
+                    return {
+                        ok: false,
+                        missing: total - answered,
+                        questionnaireTitle: title
+                    };
+                }
+            }
+            return {
+                ok: true
+            };
+        }
+    </script>
+
     {{-- POST JAWABAN KE DATABASE --}}
     <script>
         document.getElementById('selesaiKelas').addEventListener('click', async function(e) {
@@ -871,17 +1141,72 @@
                 })
             );
 
-            if (hasUnwatched || hasUnansweredQuiz || hasUnfilledEssay) {
+            // — cek kuesioner juga —
+            const chk = checkAllQuestionnairesAnswered();
+            const hasUnansweredQuestionnaire = !chk.ok;
+
+            if (hasUnwatched || hasUnansweredQuiz || hasUnfilledEssay || hasUnansweredQuestionnaire) {
                 let msg = "Anda belum:\n";
                 if (hasUnwatched) msg += "- Menonton video hingga akhir\n";
                 if (hasUnansweredQuiz) msg += "- Menjawab seluruh quiz\n";
                 if (hasUnfilledEssay) msg += "- Mengisi seluruh jawaban essay\n";
+                if (hasUnansweredQuestionnaire) {
+                    msg += `- Menjawab seluruh pertanyaan pada kuesioner “${chk.questionnaireTitle}”\n`;
+                }
                 return swal("Peringatan!", msg, "warning");
             }
 
-            // 7️⃣ Pastikan progress = 100% lalu submit quiz
+            // semua lengkap → lanjut submit & set progress 100%
             currentModule = totalModules;
             updateProgress();
+
+            const saveResponseUrlTemplate =
+                "{{ route('pages.course.submitResponse', ['questionnaire' => ':qid', 'user' => ':user']) }}";
+            const saveAnswerUrlTemplate =
+                "{{ route('pages.course.submitAnswer', ['question' => ':question', 'response' => ':response']) }}";
+
+            const headers = document.querySelectorAll('[data-questionnaire-id]');
+            for (let hdr of headers) {
+                const qid = hdr.getAttribute('data-questionnaire-id');
+                const key = `answers_user_${userId}_course_${courseId}_questionnaire_${qid}`;
+                const saved = JSON.parse(localStorage.getItem(key) || '{}');
+                if (!Object.keys(saved).length) continue;
+
+                // 1) simpan header response
+                const saveRespUrl = saveResponseUrlTemplate
+                    .replace(':qid', qid)
+                    .replace(':user', userId);
+
+                const respRes = await fetch(saveRespUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+                if (!respRes.ok) throw new Error('Gagal simpan response');
+                const {
+                    response_id
+                } = await respRes.json();
+
+                // 2) simpan tiap jawaban
+                for (let [questionId, scale] of Object.entries(saved)) {
+                    const saveAnsUrl = saveAnswerUrlTemplate
+                        .replace(':question', questionId)
+                        .replace(':response', response_id);
+
+                    await fetch(saveAnsUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            scale_value: scale
+                        })
+                    });
+                }
+            }
 
             // 8️⃣ Kirim Quiz
             for (let modulQuizzesId in userAnswers) {
@@ -1043,7 +1368,9 @@
     {{-- PROGRESS BAR --}}
     <script>
         // Ambil total modul & inisialisasi
-        const totalModules = {{ $course->modul->count() + 1 }};
+        const modulCount = {{ $course->modul->count() }};
+        const questionnaireCount = {{ $course->questionnaires->count() }};
+        const totalModules = 1 + modulCount + questionnaireCount;
         let currentModule = 0;
         let courseStatus = null;
         const progressKey = `progress_user_${userId}_course_${courseId}`;
@@ -1072,31 +1399,23 @@
 
         function updateProgress() {
             const saved = parseInt(localStorage.getItem(progressKey)) || 0;
-            let pct;
-
-            if (saved >= 100) {
-                pct = 100;
-            } else {
-                pct = Math.floor((currentModule / totalModules) * 100);
-                if (pct > 100) pct = 100;
-                localStorage.setItem(progressKey, pct);
-            }
+            let pct = saved >= 100 ?
+                100 :
+                Math.floor((currentModule / totalModules) * 100);
+            if (pct > 100) pct = 100;
+            localStorage.setItem(progressKey, pct);
 
             document.querySelector('.progress-bar').style.width = `${pct}%`;
             document.querySelector('.progress-status span.fw-bold').innerText = `${pct}%`;
 
-            const selesaiBtn = document.getElementById('selesaiKelas');
-            const previewBtn = document.getElementById('previewReviewBtn');
-
             if (pct === 100) {
-                // Berhenti timer saat progress 100%
                 stopTimer();
-
-                selesaiBtn.disabled = true;
-                previewBtn.classList.remove('d-none');
+                window.courseCompleted = true;
+                document.getElementById('selesaiKelas').disabled = true;
+                document.getElementById('previewReviewBtn').classList.remove('d-none');
             } else {
-                selesaiBtn.disabled = false;
-                previewBtn.classList.add('d-none');
+                document.getElementById('selesaiKelas').disabled = false;
+                document.getElementById('previewReviewBtn').classList.add('d-none');
             }
 
             updateProgressToDatabase();
