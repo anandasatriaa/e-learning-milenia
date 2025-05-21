@@ -74,21 +74,39 @@
 
         /* Scale linear */
         .linear-scale {
+            width: 100%;
             display: flex;
-            flex-direction: column;
-            align-items: stretch;
+            justify-content: center;
+        }
+        .scale-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: max-content; /* Supaya scroll muncul jika lebar lebih besar dari layar */
+        }
+
+        .scale-scroll {
+            overflow-x: auto;
+            max-width: 100%;
+        }
+
+        .linear-scale .label {
+            width: auto;
+            min-width: 60px;
+            text-align: center;
+            margin-top: 2.5rem;
         }
 
         .scale-options {
             display: flex;
+            gap: 12px;
         }
 
         .scale-option {
-            flex: 1;
-            text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 4px;
         }
 
         .scale-option .option-number {
@@ -950,26 +968,28 @@
             let options = '';
             for (let i = q.scale_min; i <= q.scale_max; i++) {
                 options += `
-              <div class="scale-option">
-                <div class="option-number">${i}</div>
-                <div class="form-check">
-                  <input class="form-check-input" type="radio"
-                         name="question_${q.id}"
-                         id="question_${q.id}_${i}"
-                         value="${i}">
-                </div>
-              </div>`;
+                <div class="scale-option">
+                    <div class="option-number">${i}</div>
+                    <div class="form-check">
+                    <input class="form-check-input" type="radio"
+                            name="question_${q.id}"
+                            id="question_${q.id}_${i}"
+                            value="${i}">
+                    </div>
+                </div>`;
             }
 
             return `
             <div class="linear-scale">
-              <div class="scale-options">
-                ${options}
-              </div>
-              <div class="scale-labels">
-                <span>${q.label_min}</span>
-                <span>${q.label_max}</span>
-              </div>
+                <div class="scale-scroll">
+                    <div class="scale-wrapper">
+                        <span class="label label-min">${q.label_min}</span>
+                        <div class="scale-options">
+                            ${options}
+                        </div>
+                        <span class="label label-max">${q.label_max}</span>
+                    </div>
+                </div>
             </div>`;
         }
 
