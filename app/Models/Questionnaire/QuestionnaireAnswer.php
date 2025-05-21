@@ -15,4 +15,12 @@ class QuestionnaireAnswer extends Model
         'response_id',
         'scale_value',
     ];
+
+    public function question()
+    {
+        return $this->belongsTo(
+            \App\Models\Questionnaire\QuestionnaireQuestion::class,
+            'question_id'
+        );
+    }
 }

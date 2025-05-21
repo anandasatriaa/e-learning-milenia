@@ -103,6 +103,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/feedback-kuesioner/{questionnaire}/edit', [AdminKuesionerController::class, 'edit'])->name('feedback-kuesioner.edit');
             Route::put('/feedback-kuesioner/{questionnaire}', [AdminKuesionerController::class, 'update'])->name('feedback-kuesioner.update');
             Route::delete('/feedback-kuesioner/{questionnaire}', [AdminKuesionerController::class, 'destroy'])->name('feedback-kuesioner.destroy');
+            Route::get('/feeback-kuesioner/{id}/data', [AdminKuesionerController::class, 'data'])->name('feedback-kuesioner.data');
         });
 
         Route::group(['prefix' => 'user', 'as' => 'user.'], function () {

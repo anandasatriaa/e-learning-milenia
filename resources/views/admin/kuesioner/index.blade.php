@@ -42,6 +42,121 @@
             display: inline-flex;
             align-items: center;
         }
+
+        .response-item {
+            border-left: 3px solid #0d6efd;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-bar {
+            height: 40px;
+            background: #e9ecef;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-fill {
+            height: 100%;
+            background: #0d6efd;
+            transition: width 0.5s ease;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+
+        .response-badge {
+            font-size: 0.8em;
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .accordion-item {
+            margin-bottom: 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px !important;
+        }
+
+        .accordion-button {
+            border-radius: 8px !important;
+            padding: 1rem;
+            background-color: white;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #f8f9fa;
+            box-shadow: none;
+        }
+
+        /* Radio button styling */
+        .scale-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            padding: 0 0.5rem;
+        }
+
+        .number-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin: 0;
+            position: relative;
+            border: 2px solid #adb5bd;
+        }
+
+        .form-check-input:disabled {
+            opacity: 1;
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .form-check-input:disabled:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .scale-option {
+                padding: 0 0.25rem;
+            }
+
+            .number-label {
+                font-size: 0.8rem;
+            }
+
+            .form-check-input {
+                width: 1rem;
+                height: 1rem;
+            }
+        }
+
+        /* Highlight container jawaban */
+        .response-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .avatar-placeholder {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
     </style>
 @endsection
 @section('content')
@@ -60,43 +175,48 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <table id="questionnaire-table" class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Judul</th>
-                                    <th>Dibuat Pada</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($questionnaires as $idx => $q)
+                        <div class="table-responsive">
+                            <table id="questionnaire-table" class="table table-striped">
+                                <thead>
                                     <tr>
-                                        <td>{{ $idx + 1 }}</td>
-                                        <td>{{ $q->title }}</td>
-                                        <td>{{ $q->created_at->format('d M Y') }}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-info btn-open-edit" data-id="{{ $q->id }}"
-                                                data-bs-toggle="modal" data-bs-target="#editQuestionnaireModal">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <form action="{{ route('admin.kuesioner.feedback-kuesioner.destroy', $q) }}"
-                                                method="POST" class="d-inline delete-form">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="btn btn-sm btn-danger btn-delete">
-                                                    <i class="fas fa-trash-alt"></i>
+                                        <th>#</th>
+                                        <th>Judul</th>
+                                        <th>Dibuat Pada</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($questionnaires as $idx => $q)
+                                        <tr>
+                                            <td>{{ $idx + 1 }}</td>
+                                            <td>{{ $q->title }}</td>
+                                            <td>{{ $q->created_at->format('d M Y') }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info btn-open-edit" data-id="{{ $q->id }}"
+                                                    data-bs-toggle="modal" data-bs-target="#editQuestionnaireModal">
+                                                    <i class="fas fa-edit"></i>
                                                 </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="text-center">Belum ada kuesioner.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                                <form action="{{ route('admin.kuesioner.feedback-kuesioner.destroy', $q) }}"
+                                                    method="POST" class="d-inline delete-form">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="button" class="btn btn-sm btn-danger btn-delete">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                                <button class="btn btn-sm btn-success btn-view-answers" data-url="{{ route('admin.kuesioner.feedback-kuesioner.data', ['id' => $q->id]) }}" data-questionnaire-id="{{ $q->id }}">
+                                                    <i class="fas fa-chart-bar"></i> Lihat Jawaban
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center">Belum ada kuesioner.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -181,8 +301,8 @@
 
                                 <div class="border p-3 bg-light preview-scale">
                                     <h6 class="preview-question-text"></h6>
-                                    <div class="d-flex justify-content-between mb-2 scale-labels"></div>
-                                    <div class="d-flex justify-content-between mb-2 scale-radios"></div>
+                                    <div class="d-flex justify-content-evenly mb-2 scale-labels"></div>
+                                    <div class="d-flex justify-content-evenly mb-2 scale-radios"></div>
                                     <div class="d-flex justify-content-between mt-2">
                                         <div class="text-start preview-label-min" style="width:150px"></div>
                                         <div class="text-end preview-label-max" style="width:150px"></div>
@@ -242,6 +362,49 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Jawaban User -->
+    <div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="responseModalLabel">Laporan Jawaban Kuesioner</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modalLoader" class="text-center py-5">
+                        <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
+                    </div>
+
+                    <div id="modalContent" class="d-none">
+                        <nav>
+                            <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                                <button class="nav-link active" id="nav-summary-tab" data-bs-toggle="tab"
+                                    data-bs-target="#nav-summary" type="button">Ringkasan</button>
+                                <button class="nav-link" id="nav-details-tab" data-bs-toggle="tab"
+                                    data-bs-target="#nav-details" type="button">Detail Responden</button>
+                            </div>
+                        </nav>
+                        <div class="tab-content py-4" id="nav-tabContent">
+                            <!-- Tab Ringkasan -->
+                            <div class="tab-pane fade show active" id="nav-summary">
+                                <div id="chartContainer">
+                                    <!-- nanti JS akan inject <canvas> di sini -->
+                                </div>
+                            </div>
+
+                            <!-- Tab Detail Responden -->
+                            <div class="tab-pane fade" id="nav-details">
+                                <div class="list-group" id="respondentList">
+                                    <!-- Daftar responden akan diisi di sini -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('js')
 
@@ -262,10 +425,7 @@
                         orderable: false,
                         targets: 3
                     } // kolom Aksi tidak sortable
-                ],
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
-                }
+                ]
             });
         });
     </script>
@@ -819,5 +979,213 @@
                         });
                 });
         });
+    </script>
+
+    {{-- MODAL JAWABAN RESPONDEN --}}
+    <script>
+        // 1) Daftarkan plugin global untuk men-generate persentase
+        Chart.pluginService.register({
+            afterDatasetsDraw: function(chart) {
+                var ctx  = chart.ctx;
+                var data = chart.data;
+                if (!data.datasets.length) return;
+
+                // total nilai untuk persentase
+                var total = data.datasets[0].data.reduce(function(sum, v) {
+                return sum + v;
+                }, 0);
+                if (total === 0) return;
+
+                data.datasets.forEach(function(ds, di) {
+                var meta = chart.getDatasetMeta(di);
+                meta.data.forEach(function(bar, bi) {
+                    var value      = ds.data[bi] || 0;
+                    var percentage = ((value / total) * 100).toFixed(1) + '%';
+
+                    // hitung posisi di dalam batang
+                    var model = bar._model;
+            var xPos  = model.x;
+            // Ambil y atas batang, lalu tambahkan padding kecil (misal 4px)
+            var yPos  = model.y + 4;
+
+            ctx.save();
+            ctx.fillStyle    = '#fff';
+            ctx.font         = '12px Arial';
+            ctx.textAlign    = 'center';
+            // Pastikan baseline di atas teks
+            ctx.textBaseline = 'top';
+            ctx.fillText(percentage, xPos, yPos);
+            ctx.restore();
+                });
+                });
+            }
+        });
+
+        const responseModalEl = document.getElementById('responseModal');
+        const responseModal   = new bootstrap.Modal(responseModalEl);
+
+        document.querySelectorAll('.btn-view-answers').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Tampilkan modal paling cepat dengan loader saja
+                document.getElementById('modalLoader').classList.remove('d-none');
+                document.getElementById('modalContent').classList.add('d-none');
+                responseModal.show();
+
+                // Bersihkan konten
+                document.getElementById('chartContainer').innerHTML = '';
+                document.getElementById('respondentList').innerHTML = '';
+
+                // Fetch data
+                fetch(btn.dataset.url)
+                .then(r => {
+                    if (!r.ok) throw new Error('Fetch failed');
+                    return r.json();
+                })
+                .then(payload => {
+                    // Render chart & list
+                    renderCharts(payload.questions);
+                    renderRespondents(payload.respondents);
+                })
+                .then(() => {
+                    // Setelah selesai render, sembunyikan loader & tampilkan konten
+                    document.getElementById('modalLoader').classList.add('d-none');
+                    document.getElementById('modalContent').classList.remove('d-none');
+                })
+                .catch(err => {
+                    console.error(err);
+                    // Tampilkan pesan error
+                    document.getElementById('modalLoader').innerHTML =
+                    '<p class="text-danger">Gagal memuat data.</p>';
+                });
+            });
+        });
+
+        function renderCharts(data) {
+        const container = document.getElementById('chartContainer');
+        container.innerHTML = ''; // safety
+
+        data.forEach((q, idx) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'mb-5';
+            wrap.innerHTML = `
+            <h6 class="mb-3">${idx+1}. ${q.question}</h6>
+            <div class="chart-wrapper" style="height:300px;">
+                <canvas id="chart-${idx}"></canvas>
+            </div>
+            `;
+            container.appendChild(wrap);
+
+            const labels = Object.keys(q.answers);
+            const counts = Object.values(q.answers).map(v => +v);
+            const ctx    = document.getElementById(`chart-${idx}`).getContext('2d');
+
+            new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                label: 'Jumlah Responden',
+                data: counts,
+                backgroundColor: 'rgba(13,110,253,0.7)',
+                borderColor: 'rgba(13,110,253,1)',
+                borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                x: { ticks: { autoSkip: false } },
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                },
+                plugins: {
+                tooltip: { enabled: true },
+                legend: { display: false },
+                barValues: {}    // <-- aktifkan plugin kustom
+                }
+            }
+            });
+        });
+        }
+    
+        // Fungsi renderRespondents (sama seperti sebelumnya)
+        function renderRespondents(respondents) {
+        const container = document.getElementById('respondentList');
+        container.innerHTML = '';
+
+        respondents.forEach((user, index) => {
+            const accordionItem = document.createElement('div');
+            accordionItem.className = 'accordion-item';
+
+            // Gunakan foto user, fallback ke avatar generik kalau user.photoUrl kosong
+            const photoUrl = user.photoUrl || '/images/default-avatar.png';
+
+            accordionItem.innerHTML = `
+            <div class="accordion-header">
+                <button class="accordion-button collapsed"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapse-${index}"
+                        aria-expanded="false">
+                <div class="d-flex align-items-center w-100">
+                    <div class="me-3">
+                    <img src="${photoUrl}"
+                        alt="Foto ${user.name}"
+                        class="rounded-circle"
+                        style="width: 40px; height: 40px; object-fit: cover;">
+                    </div>
+                    <div class="flex-grow-1">
+                    <h6 class="mb-0">${user.name}</h6>
+                    <small class="text-muted">${user.division}</small>
+                    </div>
+                </div>
+                </button>
+            </div>
+
+            <div id="collapse-${index}"
+                class="accordion-collapse collapse"
+                data-bs-parent="#respondentList">
+                <div class="accordion-body mx-3 pt-3">
+                ${user.answers.map(answer => `
+                    <div class="response-item mb-4">
+                    <p class="mb-3">${answer.question}</p>
+                    <div class="d-flex mb-2 justify-content-evenly">
+                        ${Array.from(
+                        { length: answer.scale_max - answer.scale_min + 1 },
+                        (_, i) => {
+                            const value = answer.scale_min + i;
+                            return `
+                            <div class="scale-option me-3">
+                                <div class="number-label mb-1 text-center">${value}</div>
+                                <input
+                                type="radio"
+                                class="form-check-input"
+                                name="response_${index}_${answer.id}"
+                                id="response_${index}_${answer.id}_${value}"
+                                value="${value}"
+                                ${value === answer.answer ? 'checked' : ''}
+                                disabled>
+                            </div>
+                            `;
+                        }
+                        ).join('')}
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <div class="text-start small text-muted" style="width:150px">
+                        ${answer.label_min}
+                        </div>
+                        <div class="text-end small text-muted" style="width:150px">
+                        ${answer.label_max}
+                        </div>
+                    </div>
+                    </div>
+                `).join('')}
+                </div>
+            </div>
+            `;
+
+            container.appendChild(accordionItem);
+        });
+        }
     </script>
 @endsection

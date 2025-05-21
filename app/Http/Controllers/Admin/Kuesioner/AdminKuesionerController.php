@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Admin\Kuesioner;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Questionnaire\Questionnaire;
+use App\Models\Questionnaire\QuestionnaireQuestion;
+use App\Models\Questionnaire\QuestionnaireResponse;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class AdminKuesionerController extends Controller
 {
@@ -45,6 +48,86 @@ class AdminKuesionerController extends Controller
         $questionnaires = Questionnaire::with('courses')->orderBy('created_at', 'desc')->get();
 
         return view('admin.kuesioner.index', compact('courses', 'questionnaires'));
+    }
+
+    public function data($id)
+    {
+        // 1) Ambil semua pertanyaan kuesioner dengan jumlah tiap nilai skala
+        $questions = QuestionnaireQuestion::where('questionnaire_id', $id)
+            ->orderBy('position')
+            ->get()
+            ->map(function ($q) {
+                // hitung jumlah per scale_value
+                $counts = DB::table('questionnaires_answers')
+                    ->where('question_id', $q->id)
+                    ->select('scale_value', DB::raw('count(*) as count'))
+                    ->groupBy('scale_value')
+                    ->pluck('count', 'scale_value')
+                    ->toArray();
+
+                // pastikan semua nilai skala tampil (jika ada yang nol)
+                $answers = [];
+                for ($v = $q->scale_min; $v <= $q->scale_max; $v++) {
+                    $answers[$v] = $counts[$v] ?? 0;
+                }
+
+                return [
+                    'question'   => $q->text,
+                    'scale_min'  => $q->scale_min,
+                    'scale_max'  => $q->scale_max,
+                    'label_min'  => $q->label_min,
+                    'label_max'  => $q->label_max,
+                    'answers'    => $answers,
+                ];
+            });
+
+        // 2) Ambil responden beserta jawaban mereka
+        $respondents = QuestionnaireResponse::with(['user', 'answers.question'])
+            ->where('questionnaire_id', $id)
+            ->get()
+            ->map(function ($resp) {
+                $user = $resp->user;
+
+                // --- Mulai logic foto ---
+                $formattedFoto = str_pad($user->ID, 5, '0', STR_PAD_LEFT);
+                $cacheBuster   = time();
+
+                $clientIp = request()->ip();
+                if (
+                    $clientIp === '127.0.0.1' ||
+                    \Illuminate\Support\Str::startsWith($clientIp, '192.168.0.')
+                ) {
+                    $baseUrl = 'http://192.168.0.8/hrd-milenia/foto/';
+                } else {
+                    $baseUrl = 'http://pc.dyndns-office.com:8001/hrd-milenia/foto/';
+                }
+
+                $photoUrl = $baseUrl . "{$formattedFoto}.JPG?v={$cacheBuster}";
+                // --- Selesai logic foto ---
+
+                return [
+                    'name'      => $user->Nama,
+                    'division'  => $user->Divisi ?: '-',
+                    'photoUrl'  => $photoUrl,
+                    'answers'   => $resp->answers->map(function ($a) {
+                        return [
+                            'id'         => $a->question->id,
+                            'question'   => $a->question->text,
+                            'answer'     => $a->scale_value,
+                            'scale_min'  => $a->question->scale_min,
+                            'scale_max'  => $a->question->scale_max,
+                            'label_min'  => $a->question->label_min,
+                            'label_max'  => $a->question->label_max,
+                        ];
+                    }),
+                ];
+            });
+
+        // ambil $questions & $respondents seperti contoh sebelumnya
+        return response()->json([
+            'questions'   => $questions,
+            'respondents' => $respondents,
+        ]);
     }
 
     public function store(Request $request)

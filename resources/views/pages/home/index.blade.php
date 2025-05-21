@@ -326,6 +326,7 @@
     {{-- Progress Bar --}}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const userId    = @json(Auth::id());
             const courseIds = @json($courseIds); // Ambil array courseId dari controller
 
             // Loop untuk setiap courseId dan proses progress untuk masing-masing kursus
@@ -344,7 +345,7 @@
 
                     // Jika progress dari database adalah 0, ambil data dari localStorage
                     if (progressFromDatabase === 0) {
-                        const progressStorageKey = `progress_bar_course_${courseId}`;
+                        const progressStorageKey = `progress_bar_course_${courseId}_user_${userId}`;
                         const progressFromLocalStorage = parseInt(localStorage.getItem(
                             progressStorageKey)) || 0;
 

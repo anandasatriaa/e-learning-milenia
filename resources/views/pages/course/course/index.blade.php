@@ -1156,6 +1156,16 @@
                 return swal("Peringatan!", msg, "warning");
             }
 
+            // ✅ Tampilkan loading
+            swal({
+                title: "Sedang menyimpan...",
+                text: "Mohon tunggu sebentar",
+                icon: "info",
+                buttons: false,
+                closeOnClickOutside: false,
+                closeOnEsc: false
+            });
+
             // semua lengkap → lanjut submit & set progress 100%
             currentModule = totalModules;
             updateProgress();
@@ -1262,6 +1272,9 @@
                     progress_bar: 100
                 })
             });
+
+            // ✅ Tutup swal loading
+            swal.close();
 
             await swal("Jawaban berhasil dikumpulkan!", {
                 icon: "success",
@@ -1479,7 +1492,7 @@
                     const makeSrc = path => {
                         if (!path) return '';
                         if (/^https?:\/\//.test(path)) return path;
-                        return `${window.location.origin}/storage/${path.replace(/^\/?storage\//,'')}`;
+                        return `${window.location.origin}/e-learning/public/storage/${path.replace(/^\/?storage\//,'')}`;
                     };
 
                     // --- Render summary, progress, stats seperti biasa ---
